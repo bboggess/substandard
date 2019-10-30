@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:key="@string/pref_server_key"
+        android:title="@string/pref_server_value"/>
+
+    <EditTextPreference
+        android:key="@string/pref_username_key"
+        android:title="@string/pref_username_value"/>
+
+    <EditTextPreference
+        android:key="@string/pref_password_key"
+        android:password="true"
+        android:title="@string/pref_password_value"/>
+</PreferenceScreen>

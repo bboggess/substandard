@@ -11,13 +11,19 @@
     <string name="pref_server_key" translatable="false">serverAddress</string>
     <string name="pref_server_value">Server Address</string>
 
+    <string name="pref_login_key" translatable="false">login</string>
+    <string name="pref_login_value">Login</string>
+
     <string name="pref_username_key" translatable="false">username</string>
     <string name="pref_username_value">Username</string>
 
-    <string name="pref_password_key" translatable="false">password</string>
-    <string name="pref_password_value">Password</string>
+    <string name="pref_auth_token_key" translatable="false">auth</string>
+    <string name="pref_salt_key" translatable="false">salt</string>
 
-
+    <!-- Used in login dialog -->
+    <string name="login">Log in</string>
+    <string name="cancel">Cancel</string>
+    <string name="password">Password</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

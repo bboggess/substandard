@@ -1,30 +1,32 @@
-package com.example.substandard.database;
+package com.example.substandard.database.data;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "artists_server")
+@Entity(tableName = "artists")
 public class Artist {
 
     @PrimaryKey
     private int id;
     private String name;
-    @ColumnInfo(name = "cover_art")
-    private String coverArt;
-    @ColumnInfo(name = "image_url")
-    private String imageUrl;
+//    @ColumnInfo(name = "cover_art")
+//    private String coverArt;
+//    @ColumnInfo(name = "image_url")
+//    private String imageUrl;
     @ColumnInfo(name = "album_count")
     private int albumCount;
 
-    public Artist(int id, String name, String coverArt, String imageUrl, int albumCount) {
+    public Artist(int id, String name,  int albumCount) {
         this.id = id;
         this.name = name;
-        this.coverArt = coverArt;
-        this.imageUrl = imageUrl;
         this.albumCount = albumCount;
     }
 
+    /**
+     *
+     * @return Unique identifier for each Artist. This matches the ID used by server
+     */
     public int getId() {
         return id;
     }
@@ -33,6 +35,10 @@ public class Artist {
         this.id = id;
     }
 
+    /**
+     *
+     * @return Just the artist name
+     */
     public String getName() {
         return name;
     }
@@ -41,22 +47,10 @@ public class Artist {
         this.name = name;
     }
 
-    public String getCoverArt() {
-        return coverArt;
-    }
-
-    public void setCoverArt(String coverArt) {
-        this.coverArt = coverArt;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
+    /**
+     *
+     * @return The number of albums this artist owns in the library
+     */
     public int getAlbumCount() {
         return albumCount;
     }

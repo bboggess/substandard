@@ -1,13 +1,23 @@
 package com.example.substandard.activity;
 
+import android.app.Dialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.MenuItem;
+import android.widget.EditText;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
+import androidx.preference.PreferenceManager;
 
 import com.example.substandard.R;
+import com.example.substandard.database.network.SubsonicNetworkUtils;
+import com.example.substandard.fragment.LoginDialogFragment;
 import com.example.substandard.fragment.SettingsFragment;
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity implements
+    LoginDialogFragment.LoginDialogListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,5 +28,42 @@ public class SettingsActivity extends AppCompatActivity {
                 .beginTransaction()
                 .replace(R.id.activity_settings, new SettingsFragment())
                 .commit();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            onBackPressed();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    // TODO Check whether the login is valid before saving to disk
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        if (dialog instanceof LoginDialogFragment) {
+            Dialog view = dialog.getDialog();
+            EditText usernameEditText = view.findViewById(R.id.username_edit_text);
+            EditText passwordEditText = view.findViewById(R.id.password_edit_text);
+            String username = usernameEditText.getText().toString();
+            String password = passwordEditText.getText().toString();
+            String salt = SubsonicNetworkUtils.createSalt();
+            String authToken = SubsonicNetworkUtils.createAuthToken(password, salt);
+
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(getString(R.string.pref_salt_key), salt);
+            editor.putString(getString(R.string.pref_auth_token_key), authToken);
+            editor.putString(getString(R.string.pref_username_key), username);
+            editor.commit();
+        }
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+
     }
 }

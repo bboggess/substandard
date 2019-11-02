@@ -3,13 +3,22 @@ package com.example.substandard.fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
+import com.example.substandard.database.data.Artist;
+import com.example.substandard.utility.InjectorUtils;
+
+import java.util.List;
 
 
 /**
@@ -21,6 +30,7 @@ import com.example.substandard.R;
  * create an instance of this fragment.
  */
 public class MainFragment extends Fragment {
+    private static final String TAG = MainFragment.class.getSimpleName();
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -30,7 +40,12 @@ public class MainFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    private ArtistAdapter artistAdapter;
+    private RecyclerView recyclerView;
+
     private OnFragmentInteractionListener mListener;
+
+    private ArtistViewModel artistViewModel;
 
     public MainFragment() {
         // Required empty public constructor
@@ -67,7 +82,28 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_main, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
+        recyclerView = rootView.findViewById(R.id.rv_artists);
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setHasFixedSize(true);
+
+        artistAdapter = new ArtistAdapter(getContext());
+        recyclerView.setAdapter(artistAdapter);
+
+        ArtistViewModelFactory factory = InjectorUtils.provideArtistViewModelFactory(getContext());
+        artistViewModel = new ViewModelProvider(getActivity(), factory).get(ArtistViewModel.class);
+        artistViewModel.getArtists().observe(this, new Observer<List<Artist>>() {
+            @Override
+            public void onChanged(List<Artist> artists) {
+                Log.d(TAG, "updating UI on database change");
+                artistAdapter.setArtists(artists);
+            }
+        });
+
+        return rootView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

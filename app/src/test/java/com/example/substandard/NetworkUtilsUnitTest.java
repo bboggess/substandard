@@ -1,6 +1,6 @@
 package com.example.substandard;
 
-import com.example.substandard.utility.SubsonicNetworkUtils;
+import com.example.substandard.database.network.SubsonicNetworkUtils;
 
 import org.junit.Test;
 

@@ -44,9 +44,6 @@ public class MainActivity extends AppCompatActivity implements
         mDrawerLayout.addDrawerListener(toggle);
         toggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        // Testing -- delete
-        textView = findViewById(R.id.tv_main);
     }
 
     /**

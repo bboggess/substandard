@@ -5,12 +5,8 @@
         android:key="@string/pref_server_key"
         android:title="@string/pref_server_value"/>
 
-    <EditTextPreference
-        android:key="@string/pref_username_key"
-        android:title="@string/pref_username_value"/>
+    <Preference
+        android:key="@string/pref_login_key"
+        android:title="@string/pref_login_value"/>
 
-    <EditTextPreference
-        android:key="@string/pref_password_key"
-        android:password="true"
-        android:title="@string/pref_password_value"/>
 </PreferenceScreen>

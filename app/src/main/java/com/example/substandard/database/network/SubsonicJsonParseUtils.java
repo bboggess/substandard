@@ -1,8 +1,8 @@
-package com.example.substandard.utility;
+package com.example.substandard.database.network;
 
 import android.util.Log;
 
-import com.example.substandard.database.Artist;
+import com.example.substandard.database.data.Artist;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,8 +17,14 @@ import java.util.List;
 public class SubsonicJsonParseUtils {
     private static final String TAG = SubsonicNetworkUtils.class.getSimpleName();
 
-    /**
-     * Various constants for names of fields in JSON objects received from server
+    /*
+     ********************************************************************************
+     * General use parsing methods which apply to all requests, regardless of service.
+     ********************************************************************************
+     */
+
+    /*
+     * Various constants for names of fields in subsonic-response JSON objects
      */
     private static final String SUBSONIC_RESPONSE_KEY = "subsonic-response";
     private static final String RESPONSE_STATUS_KEY = "status";
@@ -26,20 +32,6 @@ public class SubsonicJsonParseUtils {
     private static final String RESPONSE_FAILED = "failed";
     private static final String RESPONSE_ERROR_KEY = "error";
     private static final String RESPONSE_ERROR_MESSAGE_KEY = "message";
-
-    private static final String ARTISTS_KEY = "artists";
-    private static final String ARTISTS_INDEX_ARRAY_KEY = "index";
-
-    private static final String ARTIST_ARRAY_KEY = "artist";
-    private static final String ARTIST_ID_KEY = "id";
-    private static final String ARTIST_NAME_KEY = "name";
-    private static final String ARTIST_ART_KEY = "coverArt";
-    private static final String ARTIST_IMAGE_URL_KEY = "artistImageUrl";
-    private static final String ARTIST_ALBUM_COUNT = "albumCount";
-
-    /**
-     * General use parsing methods which apply to all requests, regardless of service.
-     */
 
     /**
      * When the request fails, pass the JSON response here to retrieve the error message
@@ -50,6 +42,7 @@ public class SubsonicJsonParseUtils {
      */
     public static String parseErrorCode(JSONObject json) throws JSONException {
         JSONObject responseObject = json.getJSONObject(SUBSONIC_RESPONSE_KEY);
+        // This should never be true. If it is, you fucked up.
         if (responseObject.getString(RESPONSE_STATUS_KEY).equals(RESPONSE_SUCCESS)) {
             Log.d(TAG, "parseErrorCode: the request didn't fail");
             return null;
@@ -82,8 +75,13 @@ public class SubsonicJsonParseUtils {
     }
 
     /*
-     * Parsing methods to handle request for the getArtists service. An example response is the following:
-     *
+     ************************************************************************************
+     * Parsing methods to handle request for the getArtists service.
+     ************************************************************************************
+     */
+
+    /*
+     *  An example response is the following:
      *  * {
      *  *     "subsonic-response":
      *  *     {
@@ -117,6 +115,20 @@ public class SubsonicJsonParseUtils {
      *  * }
      */
 
+    /*
+     * Constants needed to access fields in JSON meeting this format
+     */
+
+    private static final String ARTISTS_KEY = "artists";
+    private static final String ARTISTS_INDEX_ARRAY_KEY = "index";
+
+    private static final String ARTIST_ARRAY_KEY = "artist";
+    private static final String ARTIST_ID_KEY = "id";
+    private static final String ARTIST_NAME_KEY = "name";
+    private static final String ARTIST_ART_KEY = "coverArt";
+    private static final String ARTIST_IMAGE_URL_KEY = "artistImageUrl";
+    private static final String ARTIST_ALBUM_COUNT = "albumCount";
+
     /**
      * Parses a JSON object returned from a call to the getArtists service.
      * @param json The JSON object returned from the service
@@ -125,6 +137,7 @@ public class SubsonicJsonParseUtils {
      * @throws JSONException If JSON is malformed
      */
     public static List<Artist> parseGetArtists(JSONObject json) throws JSONException {
+        Log.d(TAG, "parsing JSON from getArtists request");
         List<Artist> artistList = new ArrayList<>();
         if (!requestSuccessful(json)) {
             return null;
@@ -145,11 +158,18 @@ public class SubsonicJsonParseUtils {
                 JSONObject artistObject = artistsArrayAtIndex.getJSONObject(j);
                 int id = artistObject.getInt(ARTIST_ID_KEY);
                 String name = artistObject.getString(ARTIST_NAME_KEY);
-                String coverArt = artistObject.getString(ARTIST_ART_KEY);
-                String imageUrl = artistObject.getString(ARTIST_IMAGE_URL_KEY);
+                // These two fields throw JSON exceptions??? Remove them I guess.
+//                String coverArt = "";
+//                if (artistObject.has(ARTIST_ART_KEY)) {
+//                    coverArt = artistObject.getString(ARTIST_ART_KEY);
+//                }
+//                String imageUrl = "";
+//                if (artistObject.has(ARTIST_IMAGE_URL_KEY)) {
+//                    imageUrl = artistObject.getString(ARTIST_IMAGE_URL_KEY);
+//                }
                 int albumCount = artistObject.getInt(ARTIST_ALBUM_COUNT);
 
-                artistList.add(new Artist(id, name, coverArt, imageUrl, albumCount));
+                artistList.add(new Artist(id, name, albumCount));
             }
         }
 

@@ -1,4 +1,4 @@
-package com.example.substandard.fragment;
+package com.example.substandard.ui.settings;
 
 
 import android.content.SharedPreferences;
@@ -24,7 +24,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 
         // Set up click listener for login dialog
         Preference p = findPreference(getString(R.string.pref_login_key));
-        p.setOnPreferenceClickListener(this);
+        if (null != p) {
+            p.setOnPreferenceClickListener(this);
+        }
 
         // Here we set up all preference summaries
         PreferenceScreen preferenceScreen = getPreferenceScreen();

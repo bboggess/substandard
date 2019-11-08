@@ -1,4 +1,4 @@
-package com.example.substandard.fragment;
+package com.example.substandard.ui.main;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
@@ -13,7 +13,7 @@ public class ArtistViewModel extends ViewModel {
     private final LiveData<List<Artist>> artists;
     private final SubsonicArtistRepository repository;
 
-    public ArtistViewModel(SubsonicArtistRepository repository) {
+    ArtistViewModel(SubsonicArtistRepository repository) {
         this.repository = repository;
         artists = repository.getArtists();
     }

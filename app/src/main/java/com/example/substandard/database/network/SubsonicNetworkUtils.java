@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.example.substandard.data.SubstandardPreferences;
+import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.Artist;
 
 import org.apache.commons.codec.binary.Hex;
@@ -32,12 +33,12 @@ import java.util.UUID;
 /* TODO finish writing request methods. Need to work out some more implementation details first.
  */
 public class SubsonicNetworkUtils {
-    /**
+    /*
      * Tag for debugging purposes.
      */
     private static final String TAG = SubsonicNetworkUtils.class.getSimpleName();
 
-    /**
+    /*
      * This is the version of the REST API that this app will use. This is value was chosen to be
      * backwards compatible with all version 6.*.* of Subsonic. Not compatible with any earlier versions.
      */
@@ -45,7 +46,7 @@ public class SubsonicNetworkUtils {
 
     private static final String SUBSONIC_REST_PATH = "rest";
 
-    /**
+    /*
      * I prefer to have the results returned in json rather than xml. I don't know why I prefer
      * this. Maybe I had a reason.
      */
@@ -53,7 +54,7 @@ public class SubsonicNetworkUtils {
 
     private final static String APP_NAME = "substandard";
 
-    /**
+    /*
      * Query parameters for building URL requests to server.
      *
      * All except for FORMAT_QUERY are required in all requests.
@@ -75,7 +76,7 @@ public class SubsonicNetworkUtils {
     private final static String CLIENT_QUERY = "c";
     private final static String FORMAT_QUERY = "f";
 
-    /**
+    /*
      * Optional parameters needed for various services.
      */
     // used in many services
@@ -132,7 +133,7 @@ public class SubsonicNetworkUtils {
     private final static String MAX_SONG_COUNT = "songCount";
     private final static String SONG_OFFSET = "songOffset";
 
-    /**
+    /*
      * Strings for choosing a service to call from the server. Used only in building URL.
      */
     private enum SubsonicService {
@@ -147,7 +148,7 @@ public class SubsonicNetworkUtils {
         GET_SIMILAR_SONGS ("getSimilarSongs"),
         GET_TOP_SONGS ("getTopSongs"),
         GET_NOW_PLAYING ("getNowPlaying"),
-        GET_ALBUM_LIST ("getAlbumList"),
+        GET_ALBUM_LIST ("getAlbumList2"),
         GET_STARRED ("getStarred"),
         SEARCH ("search3"),
         GET_PLAYLISTS ("getPlaylists"),
@@ -251,7 +252,7 @@ public class SubsonicNetworkUtils {
          */
         private Map<String, String> additionalParameters;
 
-        public SubsonicServerRequest(SubsonicUser user, SubsonicService service) {
+        SubsonicServerRequest(SubsonicUser user, SubsonicService service) {
             this.user = user;
             this.service = service;
             this.additionalParameters = Collections.EMPTY_MAP;
@@ -402,7 +403,7 @@ public class SubsonicNetworkUtils {
     }
 
     /**
-     * Sends request to the server to return json file containing artists on server.
+     * Sends request to the server to return a list containing all artists on server.
      *
      * @param requestUser User on whose behalf we are making request
      * @return List of all Artists on the server
@@ -410,7 +411,7 @@ public class SubsonicNetworkUtils {
      * @throws JSONException if response from server is not valid JSON (i.e. you passed an invalid
      * server address)
      */
-    static List<Artist> getArtists(SubsonicUser requestUser) throws
+    static List<Artist> getAllArtists(SubsonicUser requestUser) throws
             IOException, JSONException {
         SubsonicServerRequest request = new SubsonicServerRequest(requestUser, SubsonicService.GET_ARTISTS);
         URL requestUrl = buildUrl(request);
@@ -418,23 +419,41 @@ public class SubsonicNetworkUtils {
     }
 
     /**
-     * Sends request to the server to return JSON file containing info for a given artist
+     * Sends request to the server to get albums for a given artist
      * @param artistId ID of the requested artist
      * @param requestUser User attached to request
      * @return Artist object from the server
      * @throws IOException if I/O error reading from server
      * @throws JSONException if response from server is not valid JSON
      */
-    public static Artist getArtist(int artistId, SubsonicUser requestUser) throws
+    static List<Album> getArtistAlbums(int artistId, SubsonicUser requestUser) throws
             IOException, JSONException {
         Map<String, String> optionalParams = new HashMap<>();
         optionalParams.put(ID_QUERY, Integer.toString(artistId));
         SubsonicServerRequest request = new SubsonicServerRequest(requestUser,
                 SubsonicService.GET_ARTIST, optionalParams);
         URL requestUrl = buildUrl(request);
-//        return sendRequest(requestUrl);
-        // TODO write parser method so we can build Artist object from JSON
-        return null;
+        return SubsonicJsonParseUtils.parseGetArtist(sendRequest(requestUrl));
+    }
+
+    private static final String ALBUM_SEARCH_TYPE_QUERY = "type";
+    private static final String ALL_ARTIST_PARAM = "alphabeticalByName";
+
+    /**
+     * Sends request to get all albums, sorted alphabetically
+     * @param requestUser User attached to request
+     * @return List of all albums present on the server
+     * @throws IOException if I/O error reading from server
+     * @throws JSONException if response from server is not valid JSON
+     */
+    public static List<Album> getAllAlbums(SubsonicUser requestUser) throws
+            IOException, JSONException {
+        Map<String, String> optionalParams = new HashMap<>();
+        optionalParams.put(ALBUM_SEARCH_TYPE_QUERY, ALL_ARTIST_PARAM);
+        SubsonicServerRequest request = new SubsonicServerRequest(requestUser,
+                SubsonicService.GET_ALBUM_LIST, optionalParams);
+        URL requestUrl = buildUrl(request);
+        return SubsonicJsonParseUtils.parseGetAlbumList(sendRequest(requestUrl));
     }
 
 }

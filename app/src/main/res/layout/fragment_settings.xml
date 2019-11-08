@@ -5,7 +5,7 @@
 
     <fragment
         android:id="@+id/activity_settings"
-        android:name="com.example.substandard.fragment.SettingsFragment"
+        android:name="com.example.substandard.ui.settings.SettingsFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

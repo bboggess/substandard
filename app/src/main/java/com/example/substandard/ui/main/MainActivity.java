@@ -1,32 +1,35 @@
-package com.example.substandard.activity;
+package com.example.substandard.ui.main;
 
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.substandard.R;
-import com.example.substandard.fragment.MainFragment;
+import com.example.substandard.ui.settings.SettingsActivity;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity implements
-        MainFragment.OnFragmentInteractionListener,
+        ArtistsFragment.OnFragmentInteractionListener,
         NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout mDrawerLayout;
-    // TODO delete test TextView
-    private TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.add(R.id.fragment_container, new ArtistsFragment(), "Artists");
+        ft.commit();
 
         setUpNavigationDrawer();
         setupNavigationClickListener();
@@ -72,13 +75,34 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+                mDrawerLayout.closeDrawer(GravityCompat.START);
+            } else {
+                mDrawerLayout.openDrawer(GravityCompat.START);
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void swapFragments(Fragment newFragment, String tag) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.fragment_container, newFragment, tag);
+        ft.addToBackStack(null);
+        ft.commit();
+    }
+
     // Should I be launching Settings as an Activity or a Fragment?
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.item_settings:
-                Intent launchSettingsActivity = new Intent(MainActivity.this, SettingsActivity.class);
-                startActivity(launchSettingsActivity);
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                startActivity(settingsIntent);
+//                swapFragments(new SettingsFragment(),"Settings");
                 break;
 
             default:

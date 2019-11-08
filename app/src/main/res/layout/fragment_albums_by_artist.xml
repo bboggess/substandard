@@ -3,11 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.MainFragment">
+    tools:context=".ui.artistdetail.AlbumsByArtistFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_artists"
+        android:id="@+id/rv_albums_by_artist"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
+        android:layout_height="match_parent"/>
 </FrameLayout>

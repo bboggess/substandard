@@ -1,4 +1,4 @@
-package com.example.substandard.fragment;
+package com.example.substandard.ui.main;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;

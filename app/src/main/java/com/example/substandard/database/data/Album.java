@@ -5,6 +5,8 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
+import java.util.Date;
+
 @Entity(tableName = "albums_server",
     foreignKeys = {
         @ForeignKey(entity = Artist.class,
@@ -14,19 +16,16 @@ public class Album {
     @PrimaryKey
     private int id;
     private String name;
-    @ColumnInfo(name = "cover_art")
-    private String coverArt;
     @ColumnInfo(name = "song_count")
     private int songCount;
-    private String created;
-    private String duration;
+    private Date created;
+    private int duration;
     @ColumnInfo(name = "artist_id")
     private int artistId;
 
-    public Album(int id, String name, String coverArt, int songCount, String created, String duration, int artistId) {
+    public Album(int id, String name, int songCount, Date created, int duration, int artistId) {
         this.id = id;
         this.name = name;
-        this.coverArt = coverArt;
         this.songCount = songCount;
         this.created = created;
         this.duration = duration;
@@ -59,20 +58,6 @@ public class Album {
 
     /**
      *
-     * @return ID that the Subsonic server uses for the cover art image file. You can use this
-     * to request the art from the server
-     */
-    // TODO there's 100% got to be a better way of storing this info. How?
-    public String getCoverArt() {
-        return coverArt;
-    }
-
-    public void setCoverArt(String coverArt) {
-        this.coverArt = coverArt;
-    }
-
-    /**
-     *
      * @return the number of tracks on the album
      */
     public int getSongCount() {
@@ -85,16 +70,14 @@ public class Album {
 
     /**
      *
-     * @return The date the album was added to the library, in the format
-     * %y%y%y%y-%m%m-%d%dT%h%h:%m%m:%s%s
-     * E.g. 2004-11-27T20:23:22
+     * @return The date the album was added to the library
      */
     // TODO replace this by a Date object with necessary TypeConverter
-    public String getCreated() {
+    public Date getCreated() {
         return created;
     }
 
-    public void setCreated(String created) {
+    public void setCreated(Date created) {
         this.created = created;
     }
 
@@ -102,11 +85,11 @@ public class Album {
      *
      * @return Length of the album in seconds
      */
-    public String getDuration() {
+    public int getDuration() {
         return duration;
     }
 
-    public void setDuration(String duration) {
+    public void setDuration(int duration) {
         this.duration = duration;
     }
 

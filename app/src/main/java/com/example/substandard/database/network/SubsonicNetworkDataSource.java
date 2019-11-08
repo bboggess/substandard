@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.substandard.AppExecutors;
+import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.Artist;
 
 import org.json.JSONException;
@@ -77,7 +78,7 @@ public class SubsonicNetworkDataSource {
                 }
 
                 try {
-                    List<Artist> downloadedArtistList = SubsonicNetworkUtils.getArtists(user);
+                    List<Artist> downloadedArtistList = SubsonicNetworkUtils.getAllArtists(user);
                     artists.postValue(downloadedArtistList);
                 } catch (IOException e) {
                     Log.d(TAG, "fetchArtists: I/O error on server request");
@@ -89,5 +90,34 @@ public class SubsonicNetworkDataSource {
                 }
             }
         });
+    }
+
+    /**
+     * Grabs all albums by the given artist present on the server
+     * @param artist artist whose albums we want
+     * @return List of albums (as live data because background threads)
+     */
+    public LiveData<List<Album>> fetchAlbumsForArtist(final Artist artist) {
+        final MutableLiveData<List<Album>> albums = new MutableLiveData<>();
+        AppExecutors.getInstance().networkIo().execute(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "fetching albums by " + artist.getName());
+                SubsonicNetworkUtils.SubsonicUser user = SubsonicNetworkUtils
+                        .getSubsonicUserFromPreferences(context);
+                try {
+                    List<Album> albumsByArtist = SubsonicNetworkUtils.getArtistAlbums(artist.getId(), user);
+                    albums.postValue(albumsByArtist);
+                } catch (IOException e) {
+                    Log.d(TAG, "fetchArtists: I/O error on server request");
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    Log.d(TAG, "fetchArtists: malformed JSON from server request." +
+                            "Did you pass correct address?");
+                    e.printStackTrace();
+                }
+            }
+        });
+        return albums;
     }
 }

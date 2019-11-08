@@ -1,4 +1,4 @@
-package com.example.substandard.fragment;
+package com.example.substandard.ui.settings;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

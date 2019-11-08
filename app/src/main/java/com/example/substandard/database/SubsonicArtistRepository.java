@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 
 import com.example.substandard.AppExecutors;
+import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.Artist;
 import com.example.substandard.database.data.ArtistDao;
 import com.example.substandard.database.network.SubsonicNetworkDataSource;
@@ -82,6 +83,9 @@ public class SubsonicArtistRepository {
         dataSource.fetchArtists();
     }
 
+    /**
+     * Grabs all artists from server, updating database if need be.
+     */
     public synchronized void refreshLibrary() {
         Log.d(TAG, "refreshing library");
         dataSource.fetchArtists();
@@ -97,4 +101,21 @@ public class SubsonicArtistRepository {
         return artistDao.loadAll();
     }
 
+    /**
+     * Lookup artist by id column
+     * @param id id of the artist we want
+     * @return artist from the database
+     */
+    public LiveData<Artist> getArtistById(int id) {
+        return artistDao.loadArtistById(id);
+    }
+
+    /**
+     * Fetches all albums by the artist from the server
+     * @param artist the artist whose albums we want
+     * @return a list of all albums from the given artist
+     */
+    public LiveData<List<Album>> getAlbumsByArtist(Artist artist) {
+        return dataSource.fetchAlbumsForArtist(artist);
+    }
 }

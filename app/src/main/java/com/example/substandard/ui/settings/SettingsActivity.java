@@ -1,4 +1,4 @@
-package com.example.substandard.activity;
+package com.example.substandard.ui.settings;
 
 import android.app.Dialog;
 import android.content.SharedPreferences;
@@ -13,8 +13,6 @@ import androidx.preference.PreferenceManager;
 
 import com.example.substandard.R;
 import com.example.substandard.database.network.SubsonicNetworkUtils;
-import com.example.substandard.fragment.LoginDialogFragment;
-import com.example.substandard.fragment.SettingsFragment;
 
 public class SettingsActivity extends AppCompatActivity implements
     LoginDialogFragment.LoginDialogListener {
@@ -58,7 +56,7 @@ public class SettingsActivity extends AppCompatActivity implements
             editor.putString(getString(R.string.pref_salt_key), salt);
             editor.putString(getString(R.string.pref_auth_token_key), authToken);
             editor.putString(getString(R.string.pref_username_key), username);
-            editor.commit();
+            editor.apply();
         }
     }
 

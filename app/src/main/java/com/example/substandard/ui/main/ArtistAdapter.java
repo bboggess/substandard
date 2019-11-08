@@ -1,4 +1,4 @@
-package com.example.substandard.fragment;
+package com.example.substandard.ui.main;
 
 import android.content.Context;
 import android.util.Log;
@@ -15,15 +15,21 @@ import com.example.substandard.database.data.Artist;
 
 import java.util.List;
 
+/**
+ * {@link androidx.recyclerview.widget.RecyclerView.Adapter} for the {@link RecyclerView} used in
+ * {@link ArtistsFragment} for displaying all artists in the library.
+ */
 public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistAdapterViewHolder> {
     private final static String TAG = ArtistAdapter.class.getSimpleName();
 
     private final Context context;
+    private ItemClickListener clickListener;
 
     private List<Artist> artists;
 
-    public ArtistAdapter(@NonNull Context context) {
+    ArtistAdapter(@NonNull Context context, ItemClickListener listener) {
         this.context = context;
+        this.clickListener = listener;
     }
 
     @NonNull
@@ -57,12 +63,23 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistAdap
         notifyDataSetChanged();
     }
 
-    class ArtistAdapterViewHolder extends RecyclerView.ViewHolder {
+    interface ItemClickListener {
+        void onItemClick(Artist artist);
+    }
+
+    class ArtistAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView artistTextView;
 
         ArtistAdapterViewHolder(View view) {
             super(view);
             artistTextView = view.findViewById(R.id.artist_tv);
+            artistTextView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            Artist artist = artists.get(getAdapterPosition());
+            clickListener.onItemClick(artist);
         }
     }
 }

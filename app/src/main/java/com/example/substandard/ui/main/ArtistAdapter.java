@@ -27,7 +27,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistAdap
 
     private List<Artist> artists;
 
-    ArtistAdapter(@NonNull Context context, ItemClickListener listener) {
+    public ArtistAdapter(@NonNull Context context, ItemClickListener listener) {
         this.context = context;
         this.clickListener = listener;
     }
@@ -63,7 +63,11 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistAdap
         notifyDataSetChanged();
     }
 
-    interface ItemClickListener {
+    public interface ItemClickListener {
+        /**
+         * Called when a bound Artist TextView is clicked on.
+         * @param artist the Artist bound to the clicked view
+         */
         void onItemClick(Artist artist);
     }
 

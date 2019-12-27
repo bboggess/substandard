@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.Artist;
+import com.example.substandard.database.data.Song;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -310,7 +311,12 @@ class SubsonicJsonParseUtils {
             dateCreated = parseDateString(albumObject.getString(ALBUM_CREATED_DATE_KEY));
         }
 
-        return new Album(albumId, albumName, numTracks, dateCreated, duration, artistId);
+        String albumCover = null;
+        if (albumObject.has(ALBUM_COVER_ART_KEY)) {
+            albumCover = albumObject.getString(ALBUM_COVER_ART_KEY);
+        }
+
+        return new Album(albumId, albumName, numTracks, dateCreated, duration, artistId, albumCover);
     }
 
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
@@ -368,4 +374,163 @@ class SubsonicJsonParseUtils {
         return albumList;
     }
 
+    /*
+     ************************************************************************************
+     * Parsing methods to handle request for the getArtistInfo service.
+     ************************************************************************************
+     */
+    private static final String ARTIST_INFO_KEY = "artistInfo2";
+    private static final String SIMILAR_ARTIST_ARRAY_KEY = "similarArtist";
+
+    static List<Artist> parseGetSimilarArtists(JSONObject json) throws JSONException {
+        List<Artist> similarArtists = new ArrayList<>();
+        if (!requestSuccessful(json)) {
+            return null;
+        }
+
+        JSONObject responseObject = json.getJSONObject(SUBSONIC_RESPONSE_KEY);
+        if (!responseObject.has(ARTIST_INFO_KEY)) {
+            Log.d(TAG, "parseGetSimilarArtists: incorrect JSON format. Did this come from getArtistInfo?");
+            return null;
+        }
+
+        JSONObject similarArtistObject = responseObject.getJSONObject(ARTIST_INFO_KEY);
+        JSONArray similarArtistArray = similarArtistObject.getJSONArray(SIMILAR_ARTIST_ARRAY_KEY);
+        for (int i = 0; i < similarArtistArray.length(); i++) {
+            JSONObject artistObject = similarArtistArray.getJSONObject(i);
+            int id = artistObject.getInt(ARTIST_ID_KEY);
+            String name = artistObject.getString(ARTIST_NAME_KEY);
+            int albumCount = artistObject.getInt(ARTIST_ALBUM_COUNT);
+
+            similarArtists.add(new Artist(id, name, albumCount));
+        }
+
+        return similarArtists;
+    }
+
+    /*
+     ****************************************************************************
+     * Parsing methods for getting tracks from an album, using getAlbum service.
+     ****************************************************************************
+     */
+
+    /*
+      {
+       "subsonic-response" : {
+          "status" : "ok",
+          "version" : "1.16.1",
+          "album" : {
+             "id" : "810",
+             "name" : "Reinventing Axl Rose",
+             "artist" : "Against Me!",
+             "artistId" : "447",
+             "coverArt" : "al-810",
+             "songCount" : 11,
+             "duration" : 1857,
+             "playCount" : 2,
+             "created" : "2019-07-09T20:47:23.000Z",
+             "year" : 2002,
+             "genre" : "Folk Punk",
+             "song" : [ {
+                "id" : "10319",
+                "parent" : "10295",
+                "isDir" : false,
+                "title" : "Pints of Guinness Make You Strong",
+                "album" : "Reinventing Axl Rose",
+                "artist" : "Against Me!",
+                "track" : 1,
+                "year" : 2002,
+                "genre" : "Folk Punk",
+                "coverArt" : "10295",
+                "size" : 4291505,
+                "contentType" : "audio/mpeg",
+                "suffix" : "mp3",
+                "duration" : 160,
+                "bitRate" : 192,
+                "path" : "Against Me!/[2002] Reinventing Axl Rose/01 - Pints of Guinness Make You Strong.mp3",
+                "playCount" : 2,
+                "discNumber" : 1,
+                "created" : "2019-07-09T20:47:22.000Z",
+                "albumId" : "810",
+                "artistId" : "447",
+                "type" : "music"
+             },...
+             } ]
+         } } }
+     */
+
+    private static final String ALBUM_OBJECT_KEY = "album";
+    private static final String SONG_ARRAY_KEY = "song";
+
+    static List<Song> parseGetAlbum(JSONObject json) throws JSONException {
+        List<Song> albumTracks = new ArrayList<>();
+        if (!requestSuccessful(json)) {
+            return null;
+        }
+
+        JSONObject responseObject = json.getJSONObject(SUBSONIC_RESPONSE_KEY);
+        if (!responseObject.has(ALBUM_OBJECT_KEY)) {
+            Log.d(TAG, "parseGetAlbum: incorrect JSON format. Did this come from getAlbum?");
+            return null;
+        }
+
+        JSONObject albumObject = responseObject.getJSONObject(ALBUM_OBJECT_KEY);
+        JSONArray songArray = albumObject.getJSONArray(SONG_ARRAY_KEY);
+        for (int i = 0; i < songArray.length(); i++) {
+            JSONObject songObject = songArray.getJSONObject(i);
+            albumTracks.add(parseSongObject(songObject));
+        }
+
+        return albumTracks;
+    }
+
+    private static final String SONG_ID_KEY = "id";
+    private static final String SONG_ARTIST_ID_KEY = "artistId";
+    private static final String SONG_ALBUM_ID_KEY = "albumId";
+    private static final String SONG_TITLE_KEY = "title";
+    private static final String SONG_GENRE_KEY = "genre";
+    private static final String SONG_DURATION_KEY = "duration";
+    private static final String TRACK_KEY = "track";
+
+    /**
+     * Private helper method to create Song object from corresponding JSON
+     * @param songObject A JSON song object returned by the server, e.g. from getAlbum
+     * @return new Song, with dummy values in a field if field is not present
+     * @throws JSONException malformed JSON object
+     */
+    private static Song parseSongObject(JSONObject songObject) throws JSONException {
+        int id = songObject.getInt(SONG_ID_KEY);
+
+        String title = "" ;
+        if (songObject.has(SONG_TITLE_KEY)) {
+            title = songObject.getString(SONG_TITLE_KEY);
+        }
+
+        String genre = "";
+        if (songObject.has(SONG_GENRE_KEY)) {
+            genre = songObject.getString(SONG_GENRE_KEY);
+        }
+
+        long duration = -1;
+        if (songObject.has(SONG_DURATION_KEY)) {
+            duration = songObject.getLong(SONG_DURATION_KEY);
+        }
+
+        int artistId = -1;
+        if (songObject.has(SONG_ARTIST_ID_KEY)) {
+            artistId = songObject.getInt(SONG_ARTIST_ID_KEY);
+        }
+
+        int albumId = -1;
+        if (songObject.has(SONG_ALBUM_ID_KEY)) {
+            albumId = songObject.getInt(SONG_ALBUM_ID_KEY);
+        }
+
+        int track = -1;
+        if (songObject.has(TRACK_KEY)) {
+            track = songObject.getInt(TRACK_KEY);
+        }
+
+        return new Song(id, title, artistId, albumId, genre, duration, track);
+    }
 }

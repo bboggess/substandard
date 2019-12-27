@@ -3,16 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.main.AlbumsByArtistFragment">
+    tools:context=".ui.main.SongListFragment">
 
     <ProgressBar
-        android:id="@+id/albums_by_artist_pb"
+        android:id="@+id/song_view_pb"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:visibility="invisible"/>
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_albums_by_artist"
+        android:id="@+id/rv_song_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
 </FrameLayout>

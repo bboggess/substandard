@@ -1,8 +1,6 @@
 package com.example.substandard.ui.main;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,7 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
 import com.example.substandard.database.data.Artist;
-import com.example.substandard.ui.artistdetail.ArtistViewActivity;
+import com.example.substandard.ui.model.ArtistViewModel;
+import com.example.substandard.ui.model.ArtistViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
 
 import java.util.List;
@@ -73,7 +72,7 @@ public class ArtistsFragment extends Fragment implements ArtistAdapter.ItemClick
 
     private void setUpArtistsViewModel() {
         ArtistViewModelFactory factory = InjectorUtils.provideArtistViewModelFactory(getContext());
-        artistViewModel = new ViewModelProvider(getActivity(), factory).get(ArtistViewModel.class);
+        artistViewModel = new ViewModelProvider(this, factory).get(ArtistViewModel.class);
         artistViewModel.getArtists().observe(this, new Observer<List<Artist>>() {
             @Override
             public void onChanged(List<Artist> artists) {
@@ -91,13 +90,6 @@ public class ArtistsFragment extends Fragment implements ArtistAdapter.ItemClick
         setUpRecyclerView(rootView);
         setUpArtistsViewModel();
         return rootView;
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
     @Override
@@ -119,10 +111,7 @@ public class ArtistsFragment extends Fragment implements ArtistAdapter.ItemClick
 
     @Override
     public void onItemClick(Artist artist) {
-        Log.d(TAG, "handling RecyclerView click");
-        Intent artistViewIntent = new Intent(getContext(), ArtistViewActivity.class);
-        artistViewIntent.putExtra(ArtistViewActivity.ARTIST_ID_EXTRA, artist.getId());
-        startActivity(artistViewIntent);
+        mListener.onArtistClick(artist);
     }
 
     /**
@@ -136,7 +125,6 @@ public class ArtistsFragment extends Fragment implements ArtistAdapter.ItemClick
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onArtistClick(Artist artist);
     }
 }

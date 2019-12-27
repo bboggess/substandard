@@ -8,9 +8,11 @@ import com.example.substandard.database.data.Artist;
 import com.example.substandard.database.data.ArtistDao;
 import com.example.substandard.database.data.ArtistDatabase;
 import com.example.substandard.database.network.SubsonicNetworkDataSource;
-import com.example.substandard.ui.artistdetail.AlbumsByArtistViewModelFactory;
-import com.example.substandard.ui.artistdetail.ArtistDetailViewModelFactory;
-import com.example.substandard.ui.main.ArtistViewModelFactory;
+import com.example.substandard.ui.model.AlbumsByArtistViewModelFactory;
+import com.example.substandard.ui.model.ArtistDetailViewModelFactory;
+import com.example.substandard.ui.model.ArtistViewModelFactory;
+import com.example.substandard.ui.model.SimilarArtistsViewModelFactory;
+import com.example.substandard.ui.model.SongListViewModelFactory;
 
 /**
  * Static methods for linking various components
@@ -22,7 +24,7 @@ public class InjectorUtils {
      * @param context Context used for getting user preferences, etc
      * @return repository which can be used to make requests from the Artist database
      */
-    private static SubsonicArtistRepository provideArtistRepository(Context context) {
+    public static SubsonicArtistRepository provideArtistRepository(Context context) {
         ArtistDatabase database = ArtistDatabase.getInstance(context.getApplicationContext());
         ArtistDao artistDao = database.artistDao();
         AppExecutors executors = AppExecutors.getInstance();
@@ -50,4 +52,15 @@ public class InjectorUtils {
         SubsonicArtistRepository repository = provideArtistRepository(context);
         return new AlbumsByArtistViewModelFactory(repository, artist);
     }
+
+    public static SimilarArtistsViewModelFactory provideSimilarArtistsViewModelFactory(Context context, int artistId) {
+        SubsonicArtistRepository repository = provideArtistRepository(context);
+        return new SimilarArtistsViewModelFactory(repository, artistId);
+    }
+
+    public static SongListViewModelFactory provideSongListViewModelFactory(Context context, int albumId) {
+        SubsonicArtistRepository repository = provideArtistRepository(context);
+        return new SongListViewModelFactory(repository, albumId);
+    }
+
 }

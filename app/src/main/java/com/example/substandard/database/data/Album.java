@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey;
 
 import java.util.Date;
 
-@Entity(tableName = "albums_server",
+@Entity(tableName = "albums",
     foreignKeys = {
         @ForeignKey(entity = Artist.class,
             parentColumns = "id",
@@ -22,14 +22,17 @@ public class Album {
     private int duration;
     @ColumnInfo(name = "artist_id")
     private int artistId;
+    @ColumnInfo(name = "cover_art")
+    private String coverArt;
 
-    public Album(int id, String name, int songCount, Date created, int duration, int artistId) {
+    public Album(int id, String name, int songCount, Date created, int duration, int artistId, String coverArt) {
         this.id = id;
         this.name = name;
         this.songCount = songCount;
         this.created = created;
         this.duration = duration;
         this.artistId = artistId;
+        this.coverArt = coverArt;
     }
 
     /**
@@ -112,5 +115,17 @@ public class Album {
     @Override
     public String toString() {
         return name;
+    }
+
+    /**
+     *
+     * @return key for obtaining cover art from server
+     */
+    public String getCoverArt() {
+        return coverArt;
+    }
+
+    public void setCoverArt(String coverArt) {
+        this.coverArt = coverArt;
     }
 }

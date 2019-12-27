@@ -1,4 +1,4 @@
-package com.example.substandard.ui.artistdetail;
+package com.example.substandard.ui.model;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
@@ -6,18 +6,18 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.substandard.database.SubsonicArtistRepository;
 
-public class ArtistDetailViewModelFactory extends ViewModelProvider.NewInstanceFactory {
+public class SongListViewModelFactory extends ViewModelProvider.NewInstanceFactory {
     private SubsonicArtistRepository repository;
-    private int artistId;
+    private int albumId;
 
-    public ArtistDetailViewModelFactory(SubsonicArtistRepository repository, int artistId) {
+    public SongListViewModelFactory(SubsonicArtistRepository repository, int albumId) {
         this.repository = repository;
-        this.artistId = artistId;
+        this.albumId = albumId;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new ArtistDetailViewModel(artistId, repository);
+        return (T) new SongListViewModel(albumId, repository);
     }
 }

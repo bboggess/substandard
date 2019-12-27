@@ -1,12 +1,15 @@
 package com.example.substandard.database.network;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
 
 import com.example.substandard.data.SubstandardPreferences;
 import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.Artist;
+import com.example.substandard.database.data.Song;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -456,4 +459,51 @@ public class SubsonicNetworkUtils {
         return SubsonicJsonParseUtils.parseGetAlbumList(sendRequest(requestUrl));
     }
 
+    public static List<Artist> getSimilarArtists(int artistId, SubsonicUser requestUser) throws
+            IOException, JSONException {
+        Map<String, String> optionalParams = new HashMap<>();
+        optionalParams.put(ID_QUERY, Integer.toString(artistId));
+        SubsonicServerRequest request = new SubsonicServerRequest(requestUser,
+                SubsonicService.GET_ARTIST_INFO, optionalParams);
+        URL requestUrl = buildUrl(request);
+        return SubsonicJsonParseUtils.parseGetSimilarArtists(sendRequest(requestUrl));
+    }
+
+    private static Bitmap getBitmapFromURL(URL url) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.connect();
+        Bitmap image = BitmapFactory.decodeStream(connection.getInputStream());
+        connection.disconnect();
+        return image;
+    }
+
+    public static Bitmap getCoverArt(Album album, SubsonicUser requestUser) throws
+            IOException {
+        Map<String, String> optionalParams = new HashMap<>();
+        optionalParams.put(ID_QUERY, album.getCoverArt());
+        SubsonicServerRequest request = new SubsonicServerRequest(requestUser,
+                SubsonicService.GET_COVER_ART, optionalParams);
+        URL requestURL = buildUrl(request);
+        return getBitmapFromURL(requestURL);
+    }
+
+    public static Bitmap getCoverArt(Song song, SubsonicUser requestUser) throws
+            IOException {
+        Map<String, String> optionalParams = new HashMap<>();
+        optionalParams.put(ID_QUERY, Integer.toString(song.getId()));
+        SubsonicServerRequest request = new SubsonicServerRequest(requestUser,
+                SubsonicService.GET_COVER_ART, optionalParams);
+        URL requestURL = buildUrl(request);
+        return getBitmapFromURL(requestURL);
+    }
+
+    public static List<Song> getAlbum(int albumId, SubsonicUser requestUser) throws
+            IOException, JSONException {
+        Map<String, String> optionalParams = new HashMap<>();
+        optionalParams.put(ID_QUERY, Integer.toString(albumId));
+        SubsonicServerRequest request = new SubsonicServerRequest(requestUser,
+                SubsonicService.GET_ALBUM, optionalParams);
+        URL requestUrl = buildUrl(request);
+        return SubsonicJsonParseUtils.parseGetAlbum(sendRequest(requestUrl));
+    }
 }

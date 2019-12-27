@@ -1,5 +1,6 @@
 package com.example.substandard.database;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -9,12 +10,14 @@ import com.example.substandard.AppExecutors;
 import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.Artist;
 import com.example.substandard.database.data.ArtistDao;
+import com.example.substandard.database.data.Song;
 import com.example.substandard.database.network.SubsonicNetworkDataSource;
 
 import java.util.List;
 
 /**
- * This class class connects the Artists database with other components of the app.
+ * This class connects the Artists database with other components of the app. The only way
+ * to request network data from UI code is through the instance of this class.
  * Uses singleton instantiation pattern.
  */
 public class SubsonicArtistRepository {
@@ -24,12 +27,15 @@ public class SubsonicArtistRepository {
     private static final Object LOCK = new Object();
     private static SubsonicArtistRepository repositoryInstance;
 
+    // Actually knows how to make calls to server
     private final SubsonicNetworkDataSource dataSource;
+    // Knows how to read from/write to the database
     private final ArtistDao artistDao;
+    // Only used to schedule database operations off of main thread
     private final AppExecutors executors;
 
     // This is done poorly. Supposed to check whether we've filled the database from the
-    // server yet, but definitely doesn't.
+    // server yet, but tries to reload whenever the app starts. I guess this isn't terrible?
     private boolean isInitialized;
 
     private SubsonicArtistRepository(final ArtistDao artistDao,
@@ -117,5 +123,39 @@ public class SubsonicArtistRepository {
      */
     public LiveData<List<Album>> getAlbumsByArtist(Artist artist) {
         return dataSource.fetchAlbumsForArtist(artist);
+    }
+
+    /**
+     *
+     * @param artistId id of artist for search
+     * @return list of similar artists (note: currently only those present in the library)
+     */
+    public LiveData<List<Artist>> getSimilarArtists(int artistId) {
+        Log.d(TAG, "getting similar artists");
+        return dataSource.fetchSimilarArtists(artistId);
+    }
+
+    /**
+     * Get cover art from the server
+     * @param album Album whose cover is requested
+     * @return LiveData which will be updated with image once loaded
+     */
+    public LiveData<Bitmap> getCoverArt(Album album) {
+        Log.d(TAG, "getting cover art");
+        return dataSource.fetchCoverArt(album);
+    }
+
+    /**
+     * Get all songs from an album on the server
+     * @param album Album to find songs from
+     * @return list of all songs, wrapped in LiveData updated once processing finishes.
+     */
+    public LiveData<List<Song>> getAlbum(Album album) {
+        Log.d(TAG, "getting songs for: " + album.getName());
+        return dataSource.fetchAlbum(album);
+    }
+
+    public LiveData<List<Song>> getAlbum(int albumId) {
+        return dataSource.fetchAlbum(albumId);
     }
 }

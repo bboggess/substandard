@@ -1,4 +1,6 @@
-package com.example.substandard.ui.artistdetail;
+package com.example.substandard.ui.model;
+
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
@@ -9,15 +11,17 @@ import com.example.substandard.database.data.Artist;
 
 import java.util.List;
 
-class AlbumsByArtistViewModel extends ViewModel {
+public class AlbumsByArtistViewModel extends ViewModel {
+    private static final String TAG = AlbumsByArtistViewModel.class.getSimpleName();
+
     private final LiveData<List<Album>> albums;
-    private final SubsonicArtistRepository repository;
 
     AlbumsByArtistViewModel(Artist artist, SubsonicArtistRepository repository) {
-        this.repository = repository;
         this.albums = repository.getAlbumsByArtist(artist);
+        Log.d(TAG, "setting up ViewModel for: " + artist.getName());
     }
 
-    LiveData<List<Album>> getAlbums() { return albums; }
-
+    public LiveData<List<Album>> getAlbums() {
+        return albums;
+    }
 }

@@ -1,18 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:paddingBottom="5dp"
+    android:paddingLeft="1dp"
+    android:paddingRight="1dp">
 
-    <TextView
-        android:id="@+id/album_tv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"/>
+        <com.example.substandard.ui.CoverArtImageView
+            android:id="@+id/cover_art_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/cover_art_description"
+            android:scaleType="centerCrop"
+            android:paddingLeft="1dp"
+            android:paddingRight="1dp"
+            android:paddingTop="1dp"
+            android:src="@drawable/ic_launcher_background"/>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#dadada"
-        android:layout_marginRight="8dp"
-        android:layout_marginLeft="8dp"/>
-</LinearLayout>
+        <ProgressBar
+            android:id="@+id/album_cover_pb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/cover_art_view"
+            android:layout_alignRight="@id/cover_art_view"
+            android:layout_centerInParent="true"
+            android:visibility="invisible"/>
+
+        <TextView
+            android:id="@+id/album_name_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="1dp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:layout_below="@id/cover_art_view"
+            android:gravity="center_vertical"
+            android:text="album"/>
+
+        <TextView
+            android:id="@+id/album_artist_name_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/album_name_tv"
+            android:padding="1dp"
+            android:singleLine="true"
+            android:gravity="center_vertical"
+            android:text="artist"/>
+
+
+</RelativeLayout>

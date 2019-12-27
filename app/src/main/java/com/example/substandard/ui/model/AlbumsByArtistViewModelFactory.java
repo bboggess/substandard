@@ -1,4 +1,4 @@
-package com.example.substandard.ui.artistdetail;
+package com.example.substandard.ui.model;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;

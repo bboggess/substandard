@@ -29,6 +29,9 @@ public interface ArtistDao {
     @Update
     void update(List<Artist> artists);
 
+    @Query("SELECT name FROM artists WHERE id = :id")
+    String getArtistName(int id);
+
     @Query("SELECT * FROM artists WHERE id = :id")
     LiveData<Artist> loadArtistById(int id);
 }

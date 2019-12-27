@@ -1,7 +1,6 @@
 package com.example.substandard.ui.main;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -11,16 +10,25 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.substandard.R;
+import com.example.substandard.database.data.Album;
+import com.example.substandard.database.data.Artist;
+import com.example.substandard.ui.OnAlbumClickListener;
 import com.example.substandard.ui.settings.SettingsActivity;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity implements
+        AbstractArtistViewFragment.OnFragmentInteractionListener,
+        OnAlbumClickListener,
         ArtistsFragment.OnFragmentInteractionListener,
-        NavigationView.OnNavigationItemSelectedListener {
+        NavigationView.OnNavigationItemSelectedListener,
+        FragmentManager.OnBackStackChangedListener {
+
     private DrawerLayout mDrawerLayout;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements
         ft.add(R.id.fragment_container, new ArtistsFragment(), "Artists");
         ft.commit();
 
+        getSupportFragmentManager().addOnBackStackChangedListener(this);
         setUpNavigationDrawer();
         setupNavigationClickListener();
     }
@@ -69,10 +78,18 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    // What does this do???
     @Override
-    public void onFragmentInteraction(Uri uri) {
+    public void onArtistClick(Artist artist) {
+        ArtistViewFragment fragment = new ArtistViewFragment();
+        fragment.setArtist(artist);
+        swapFragments(fragment);
+    }
 
+    @Override
+    public void onAlbumClick(Album album) {
+        SongListFragment fragment = SongListFragment.newInstance();
+        fragment.setAlbum(album);
+        swapFragments(fragment);
     }
 
     @Override
@@ -88,21 +105,19 @@ public class MainActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    private void swapFragments(Fragment newFragment, String tag) {
+    void swapFragments(Fragment newFragment) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fragment_container, newFragment, tag);
+        ft.replace(R.id.fragment_container, newFragment);
         ft.addToBackStack(null);
         ft.commit();
     }
 
-    // Should I be launching Settings as an Activity or a Fragment?
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.item_settings:
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 startActivity(settingsIntent);
-//                swapFragments(new SettingsFragment(),"Settings");
                 break;
 
             default:
@@ -112,4 +127,12 @@ public class MainActivity extends AppCompatActivity implements
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    @Override
+    public void onBackStackChanged() {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
 }

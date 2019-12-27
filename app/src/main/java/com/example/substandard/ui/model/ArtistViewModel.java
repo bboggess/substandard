@@ -1,4 +1,4 @@
-package com.example.substandard.ui.main;
+package com.example.substandard.ui.model;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;

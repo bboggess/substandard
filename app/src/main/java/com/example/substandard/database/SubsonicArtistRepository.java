@@ -12,6 +12,7 @@ import com.example.substandard.database.data.Artist;
 import com.example.substandard.database.data.ArtistDao;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.database.network.SubsonicNetworkDataSource;
+import com.example.substandard.database.network.SubsonicNetworkUtils;
 
 import java.util.List;
 
@@ -157,5 +158,9 @@ public class SubsonicArtistRepository {
 
     public LiveData<List<Song>> getAlbum(int albumId) {
         return dataSource.fetchAlbum(albumId);
+    }
+
+    public LiveData<Boolean> isValidLogin(SubsonicNetworkUtils.SubsonicUser user) {
+        return dataSource.authenticateUser(user);
     }
 }

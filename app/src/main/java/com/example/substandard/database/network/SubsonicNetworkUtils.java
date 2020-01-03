@@ -209,7 +209,7 @@ public class SubsonicNetworkUtils {
             this.salt = salt;
         }
 
-        String getServerAddress() {
+        public String getServerAddress() {
             return serverAddress;
         }
 
@@ -217,7 +217,7 @@ public class SubsonicNetworkUtils {
             this.serverAddress = serverAddress;
         }
 
-        String getUsername() {
+        public String getUsername() {
             return username;
         }
 
@@ -225,7 +225,7 @@ public class SubsonicNetworkUtils {
             this.username = username;
         }
 
-        String getAuthToken() {
+        public String getAuthToken() {
             return authToken;
         }
 
@@ -233,7 +233,7 @@ public class SubsonicNetworkUtils {
             this.authToken = authToken;
         }
 
-        String getSalt() {
+        public String getSalt() {
             return salt;
         }
 
@@ -292,7 +292,7 @@ public class SubsonicNetworkUtils {
         }
     }
 
-    static SubsonicUser getSubsonicUserFromPreferences(Context context) {
+    public static SubsonicUser getSubsonicUserFromPreferences(Context context) {
         String username = SubstandardPreferences.getPreferredUsername(context);
         String server =  SubstandardPreferences.getPreferredServerAddress(context);
         String authToken = SubstandardPreferences.getPreferredAuthToken(context);
@@ -477,24 +477,24 @@ public class SubsonicNetworkUtils {
         return image;
     }
 
-    public static Bitmap getCoverArt(Album album, SubsonicUser requestUser) throws
+    public static Bitmap getCoverArt(String path, SubsonicUser requestUser) throws
             IOException {
         Map<String, String> optionalParams = new HashMap<>();
-        optionalParams.put(ID_QUERY, album.getCoverArt());
+        optionalParams.put(ID_QUERY, path);
         SubsonicServerRequest request = new SubsonicServerRequest(requestUser,
                 SubsonicService.GET_COVER_ART, optionalParams);
         URL requestURL = buildUrl(request);
         return getBitmapFromURL(requestURL);
     }
 
+    public static Bitmap getCoverArt(Album album, SubsonicUser requestUser) throws
+            IOException {
+        return getCoverArt(album.getCoverArt(), requestUser);
+    }
+
     public static Bitmap getCoverArt(Song song, SubsonicUser requestUser) throws
             IOException {
-        Map<String, String> optionalParams = new HashMap<>();
-        optionalParams.put(ID_QUERY, Integer.toString(song.getId()));
-        SubsonicServerRequest request = new SubsonicServerRequest(requestUser,
-                SubsonicService.GET_COVER_ART, optionalParams);
-        URL requestURL = buildUrl(request);
-        return getBitmapFromURL(requestURL);
+        return getCoverArt(Integer.toString(song.getId()), requestUser);
     }
 
     public static List<Song> getAlbum(int albumId, SubsonicUser requestUser) throws

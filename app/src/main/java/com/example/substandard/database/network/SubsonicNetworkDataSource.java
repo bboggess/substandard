@@ -265,4 +265,17 @@ public class SubsonicNetworkDataSource {
         return fetchAlbum(album.getId());
     }
 
+    public LiveData<Boolean> authenticateUser(final SubsonicNetworkUtils.SubsonicUser user) {
+        final MutableLiveData<Boolean> isSuccessful = new MutableLiveData<>();
+        AppExecutors.getInstance().networkIo().execute(new Runnable() {
+            @Override
+            public void run() {
+                boolean result = SubsonicNetworkUtils.authenticate(user);
+                isSuccessful.postValue(result);
+            }
+        });
+
+        return isSuccessful;
+    }
+
 }

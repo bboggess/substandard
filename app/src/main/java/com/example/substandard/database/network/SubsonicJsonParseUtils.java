@@ -164,7 +164,7 @@ class SubsonicJsonParseUtils {
             JSONArray artistsArrayAtIndex = artistsArrayIndexedByAbc.getJSONObject(i).getJSONArray(ARTIST_ARRAY_KEY);
             for (int j = 0; j < artistsArrayAtIndex.length(); j++) {
                 JSONObject artistObject = artistsArrayAtIndex.getJSONObject(j);
-                int id = artistObject.getInt(ARTIST_ID_KEY);
+                String id = artistObject.getString(ARTIST_ID_KEY);
                 String name = artistObject.getString(ARTIST_NAME_KEY);
                 // These two fields throw JSON exceptions??? Remove them I guess.
 //                String coverArt = "";
@@ -284,7 +284,7 @@ class SubsonicJsonParseUtils {
     private static Album parseAlbumObject(JSONObject albumObject) throws JSONException{
         Log.d(TAG, "parsing album JSON object");
 
-        int albumId = albumObject.getInt(ALBUM_ID_KEY);
+        String albumId = albumObject.getString(ALBUM_ID_KEY);
 
         String albumName = "";
         if (albumObject.has(ALBUM_NAME_KEY)) {
@@ -296,9 +296,9 @@ class SubsonicJsonParseUtils {
             duration = albumObject.getInt(ALBUM_DURATION_KEY);
         }
 
-        int artistId = -1;
+        String artistId = null;
         if (albumObject.has(ALBUM_ARTIST_ID_KEY)) {
-            artistId = albumObject.getInt(ALBUM_ARTIST_ID_KEY);
+            artistId = albumObject.getString(ALBUM_ARTIST_ID_KEY);
         }
 
         int numTracks = -1;
@@ -398,7 +398,7 @@ class SubsonicJsonParseUtils {
         JSONArray similarArtistArray = similarArtistObject.getJSONArray(SIMILAR_ARTIST_ARRAY_KEY);
         for (int i = 0; i < similarArtistArray.length(); i++) {
             JSONObject artistObject = similarArtistArray.getJSONObject(i);
-            int id = artistObject.getInt(ARTIST_ID_KEY);
+            String id = artistObject.getString(ARTIST_ID_KEY);
             String name = artistObject.getString(ARTIST_NAME_KEY);
             int albumCount = artistObject.getInt(ARTIST_ALBUM_COUNT);
 
@@ -499,7 +499,7 @@ class SubsonicJsonParseUtils {
      * @throws JSONException malformed JSON object
      */
     private static Song parseSongObject(JSONObject songObject) throws JSONException {
-        int id = songObject.getInt(SONG_ID_KEY);
+        String id = songObject.getString(SONG_ID_KEY);
 
         String title = "" ;
         if (songObject.has(SONG_TITLE_KEY)) {
@@ -516,14 +516,14 @@ class SubsonicJsonParseUtils {
             duration = songObject.getLong(SONG_DURATION_KEY);
         }
 
-        int artistId = -1;
+        String artistId = "";
         if (songObject.has(SONG_ARTIST_ID_KEY)) {
-            artistId = songObject.getInt(SONG_ARTIST_ID_KEY);
+            artistId = songObject.getString(SONG_ARTIST_ID_KEY);
         }
 
-        int albumId = -1;
+        String albumId = "";
         if (songObject.has(SONG_ALBUM_ID_KEY)) {
-            albumId = songObject.getInt(SONG_ALBUM_ID_KEY);
+            albumId = songObject.getString(SONG_ALBUM_ID_KEY);
         }
 
         int track = -1;

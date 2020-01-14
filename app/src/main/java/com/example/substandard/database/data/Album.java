@@ -1,8 +1,11 @@
 package com.example.substandard.database.data;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import java.util.Date;
@@ -11,21 +14,31 @@ import java.util.Date;
     foreignKeys = {
         @ForeignKey(entity = Artist.class,
             parentColumns = "id",
-            childColumns = "artist_id")})
+            childColumns = "artist_id")},
+    indices = @Index(value = "id"))
 public class Album {
     @PrimaryKey
-    private int id;
+    @NonNull
+    private String id;
     private String name;
-    @ColumnInfo(name = "song_count")
+    @Ignore
     private int songCount;
+    @Ignore
     private Date created;
+    @Ignore
     private int duration;
     @ColumnInfo(name = "artist_id")
-    private int artistId;
-    @ColumnInfo(name = "cover_art")
+    private String artistId;
     private String coverArt;
 
-    public Album(int id, String name, int songCount, Date created, int duration, int artistId, String coverArt) {
+    public Album(String id, String name, String artistId, String coverArt) {
+        this.id = id;
+        this.name = name;
+        this.artistId = artistId;
+        this.coverArt = coverArt;
+    }
+
+    public Album(String id, String name, int songCount, Date created, int duration, String artistId, String coverArt) {
         this.id = id;
         this.name = name;
         this.songCount = songCount;
@@ -39,11 +52,11 @@ public class Album {
      *
      * @return Unique identifier for the album. Matches the ID stored by Subsonic server
      */
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -100,11 +113,11 @@ public class Album {
      *
      * @return ID of the album artist. Useful for joins.
      */
-    public int getArtistId() {
+    public String getArtistId() {
         return artistId;
     }
 
-    public void setArtistId(int artistId) {
+    public void setArtistId(String artistId) {
         this.artistId = artistId;
     }
 

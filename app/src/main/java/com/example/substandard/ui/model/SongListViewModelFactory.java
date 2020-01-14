@@ -4,13 +4,13 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.substandard.database.SubsonicArtistRepository;
+import com.example.substandard.database.SubsonicLibraryRepository;
 
 public class SongListViewModelFactory extends ViewModelProvider.NewInstanceFactory {
-    private SubsonicArtistRepository repository;
-    private int albumId;
+    private SubsonicLibraryRepository repository;
+    private String albumId;
 
-    public SongListViewModelFactory(SubsonicArtistRepository repository, int albumId) {
+    public SongListViewModelFactory(SubsonicLibraryRepository repository, String albumId) {
         this.repository = repository;
         this.albumId = albumId;
     }

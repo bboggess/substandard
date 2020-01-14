@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -23,15 +24,15 @@ public interface ArtistDao {
     @Insert
     void insert(Artist artist);
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertAll(List<Artist> artists);
 
     @Update
     void update(List<Artist> artists);
 
     @Query("SELECT name FROM artists WHERE id = :id")
-    String getArtistName(int id);
+    String getArtistName(String id);
 
     @Query("SELECT * FROM artists WHERE id = :id")
-    LiveData<Artist> loadArtistById(int id);
+    LiveData<Artist> loadArtistById(String id);
 }

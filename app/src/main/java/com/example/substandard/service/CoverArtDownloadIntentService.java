@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.ResultReceiver;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -21,10 +20,16 @@ import java.io.IOException;
 public class CoverArtDownloadIntentService extends IntentService {
     private static final String TAG = CoverArtDownloadIntentService.class.getSimpleName();
 
+    /**
+     * Keys for obtaining arguments from the calling Intent
+     */
     public static final String BITMAP_EXTRA_KEY = "bitmap";
     public static final String IMAGE_PATH_EXTRA_KEY = "path";
     public static final String RESULT_RECEIVER_EXTRA_KEY = "receiver";
 
+    /**
+     * Constants for communicating success/failure of the download with the Receiver
+     */
     public static final int STATUS_SUCCESS = 0;
     public static final int STATUS_FAILED = 1;
 
@@ -35,12 +40,13 @@ public class CoverArtDownloadIntentService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         String path = intent.getStringExtra(IMAGE_PATH_EXTRA_KEY);
-        Log.d(TAG, "Handling service for: " + path);
         ResultReceiver resultReceiver = intent.getParcelableExtra(RESULT_RECEIVER_EXTRA_KEY);
         SubsonicNetworkUtils.SubsonicUser requestUser = SubsonicNetworkUtils
                 .getSubsonicUserFromPreferences(getApplicationContext());
 
         Bundle args = new Bundle();
+        // We try to download the image. If successful, place Bitmap in the Bundle and
+        // send to receiver. Else, send error message.
         try {
             Bitmap albumCover = SubsonicNetworkUtils.getCoverArt(path, requestUser);
             args.putParcelable(BITMAP_EXTRA_KEY, albumCover);

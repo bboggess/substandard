@@ -33,12 +33,25 @@ public class SubsonicNetworkDataSource {
     private final Context context;
 
     private final MutableLiveData<List<Artist>> artists;
+    private final MutableLiveData<List<Album>> albums;
+    private final MutableLiveData<List<Song>> songs;
+
+    public MutableLiveData<List<Album>> getAlbums() {
+        return albums;
+    }
+
+    public MutableLiveData<List<Song>> getSongs() {
+        return songs;
+    }
+
     private final AppExecutors executors;
 
     private SubsonicNetworkDataSource(Context context, AppExecutors executors) {
         this.context = context;
         this.executors = executors;
         this.artists = new MutableLiveData<>();
+        this.albums = new MutableLiveData<>();
+        this.songs = new MutableLiveData<>();
     }
 
     /**
@@ -74,22 +87,22 @@ public class SubsonicNetworkDataSource {
     private class NetworkTask {
         static final int ARTIST_ID_KEY = 1;
         private Task task;
-        private Map<Integer, Integer> additionalParams;
+        private Map<Integer, String> additionalParams;
 
         NetworkTask(Task task) {
             this(task, Collections.EMPTY_MAP);
         }
 
-        NetworkTask(Task task, Map<Integer, Integer> additionalParams) {
+        NetworkTask(Task task, Map<Integer, String> additionalParams) {
             this.task = task;
             this.additionalParams = additionalParams;
         }
 
-        void putExtraInt(int key, int value) {
+        void putExtraInt(int key, String value) {
             additionalParams.put(key, value);
         }
 
-        int getExtraInt(int key) {
+        String getExtraInt(int key) {
             return additionalParams.get(key);
         }
     }
@@ -111,7 +124,7 @@ public class SubsonicNetworkDataSource {
                             data.postValue(SubsonicNetworkUtils.getAllArtists(user));
                             break;
                         case FETCH_ALBUMS_FOR_ARTIST_TASK:
-                            int artistId = networkTask.getExtraInt(NetworkTask.ARTIST_ID_KEY);
+                            String artistId = networkTask.getExtraInt(NetworkTask.ARTIST_ID_KEY);
                             data.postValue(SubsonicNetworkUtils.getArtistAlbums(artistId, user));
                             break;
                         case FETCH_SIMILAR_ARTISTS_TASK:
@@ -162,6 +175,48 @@ public class SubsonicNetworkDataSource {
     }
 
     /**
+     * This does all of the work to initialize the library. Fetches all artists, and then
+     * for each artist gets all of their albums, and for each album all of their songs. These
+     * are posted to the LiveData as they are obtained.
+     *
+     * This is Subsonic's fault for not having an option to get all albums or all songs.
+     */
+    public void initializeLibrary() {
+        AppExecutors.getInstance().networkIo().execute(new Runnable() {
+            @Override
+            public void run() {
+                SubsonicNetworkUtils.SubsonicUser user = SubsonicNetworkUtils
+                        .getSubsonicUserFromPreferences(context);
+                // Make sure we have a user present in preferences. Hacky
+                if (user.getServerAddress() == null || user.getServerAddress().equals("")) {
+                    Log.d(TAG, "fetchArtists: no server address found");
+                    return;
+                }
+
+                // God forgive me for this
+                try {
+                    List<Artist> downloadedArtistList = SubsonicNetworkUtils.getAllArtists(user);
+                    artists.postValue(downloadedArtistList);
+                    for (Artist artist : downloadedArtistList) {
+                        List<Album> albumsByArtist = SubsonicNetworkUtils.getArtistAlbums(artist.getId(), user);
+                        albums.postValue(albumsByArtist);
+                        for (Album album : albumsByArtist) {
+                            songs.postValue(SubsonicNetworkUtils.getAlbum(album.getId(), user));
+                        }
+                    }
+                } catch (IOException e) {
+                    Log.d(TAG, "fetchArtists: I/O error on server request");
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    Log.d(TAG, "fetchArtists: malformed JSON from server request." +
+                            "Did you pass correct address?");
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
      * Grabs all albums by the given artist present on the server
      * @param artist artist whose albums we want
      * @return List of albums (as live data because background threads)
@@ -190,7 +245,7 @@ public class SubsonicNetworkDataSource {
         return albums;
     }
 
-    public LiveData<List<Artist>> fetchSimilarArtists(final int artistId) {
+    public LiveData<List<Artist>> fetchSimilarArtists(final String artistId) {
         final MutableLiveData<List<Artist>> similarArtists = new MutableLiveData<>();
         AppExecutors.getInstance().networkIo().execute(new Runnable() {
             @Override
@@ -235,7 +290,7 @@ public class SubsonicNetworkDataSource {
         return coverArt;
     }
 
-    public LiveData<List<Song>> fetchAlbum(final int albumId) {
+    public LiveData<List<Song>> fetchAlbum(final String albumId) {
         final MutableLiveData<List<Song>> songs = new MutableLiveData<>();
         AppExecutors.getInstance().networkIo().execute(new Runnable() {
             @Override

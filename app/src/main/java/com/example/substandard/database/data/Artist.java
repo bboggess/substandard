@@ -1,14 +1,18 @@
 package com.example.substandard.database.data;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "artists")
+@Entity(tableName = "artists",
+    indices = @Index(value="id"))
 public class Artist {
 
     @PrimaryKey
-    private int id;
+    @NonNull
+    private String id;
     private String name;
 //    @ColumnInfo(name = "cover_art")
 //    private String coverArt;
@@ -17,7 +21,7 @@ public class Artist {
     @ColumnInfo(name = "album_count")
     private int albumCount;
 
-    public Artist(int id, String name,  int albumCount) {
+    public Artist(String id, String name, int albumCount) {
         this.id = id;
         this.name = name;
         this.albumCount = albumCount;
@@ -27,11 +31,11 @@ public class Artist {
      *
      * @return Unique identifier for each Artist. This matches the ID used by server
      */
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

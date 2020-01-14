@@ -27,6 +27,8 @@
     <string name="pref_auth_token_key" translatable="false">auth</string>
     <string name="pref_salt_key" translatable="false">salt</string>
 
+    <string name="pref_db_initialized_key" translatable="false">db_init</string>
+
     <string name="login_failed_toast_message">Login failed</string>
 
     <!-- Used in login dialog -->

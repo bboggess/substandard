@@ -429,10 +429,10 @@ public class SubsonicNetworkUtils {
      * @throws IOException if I/O error reading from server
      * @throws JSONException if response from server is not valid JSON
      */
-    static List<Album> getArtistAlbums(int artistId, SubsonicUser requestUser) throws
+    static List<Album> getArtistAlbums(String artistId, SubsonicUser requestUser) throws
             IOException, JSONException {
         Map<String, String> optionalParams = new HashMap<>();
-        optionalParams.put(ID_QUERY, Integer.toString(artistId));
+        optionalParams.put(ID_QUERY, artistId);
         SubsonicServerRequest request = new SubsonicServerRequest(requestUser,
                 SubsonicService.GET_ARTIST, optionalParams);
         URL requestUrl = buildUrl(request);
@@ -459,10 +459,10 @@ public class SubsonicNetworkUtils {
         return SubsonicJsonParseUtils.parseGetAlbumList(sendRequest(requestUrl));
     }
 
-    public static List<Artist> getSimilarArtists(int artistId, SubsonicUser requestUser) throws
+    public static List<Artist> getSimilarArtists(String artistId, SubsonicUser requestUser) throws
             IOException, JSONException {
         Map<String, String> optionalParams = new HashMap<>();
-        optionalParams.put(ID_QUERY, Integer.toString(artistId));
+        optionalParams.put(ID_QUERY, artistId);
         SubsonicServerRequest request = new SubsonicServerRequest(requestUser,
                 SubsonicService.GET_ARTIST_INFO, optionalParams);
         URL requestUrl = buildUrl(request);
@@ -494,13 +494,13 @@ public class SubsonicNetworkUtils {
 
     public static Bitmap getCoverArt(Song song, SubsonicUser requestUser) throws
             IOException {
-        return getCoverArt(Integer.toString(song.getId()), requestUser);
+        return getCoverArt(song.getId(), requestUser);
     }
 
-    public static List<Song> getAlbum(int albumId, SubsonicUser requestUser) throws
+    public static List<Song> getAlbum(String albumId, SubsonicUser requestUser) throws
             IOException, JSONException {
         Map<String, String> optionalParams = new HashMap<>();
-        optionalParams.put(ID_QUERY, Integer.toString(albumId));
+        optionalParams.put(ID_QUERY, albumId);
         SubsonicServerRequest request = new SubsonicServerRequest(requestUser,
                 SubsonicService.GET_ALBUM, optionalParams);
         URL requestUrl = buildUrl(request);

@@ -5,7 +5,7 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.example.substandard.database.SubsonicArtistRepository;
+import com.example.substandard.database.SubsonicLibraryRepository;
 import com.example.substandard.database.data.Song;
 
 import java.util.List;
@@ -15,7 +15,7 @@ public class SongListViewModel extends ViewModel {
 
     private final LiveData<List<Song>> songs;
 
-    SongListViewModel(int albumId, SubsonicArtistRepository repository) {
+    SongListViewModel(String albumId, SubsonicLibraryRepository repository) {
         Log.d(TAG, "Created ViewModel");
         this.songs = repository.getAlbum(albumId);
     }

@@ -1,5 +1,6 @@
 package com.example.substandard.database;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
@@ -8,11 +9,12 @@ import androidx.lifecycle.Observer;
 
 import com.example.substandard.AppExecutors;
 import com.example.substandard.database.data.Album;
+import com.example.substandard.database.data.AlbumDao;
 import com.example.substandard.database.data.Artist;
 import com.example.substandard.database.data.ArtistDao;
 import com.example.substandard.database.data.Song;
+import com.example.substandard.database.data.SongDao;
 import com.example.substandard.database.network.SubsonicNetworkDataSource;
-import com.example.substandard.database.network.SubsonicNetworkUtils;
 
 import java.util.List;
 
@@ -21,31 +23,32 @@ import java.util.List;
  * to request network data from UI code is through the instance of this class.
  * Uses singleton instantiation pattern.
  */
-public class SubsonicArtistRepository {
-    private final static String TAG = SubsonicArtistRepository.class.getSimpleName();
+public class SubsonicLibraryRepository {
+    private final static String TAG = SubsonicLibraryRepository.class.getSimpleName();
 
     // For singleton instantiation
     private static final Object LOCK = new Object();
-    private static SubsonicArtistRepository repositoryInstance;
+    private static SubsonicLibraryRepository repositoryInstance;
 
     // Actually knows how to make calls to server
     private final SubsonicNetworkDataSource dataSource;
     // Knows how to read from/write to the database
     private final ArtistDao artistDao;
+    private final AlbumDao albumDao;
+    private final SongDao songDao;
     // Only used to schedule database operations off of main thread
     private final AppExecutors executors;
 
-    // This is done poorly. Supposed to check whether we've filled the database from the
-    // server yet, but tries to reload whenever the app starts. I guess this isn't terrible?
-    private boolean isInitialized;
-
-    private SubsonicArtistRepository(final ArtistDao artistDao,
-                                     final SubsonicNetworkDataSource dataSource,
-                                     final AppExecutors executors) {
+    private SubsonicLibraryRepository(final ArtistDao artistDao,
+                                      final AlbumDao albumDao,
+                                      final SongDao songDao,
+                                      final SubsonicNetworkDataSource dataSource,
+                                      final AppExecutors executors) {
         this.artistDao = artistDao;
+        this.albumDao = albumDao;
+        this.songDao = songDao;
         this.dataSource = dataSource;
         this.executors = executors;
-        isInitialized = false;
 
         // sets live data in the data source to update database when changed
         dataSource.getArtists().observeForever(new Observer<List<Artist>>() {
@@ -55,20 +58,58 @@ public class SubsonicArtistRepository {
                 executors.diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
-                        artistDao.update(artists);
+                        artistDao.insertAll(artists);
+                        Log.d(TAG, "artists written to DAO");
+                    }
+                });
+            }
+        });
+
+        dataSource.getAlbums().observeForever(new Observer<List<Album>>() {
+            @Override
+            public void onChanged(final List<Album> albums) {
+                Log.d(TAG, "Album database updated");
+                executors.diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        albumDao.insertAll(albums);
+                    }
+                });
+            }
+        });
+
+        dataSource.getSongs().observeForever(new Observer<List<Song>>() {
+            @Override
+            public void onChanged(final List<Song> songs) {
+                Log.d(TAG, "Song database updated");
+                executors.diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (Song song : songs) {
+                            Log.d(TAG, "song id: " + song.getId()
+                                + ", album id: " + song.getAlbumId()
+                                + ", artist id: " + song.getArtistId());
+                        }
+                        songDao.insertAll(songs);
                     }
                 });
             }
         });
     }
 
-    public static SubsonicArtistRepository getInstance(ArtistDao artistDao,
-                                                       SubsonicNetworkDataSource dataSource,
-                                                       AppExecutors executors) {
+    // TODO create an "lastUpdated" member to keep track of when last update was
+    // TODO change update to only download things added AFTER last update
+    public static SubsonicLibraryRepository getInstance(ArtistDao artistDao,
+                                                        AlbumDao albumDao,
+                                                        SongDao songDao,
+                                                        Context context,
+                                                        SubsonicNetworkDataSource dataSource,
+                                                        AppExecutors executors) {
         if (repositoryInstance == null) {
             synchronized (LOCK) {
                 Log.d(TAG, "created new repository instance");
-                repositoryInstance = new SubsonicArtistRepository(artistDao, dataSource, executors);
+                repositoryInstance = new SubsonicLibraryRepository(artistDao,
+                        albumDao, songDao, dataSource, executors);
             }
         }
 
@@ -77,24 +118,11 @@ public class SubsonicArtistRepository {
     }
 
     /**
-     * Fetches artists from the server if hasn't been done (at least, it's supposed to do this)
-     */
-    private synchronized void initializeData() {
-        if (isInitialized) {
-            return;
-        }
-
-        isInitialized = true;
-
-        Log.d(TAG, "database initialized");
-        dataSource.fetchArtists();
-    }
-
-    /**
      * Grabs all artists from server, updating database if need be.
      */
     public synchronized void refreshLibrary() {
         Log.d(TAG, "refreshing library");
+        // I suppose this technically triggers everything else
         dataSource.fetchArtists();
     }
 
@@ -104,8 +132,17 @@ public class SubsonicArtistRepository {
      */
     public LiveData<List<Artist>> getArtists() {
         Log.d(TAG, "obtaining artists from DAO");
-        initializeData();
         return artistDao.loadAll();
+    }
+
+    public LiveData<List<Album>> getAlbums() {
+        Log.d(TAG, "obtaining albums from DAO");
+        return albumDao.loadAll();
+    }
+
+    public LiveData<List<Song>> getSongs() {
+        Log.d(TAG, "obtaining songs from DAO");
+        return songDao.loadAll();
     }
 
     /**
@@ -113,7 +150,7 @@ public class SubsonicArtistRepository {
      * @param id id of the artist we want
      * @return artist from the database
      */
-    public LiveData<Artist> getArtistById(int id) {
+    public LiveData<Artist> getArtistById(String id) {
         return artistDao.loadArtistById(id);
     }
 
@@ -123,7 +160,7 @@ public class SubsonicArtistRepository {
      * @return a list of all albums from the given artist
      */
     public LiveData<List<Album>> getAlbumsByArtist(Artist artist) {
-        return dataSource.fetchAlbumsForArtist(artist);
+        return albumDao.loadAlbumsByArtistId(artist.getId());
     }
 
     /**
@@ -131,7 +168,7 @@ public class SubsonicArtistRepository {
      * @param artistId id of artist for search
      * @return list of similar artists (note: currently only those present in the library)
      */
-    public LiveData<List<Artist>> getSimilarArtists(int artistId) {
+    public LiveData<List<Artist>> getSimilarArtists(String artistId) {
         Log.d(TAG, "getting similar artists");
         return dataSource.fetchSimilarArtists(artistId);
     }
@@ -153,14 +190,10 @@ public class SubsonicArtistRepository {
      */
     public LiveData<List<Song>> getAlbum(Album album) {
         Log.d(TAG, "getting songs for: " + album.getName());
-        return dataSource.fetchAlbum(album);
+        return getAlbum(album.getId());
     }
 
-    public LiveData<List<Song>> getAlbum(int albumId) {
-        return dataSource.fetchAlbum(albumId);
-    }
-
-    public LiveData<Boolean> isValidLogin(SubsonicNetworkUtils.SubsonicUser user) {
-        return dataSource.authenticateUser(user);
+    public LiveData<List<Song>> getAlbum(String albumId) {
+        return songDao.loadSongsFromAlbumId(albumId);
     }
 }

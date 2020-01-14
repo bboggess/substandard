@@ -48,7 +48,7 @@ dependencies {
     implementation 'commons-codec:commons-codec:1.13'
 
     // Room API for database management
-    implementation "androidx.room:room-runtime:2.2.1"
-    annotationProcessor "androidx.room:room-compiler:2.2.1"
+    implementation "androidx.room:room-runtime:2.2.3"
+    annotationProcessor "androidx.room:room-compiler:2.2.3"
     implementation 'androidx.viewpager:viewpager:1.0.0'
 }

@@ -2,14 +2,12 @@ package com.example.substandard.service;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
 import androidx.annotation.Nullable;
-import androidx.preference.PreferenceManager;
 
-import com.example.substandard.R;
+import com.example.substandard.data.SubstandardPreferences;
 import com.example.substandard.database.network.SubsonicNetworkUtils;
 
 /**
@@ -19,12 +17,19 @@ import com.example.substandard.database.network.SubsonicNetworkUtils;
  * This Intent *must* have username, password, server address, and a ResultReceiver
  * passed in as extras.
  */
+// TODO rewrite Settings Activity to use this service to get user info
 public class LoginIntentService extends IntentService {
+    /**
+     * Keys for obtaining extras from the calling Intent
+     */
     public static final String USERNAME_EXTRA_KEY = "username";
     public static final String SERVER_EXTRA_KEY = "server";
     public static final String PASSWORD_EXTRA_KEY = "password";
     public static final String RECEIVER_EXTRA_KEY = "receiver";
 
+    /**
+     * Constants used for communicating success/failure of login
+     */
     public static final int STATUS_SUCCESS = 0;
     public static final int STATUS_FAILED = 1;
 
@@ -33,16 +38,11 @@ public class LoginIntentService extends IntentService {
         super(LoginIntentService.class.getSimpleName());
     }
 
-    private void writeToSharedPreferences(SubsonicNetworkUtils.SubsonicUser user) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(getString(R.string.pref_salt_key), user.getSalt());
-        editor.putString(getString(R.string.pref_auth_token_key), user.getAuthToken());
-        editor.putString(getString(R.string.pref_username_key), user.getUsername());
-        editor.putString(getString(R.string.pref_server_key), user.getServerAddress());
-        editor.apply();
-    }
-
+    /**
+     * Helper method to retrieve login info from the calling Intent
+     * @param intent Intent that was used to start this service
+     * @return SubsonicUser with all required info for login
+     */
     private SubsonicNetworkUtils.SubsonicUser getUserFromIntent(Intent intent) {
         String username = intent.getStringExtra(USERNAME_EXTRA_KEY);
         String server = intent.getStringExtra(SERVER_EXTRA_KEY);
@@ -53,14 +53,17 @@ public class LoginIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
+        // used to alert UI of the result of login attempt
         ResultReceiver resultReceiver = intent.getParcelableExtra(RECEIVER_EXTRA_KEY);
+
         SubsonicNetworkUtils.SubsonicUser user = getUserFromIntent(intent);
         boolean loginSuccessful = SubsonicNetworkUtils.authenticate(user);
 
+        // the ResultReceiver requires that we pass in an argument Bundle
         Bundle args = new Bundle();
 
         if (loginSuccessful) {
-            writeToSharedPreferences(user);
+            SubstandardPreferences.writePreferredUser(this, user);
             resultReceiver.send(STATUS_SUCCESS, args);
         } else {
             resultReceiver.send(STATUS_FAILED, args);

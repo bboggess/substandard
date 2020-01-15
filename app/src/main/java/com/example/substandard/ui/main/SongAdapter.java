@@ -37,7 +37,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongAdapterVie
     public void onBindViewHolder(@NonNull SongAdapterViewHolder holder, int position) {
         Song boundSong = songs.get(position);
         holder.titleView.setText(boundSong.getTitle());
-        holder.trackNumView.setText(boundSong.getTrackNum());
+        // If you pass in an int, it is treated as a resource ID
+        holder.trackNumView.setText(Integer.toString(boundSong.getTrackNum()));
     }
 
     @Override

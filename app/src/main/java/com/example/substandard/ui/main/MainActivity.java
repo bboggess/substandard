@@ -17,7 +17,7 @@ import com.example.substandard.R;
 import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.Artist;
 import com.example.substandard.database.data.Song;
-import com.example.substandard.player.client.BaseMediaBrowserAdapter;
+import com.example.substandard.service.LibraryRefreshIntentService;
 import com.example.substandard.ui.OnMediaClickListener;
 import com.example.substandard.ui.settings.SettingsActivity;
 import com.google.android.material.navigation.NavigationView;
@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private DrawerLayout mDrawerLayout;
 
-    private BaseMediaBrowserAdapter mediaBrowserAdapter;
+//    private BaseMediaBrowserAdapter mediaBrowserAdapter;
     private boolean isPlaying;
 
 
@@ -46,19 +46,19 @@ public class MainActivity extends AppCompatActivity implements
         setUpNavigationDrawer();
         setupNavigationClickListener();
 
-        mediaBrowserAdapter = new BaseMediaBrowserAdapter(this);
+//        mediaBrowserAdapter = new BaseMediaBrowserAdapter(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        mediaBrowserAdapter.onStart();
+//        mediaBrowserAdapter.onStart();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mediaBrowserAdapter.onStop();
+//        mediaBrowserAdapter.onStop();
     }
 
     /**
@@ -146,7 +146,10 @@ public class MainActivity extends AppCompatActivity implements
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 startActivity(settingsIntent);
                 break;
-
+            case R.id.item_rescan:
+                Intent rescanIntent = new Intent(this, LibraryRefreshIntentService.class);
+                startService(rescanIntent);
+                break;
             default:
                 break;
         }

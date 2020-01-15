@@ -21,6 +21,7 @@
         </activity>
         <service android:name=".service.CoverArtDownloadIntentService" />
         <service android:name=".service.LoginIntentService" />
+        <service android:name=".service.LibraryRefreshIntentService" />
     </application>
 
 </manifest>

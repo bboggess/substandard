@@ -9,4 +9,9 @@
             android:id="@+id/item_settings"
             android:title="@string/navigation_settings" />
     </group>
+    <group>
+        <item
+            android:id="@+id/item_rescan"
+            android:title="@string/navigation_rescan" />
+    </group>
 </menu>

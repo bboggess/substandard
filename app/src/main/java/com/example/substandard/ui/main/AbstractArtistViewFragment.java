@@ -5,13 +5,14 @@ import android.content.Context;
 import androidx.fragment.app.Fragment;
 
 import com.example.substandard.database.data.Artist;
+import com.example.substandard.ui.OnMediaClickListener;
 
 /**
  * Abstract Fragment that all Fragments being used for views belonging to a specific artist
  * should extend. This saves a lot of pointless boilerplate I had before.
  */
 public abstract class AbstractArtistViewFragment extends Fragment {
-    private OnFragmentInteractionListener mListener;
+    private OnMediaClickListener mListener;
 
     private Artist artist;
 
@@ -42,11 +43,11 @@ public abstract class AbstractArtistViewFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof OnMediaClickListener) {
+            mListener = (OnMediaClickListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement OnMediaClickListener");
         }
     }
 
@@ -63,20 +64,8 @@ public abstract class AbstractArtistViewFragment extends Fragment {
     }
 
 
-    public OnFragmentInteractionListener getListener() {
+    public OnMediaClickListener getListener() {
         return mListener;
     }
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        void onArtistClick(Artist artist);
-    }
+
 }

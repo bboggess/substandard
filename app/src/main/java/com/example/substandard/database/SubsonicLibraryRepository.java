@@ -1,6 +1,5 @@
 package com.example.substandard.database;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
@@ -16,6 +15,7 @@ import com.example.substandard.database.data.Song;
 import com.example.substandard.database.data.SongDao;
 import com.example.substandard.database.network.SubsonicNetworkDataSource;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -88,7 +88,7 @@ public class SubsonicLibraryRepository {
                         for (Song song : songs) {
                             Log.d(TAG, "song id: " + song.getId()
                                 + ", album id: " + song.getAlbumId()
-                                + ", artist id: " + song.getArtistId());
+                                + ", artist: " + song.getArtistName());
                         }
                         songDao.insertAll(songs);
                     }
@@ -102,7 +102,6 @@ public class SubsonicLibraryRepository {
     public static SubsonicLibraryRepository getInstance(ArtistDao artistDao,
                                                         AlbumDao albumDao,
                                                         SongDao songDao,
-                                                        Context context,
                                                         SubsonicNetworkDataSource dataSource,
                                                         AppExecutors executors) {
         if (repositoryInstance == null) {
@@ -123,7 +122,7 @@ public class SubsonicLibraryRepository {
     public synchronized void refreshLibrary() {
         Log.d(TAG, "refreshing library");
         // I suppose this technically triggers everything else
-        dataSource.fetchArtists();
+        dataSource.initializeLibrary();
     }
 
     /**
@@ -195,5 +194,31 @@ public class SubsonicLibraryRepository {
 
     public LiveData<List<Song>> getAlbum(String albumId) {
         return songDao.loadSongsFromAlbumId(albumId);
+    }
+
+    public String getSongSuffix(String id) {
+        return songDao.loadSuffix(id);
+    }
+
+    public boolean isSongAvailableOffline(String id) {
+        return songDao.isOffline(id);
+    }
+
+    /**
+     * Download song and write to given File
+     * @param id
+     * @param toWrite
+     */
+    public void downloadSong(String id, File toWrite) {
+        dataSource.writeTrackToFile(id, toWrite);
+        songDao.setAvailableOffline(id, true);
+    }
+
+    public Song getSong(String id) {
+        return songDao.loadSongById(id);
+    }
+
+    public String getAlbumName(String id) {
+        return albumDao.loadAlbumName(id);
     }
 }

@@ -34,13 +34,12 @@ public abstract class SubsonicLibraryDatabase extends RoomDatabase {
                 Log.d(TAG, "getInstance: creating database instance");
                 databaseInstance = Room.databaseBuilder(context, SubsonicLibraryDatabase.class, DATABASE_NAME)
                         // Adds a callback to initialize database when table is created
-                        // Make sure that all I/O is done on different thread!
                         .addCallback(new Callback() {
                             @Override
                             public void onCreate(@NonNull SupportSQLiteDatabase db) {
                                 super.onCreate(db);
-                                SubsonicNetworkDataSource
-                                        .getInstance(context, AppExecutors.getInstance())
+                                AppExecutors executors = AppExecutors.getInstance();
+                                SubsonicNetworkDataSource.getInstance(context, executors)
                                         .initializeLibrary();
                             }
                         })

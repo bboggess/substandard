@@ -66,7 +66,7 @@ class SubsonicJsonParseUtils {
      * @return true if request was successfully handled
      * @throws JSONException The input JSON is malformed
      */
-    // TODO create SubsonicConnectionException (or something) and throw if request fails
+    // TODO throw our new SubsonicNetworkUtils.SubsonicRequestException if the request is not successful
     static boolean requestSuccessful(JSONObject json) throws JSONException {
         if (!json.has(SUBSONIC_RESPONSE_KEY)) {
             Log.d(TAG, "requestSuccessful: Not even a valid subsonic response. Wtf are you doing?");
@@ -486,16 +486,19 @@ class SubsonicJsonParseUtils {
 
     private static final String SONG_ID_KEY = "id";
     private static final String SONG_ARTIST_ID_KEY = "artistId";
+    private static final String SONG_ARTIST_NAME_KEY = "artist";
     private static final String SONG_ALBUM_ID_KEY = "albumId";
     private static final String SONG_TITLE_KEY = "title";
     private static final String SONG_GENRE_KEY = "genre";
     private static final String SONG_DURATION_KEY = "duration";
     private static final String TRACK_KEY = "track";
+    private static final String SONG_SUFFIX_KEY = "suffix";
 
     /**
      * Private helper method to create Song object from corresponding JSON
      * @param songObject A JSON song object returned by the server, e.g. from getAlbum
-     * @return new Song, with dummy values in a field if field is not present
+     * @return new Song, with dummy values in a field if field is not present (empty for
+     * Strings, -1 for numeric types)
      * @throws JSONException malformed JSON object
      */
     private static Song parseSongObject(JSONObject songObject) throws JSONException {
@@ -516,12 +519,12 @@ class SubsonicJsonParseUtils {
             duration = songObject.getLong(SONG_DURATION_KEY);
         }
 
-        String artistId = "";
-        if (songObject.has(SONG_ARTIST_ID_KEY)) {
-            artistId = songObject.getString(SONG_ARTIST_ID_KEY);
+        String artistName = "";
+        if (songObject.has(SONG_ARTIST_NAME_KEY)) {
+            artistName = songObject.getString(SONG_ARTIST_NAME_KEY);
         }
 
-        String albumId = "";
+        String albumId = "-1";
         if (songObject.has(SONG_ALBUM_ID_KEY)) {
             albumId = songObject.getString(SONG_ALBUM_ID_KEY);
         }
@@ -531,6 +534,11 @@ class SubsonicJsonParseUtils {
             track = songObject.getInt(TRACK_KEY);
         }
 
-        return new Song(id, title, artistId, albumId, genre, duration, track);
+        String suffix = "";
+        if (songObject.has(SONG_SUFFIX_KEY)) {
+            suffix = songObject.getString(SONG_SUFFIX_KEY);
+        }
+
+        return new Song(id, title, artistName, albumId, genre, duration, suffix, track);
     }
 }

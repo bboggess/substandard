@@ -2,34 +2,30 @@ package com.example.substandard.database.data;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
-import androidx.room.Delete;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
-import androidx.room.Update;
 
 import java.util.List;
 
 @Dao
-public interface SongDao {
+public interface SongDao extends BaseDao<Song> {
     @Query("SELECT * FROM songs ORDER BY id")
     LiveData<List<Song>> loadAll();
 
-    @Delete
-    void delete(Song song);
-
-    @Insert
-    void insert(Song song);
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insertAll(List<Song> Songs);
-
-    @Update
-    void update(List<Song> songs);
-
     @Query("SELECT * FROM songs WHERE id = :id")
-    LiveData<Song> loadSongById(String id);
+    Song loadSongById(String id);
 
-    @Query("SELECT * FROM songs where album_id = :albumId")
+    @Query("SELECT * FROM songs WHERE album_id = :albumId")
     LiveData<List<Song>> loadSongsFromAlbumId(String albumId);
+
+    @Query("SELECT suffix FROM songs WHERE id = :id")
+    String loadSuffix(String id);
+
+    @Query("SELECT offline FROM songs WHERE id = :id")
+    Boolean isOffline(String id);
+
+    @Query("UPDATE songs SET offline = :availableOffline WHERE id = :id")
+    void setAvailableOffline(String id, boolean availableOffline);
+
+    @Query("SELECT artist_name FROM songs WHERE id = :id")
+    String getArtistName(String id);
 }

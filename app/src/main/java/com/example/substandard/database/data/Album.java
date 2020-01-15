@@ -15,7 +15,7 @@ import java.util.Date;
         @ForeignKey(entity = Artist.class,
             parentColumns = "id",
             childColumns = "artist_id")},
-    indices = @Index(value = "id"))
+    indices = @Index(value = "artist_id"))
 public class Album {
     @PrimaryKey
     @NonNull

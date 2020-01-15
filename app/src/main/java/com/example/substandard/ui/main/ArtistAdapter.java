@@ -23,11 +23,11 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistAdap
     private final static String TAG = ArtistAdapter.class.getSimpleName();
 
     private final Context context;
-    private ItemClickListener clickListener;
+    private ViewHolderItemClickListener<Artist> clickListener;
 
     private List<Artist> artists;
 
-    public ArtistAdapter(@NonNull Context context, ItemClickListener listener) {
+    public ArtistAdapter(@NonNull Context context, ViewHolderItemClickListener<Artist> listener) {
         this.context = context;
         this.clickListener = listener;
     }
@@ -61,14 +61,6 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistAdap
         Log.d(TAG, "setting artists in Adapter");
         this.artists = artists;
         notifyDataSetChanged();
-    }
-
-    public interface ItemClickListener {
-        /**
-         * Called when a bound Artist TextView is clicked on.
-         * @param artist the Artist bound to the clicked view
-         */
-        void onItemClick(Artist artist);
     }
 
     class ArtistAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

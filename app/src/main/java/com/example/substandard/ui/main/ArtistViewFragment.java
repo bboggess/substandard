@@ -18,14 +18,6 @@ import com.example.substandard.database.data.Artist;
 import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ArtistViewFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ArtistViewFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ArtistViewFragment extends AbstractArtistViewFragment {
     private static final String TAG = ArtistViewFragment.class.getSimpleName();
 

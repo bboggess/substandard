@@ -32,9 +32,9 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumAdapter
     private final Context context;
 
     private List<Album> albums;
-    private ItemOnClickListener clickListener;
+    private ViewHolderItemClickListener<Album> clickListener;
 
-    AlbumAdapter(@NonNull Context context, ItemOnClickListener clickListener) {
+    AlbumAdapter(@NonNull Context context, ViewHolderItemClickListener<Album> clickListener) {
         this.context = context;
         this.clickListener = clickListener;
     }
@@ -75,14 +75,6 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumAdapter
     void setAlbums(List<Album> albums) {
         this.albums = albums;
         notifyDataSetChanged();
-    }
-
-    interface ItemOnClickListener {
-        /**
-         * Called when an album in the RecyclerView is clicked on.
-         * @param album album that was clicked
-         */
-        void onItemClick(Album album);
     }
 
     /**

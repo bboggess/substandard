@@ -40,7 +40,7 @@ public class SettingsActivity extends AppCompatActivity implements
     }
 
 
-    // TODO Check whether the login is valid before saving to disk
+    // TODO Use the Service to do this!
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         if (dialog instanceof LoginDialogFragment) {

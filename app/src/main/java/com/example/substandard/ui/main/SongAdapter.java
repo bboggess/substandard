@@ -18,8 +18,11 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongAdapterVie
     private List<Song> songs;
     private Context context;
 
-    SongAdapter(Context context) {
+    private ViewHolderItemClickListener<Song> clickListener;
+
+    SongAdapter(Context context, ViewHolderItemClickListener<Song> clickListener) {
         this.context = context;
+        this.clickListener = clickListener;
     }
 
     @NonNull
@@ -34,7 +37,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongAdapterVie
     public void onBindViewHolder(@NonNull SongAdapterViewHolder holder, int position) {
         Song boundSong = songs.get(position);
         holder.titleView.setText(boundSong.getTitle());
-        holder.trackNumView.setText(Integer.toString(position + 1));
+        holder.trackNumView.setText(boundSong.getTrackNum());
     }
 
     @Override
@@ -47,7 +50,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongAdapterVie
         notifyDataSetChanged();
     }
 
-    class SongAdapterViewHolder extends RecyclerView.ViewHolder {
+    class SongAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView titleView;
         private TextView trackNumView;
 
@@ -55,6 +58,14 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongAdapterVie
             super(view);
             titleView = view.findViewById(R.id.song_tv);
             trackNumView = view.findViewById(R.id.track_num_tv);
+
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            Song clicked = songs.get(getAdapterPosition());
+            clickListener.onItemClick(clicked);
         }
     }
 }

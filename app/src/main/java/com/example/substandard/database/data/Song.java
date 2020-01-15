@@ -5,23 +5,31 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Ignore;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "songs",
+        indices = @Index(value = "album_id"),
         foreignKeys = {
-                @ForeignKey(entity = Artist.class,
-                        parentColumns = "id",
-                        childColumns = "artist_id"),
                 @ForeignKey(entity = Album.class,
                     parentColumns = "id",
                     childColumns = "album_id")})
+/**
+ * Note that there is a real problem present in Subsonic when it comes to tracks with features,
+ * or those appearing on comps, splits, etc. The artist given will not technically match any
+ * in the library (it is only keeping track of *album artists*), and so when the artist of a track
+ * does not match an album artist, no artistName is returned. Thus I have decided to remove the
+ * foreign key for artist_id and just keep track of the artist name for each song.
+ *
+ * Annoying, but whatever.
+ */
 public class Song {
     @PrimaryKey
     @NonNull
     private String id;
     private String title;
-    @ColumnInfo(name="artist_id")
-    private String artistId;
+    @ColumnInfo(name = "artist_name")
+    private String artistName;
     @ColumnInfo(name="album_id")
     private String albumId;
     private String genre;
@@ -29,25 +37,28 @@ public class Song {
     private long duration;
     @Ignore
     private int trackNum;
+    private String suffix;
     private boolean offline;
 
-    public Song(String id, String title, String artistId, String albumId, String genre, boolean offline) {
+    public Song(String id, String title, String artistName, String albumId, String genre, String suffix, boolean offline) {
         this.id = id;
         this.title = title;
-        this.artistId = artistId;
+        this.artistName = artistName;
         this.albumId = albumId;
         this.genre = genre;
+        this.suffix = suffix;
         this.offline = offline;
     }
 
-    public Song(String id, String title, String artistId, String albumId, String genre, long duration, int trackNum) {
+    public Song(String id, String title, String artistName, String albumId, String genre, long duration, String suffix, int trackNum) {
         this.id = id;
         this.title = title;
-        this.artistId = artistId;
+        this.artistName = artistName;
         this.albumId = albumId;
         this.genre = genre;
         this.duration = duration;
         this.trackNum = trackNum;
+        this.suffix = suffix;
         offline = false;
     }
 
@@ -67,12 +78,12 @@ public class Song {
         this.title = title;
     }
 
-    public String getArtistId() {
-        return artistId;
+    public String getArtistName() {
+        return artistName;
     }
 
-    public void setArtistId(String artistId) {
-        this.artistId = artistId;
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
     }
 
     public String getAlbumId() {
@@ -113,5 +124,13 @@ public class Song {
 
     public void setOffline(boolean offline) {
         this.offline = offline;
+    }
+
+    public String getSuffix() {
+        return suffix;
+    }
+
+    public void setSuffix(String suffix) {
+        this.suffix = suffix;
     }
 }

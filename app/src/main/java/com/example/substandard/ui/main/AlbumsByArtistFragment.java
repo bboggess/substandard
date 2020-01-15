@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
 import com.example.substandard.database.data.Album;
-import com.example.substandard.ui.OnAlbumClickListener;
+import com.example.substandard.ui.OnMediaClickListener;
 import com.example.substandard.ui.model.AlbumsByArtistViewModel;
 import com.example.substandard.ui.model.AlbumsByArtistViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
@@ -28,7 +28,7 @@ import java.util.List;
  * activity.
  */
 public class AlbumsByArtistFragment extends AbstractArtistViewFragment implements
-    AlbumAdapter.ItemOnClickListener {
+    ViewHolderItemClickListener<Album> {
     private final static String TAG = AlbumsByArtistFragment.class.getSimpleName();
 
     private RecyclerView albumsView;
@@ -37,16 +37,16 @@ public class AlbumsByArtistFragment extends AbstractArtistViewFragment implement
     private AlbumsByArtistViewModel albumsViewModel;
     private AlbumAdapter albumAdapter;
 
-    private OnAlbumClickListener albumClickListener;
+    private OnMediaClickListener albumClickListener;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnAlbumClickListener) {
-            albumClickListener = (OnAlbumClickListener) context;
+        if (context instanceof OnMediaClickListener) {
+            albumClickListener = (OnMediaClickListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnAlbumClickListener");
+                    + " must implement OnMediaClickListener");
         }
     }
 

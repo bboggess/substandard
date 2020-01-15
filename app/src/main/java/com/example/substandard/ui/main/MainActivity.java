@@ -16,18 +16,21 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.substandard.R;
 import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.Artist;
-import com.example.substandard.ui.OnAlbumClickListener;
+import com.example.substandard.database.data.Song;
+import com.example.substandard.player.client.BaseMediaBrowserAdapter;
+import com.example.substandard.ui.OnMediaClickListener;
 import com.example.substandard.ui.settings.SettingsActivity;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity implements
-        AbstractArtistViewFragment.OnFragmentInteractionListener,
-        OnAlbumClickListener,
-        ArtistsFragment.OnFragmentInteractionListener,
+        OnMediaClickListener,
         NavigationView.OnNavigationItemSelectedListener,
         FragmentManager.OnBackStackChangedListener {
 
     private DrawerLayout mDrawerLayout;
+
+    private BaseMediaBrowserAdapter mediaBrowserAdapter;
+    private boolean isPlaying;
 
 
     @Override
@@ -42,6 +45,20 @@ public class MainActivity extends AppCompatActivity implements
         getSupportFragmentManager().addOnBackStackChangedListener(this);
         setUpNavigationDrawer();
         setupNavigationClickListener();
+
+        mediaBrowserAdapter = new BaseMediaBrowserAdapter(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mediaBrowserAdapter.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mediaBrowserAdapter.onStop();
     }
 
     /**
@@ -93,6 +110,11 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onSongClick(Song song) {
+        // TODO play a song
+    }
+
+    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
@@ -105,6 +127,11 @@ public class MainActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * The interface consists of a main Activity containing a primary Fragment. This method swaps
+     * in a new primary Fragment, while adding the old Fragment to the back stack.
+     * @param newFragment
+     */
     void swapFragments(Fragment newFragment) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, newFragment);

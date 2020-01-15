@@ -1,10 +1,13 @@
 package com.example.substandard.database.network;
 
+import android.app.DownloadManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import com.example.substandard.data.SubstandardPreferences;
 import com.example.substandard.database.data.Album;
@@ -16,6 +19,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -292,6 +296,27 @@ public class SubsonicNetworkUtils {
         }
     }
 
+    /**
+     * On a failed request from the server, the JSON object returned contains one of 9 error
+     * codes. This Exception class is meant to give a message giving the code and the short
+     * message, both of which should be obtained from the JSON.
+     */
+    public class SubsonicRequestException extends Exception {
+        private int code;
+        private String description;
+
+        public SubsonicRequestException(int code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        @Nullable
+        @Override
+        public String getMessage() {
+            return "Error code " + code + " from server: " + description;
+        }
+    }
+
     public static SubsonicUser getSubsonicUserFromPreferences(Context context) {
         String username = SubstandardPreferences.getPreferredUsername(context);
         String server =  SubstandardPreferences.getPreferredServerAddress(context);
@@ -495,6 +520,23 @@ public class SubsonicNetworkUtils {
     public static Bitmap getCoverArt(Song song, SubsonicUser requestUser) throws
             IOException {
         return getCoverArt(song.getId(), requestUser);
+    }
+
+
+    /**
+     * Downloads an audio file and then writes it to the given File
+     * @param songId
+     * @param toWrite
+     * @param requestUser
+     * @throws IOException
+     */
+    public static void downloadSong(String songId, File toWrite, DownloadManager downloadManager, SubsonicUser requestUser) {
+        SubsonicServerRequest request = new SubsonicServerRequest(requestUser,
+                SubsonicService.DOWNLOAD);
+        Uri uri = Uri.parse(buildUrl(request).toString());
+        DownloadManager.Request downloadRequest = new DownloadManager.Request(uri);
+        downloadRequest.setDestinationUri(Uri.fromFile(toWrite));
+        downloadManager.enqueue(downloadRequest);
     }
 
     public static List<Song> getAlbum(String albumId, SubsonicUser requestUser) throws

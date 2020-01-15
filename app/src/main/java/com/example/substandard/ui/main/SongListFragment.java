@@ -1,5 +1,6 @@
 package com.example.substandard.ui.main;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,13 +19,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.substandard.R;
 import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.Song;
+import com.example.substandard.ui.OnMediaClickListener;
 import com.example.substandard.ui.model.SongListViewModel;
 import com.example.substandard.ui.model.SongListViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
 
 import java.util.List;
 
-public class SongListFragment extends Fragment {
+public class SongListFragment extends Fragment implements ViewHolderItemClickListener<Song> {
     private static final String TAG = SongListFragment.class.getSimpleName();
 
     private SongListViewModel songsViewModel;
@@ -32,6 +34,8 @@ public class SongListFragment extends Fragment {
     private RecyclerView recyclerView;
     private SongAdapter adapter;
     private ProgressBar progressBar;
+
+    private OnMediaClickListener clickListener;
 
     private Album album;
 
@@ -57,6 +61,17 @@ public class SongListFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnMediaClickListener) {
+            clickListener = (OnMediaClickListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnMediaClickListener");
+        }
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
     }
@@ -67,7 +82,7 @@ public class SongListFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
 
-        adapter = new SongAdapter(getContext());
+        adapter = new SongAdapter(getContext(), this);
         recyclerView.setAdapter(adapter);
     }
 
@@ -89,4 +104,9 @@ public class SongListFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onItemClick(Song obj) {
+        Log.d(TAG, "clicked on song: " + obj.getTitle());
+        clickListener.onSongClick(obj);
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.substandard.database.network;
 
 
+import android.app.DownloadManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
@@ -15,6 +16,7 @@ import com.example.substandard.database.data.Song;
 
 import org.json.JSONException;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -78,6 +80,10 @@ public class SubsonicNetworkDataSource {
         return artists;
     }
 
+    /**
+     * I am hoping to abstract out the repetitive bullshit of setting up tasks on the network
+     * thread in every method in this class. Still a WIP
+     */
     private enum Task {
         FETCH_ARTISTS_TASK,
         FETCH_ALBUMS_FOR_ARTIST_TASK,
@@ -331,6 +337,24 @@ public class SubsonicNetworkDataSource {
         });
 
         return isSuccessful;
+    }
+
+    /**
+     * Downloads the track and writes to given file on a background thread
+     * @param id
+     * @param toWrite
+     */
+    public void writeTrackToFile(final String id, final File toWrite) {
+        AppExecutors.getInstance().networkIo().execute(new Runnable() {
+            @Override
+            public void run() {
+                SubsonicNetworkUtils.SubsonicUser user = SubsonicNetworkUtils
+                        .getSubsonicUserFromPreferences(context);
+
+                DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+                SubsonicNetworkUtils.downloadSong(id, toWrite, downloadManager, user);
+            }
+        });
     }
 
 }

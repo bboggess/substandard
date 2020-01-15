@@ -46,6 +46,7 @@ dependencies {
 
     // Apache library for hashes
     implementation 'commons-codec:commons-codec:1.13'
+    implementation 'commons-io:commons-io:2.4'
 
     // Room API for database management
     implementation "androidx.room:room-runtime:2.2.3"

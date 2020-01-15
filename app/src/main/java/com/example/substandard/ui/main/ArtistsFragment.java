@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
 import com.example.substandard.database.data.Artist;
+import com.example.substandard.ui.OnMediaClickListener;
 import com.example.substandard.ui.model.ArtistViewModel;
 import com.example.substandard.ui.model.ArtistViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
@@ -26,13 +27,13 @@ import java.util.List;
  * A simple {@link Fragment} for displaying a list of all artists in the library within the
  * main activity.
  */
-public class ArtistsFragment extends Fragment implements ArtistAdapter.ItemClickListener {
+public class ArtistsFragment extends Fragment implements ViewHolderItemClickListener<Artist> {
     private static final String TAG = ArtistsFragment.class.getSimpleName();
 
     private ArtistAdapter artistAdapter;
     private RecyclerView recyclerView;
 
-    private OnFragmentInteractionListener mListener;
+    private OnMediaClickListener mListener;
 
     private ArtistViewModel artistViewModel;
 
@@ -95,11 +96,11 @@ public class ArtistsFragment extends Fragment implements ArtistAdapter.ItemClick
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof OnMediaClickListener) {
+            mListener = (OnMediaClickListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement OnMediaClickListener");
         }
     }
 
@@ -114,17 +115,4 @@ public class ArtistsFragment extends Fragment implements ArtistAdapter.ItemClick
         mListener.onArtistClick(artist);
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        void onArtistClick(Artist artist);
-    }
 }

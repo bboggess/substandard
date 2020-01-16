@@ -16,7 +16,10 @@ import com.example.substandard.database.data.SongDao;
 import com.example.substandard.database.network.SubsonicNetworkDataSource;
 
 import java.io.File;
+import java.net.URL;
 import java.util.List;
+
+import io.reactivex.Single;
 
 /**
  * This class connects the Artists database with other components of the app. The only way
@@ -196,11 +199,11 @@ public class SubsonicLibraryRepository {
         return songDao.loadSongsFromAlbumId(albumId);
     }
 
-    public String getSongSuffix(String id) {
+    public LiveData<String> getSongSuffix(String id) {
         return songDao.loadSuffix(id);
     }
 
-    public boolean isSongAvailableOffline(String id) {
+    public LiveData<Boolean> isSongAvailableOffline(String id) {
         return songDao.isOffline(id);
     }
 
@@ -214,11 +217,22 @@ public class SubsonicLibraryRepository {
         songDao.setAvailableOffline(id, true);
     }
 
-    public Song getSong(String id) {
+    /**
+     *
+     * @param id
+     * @return the URL that has the song we are looking for
+     */
+    public URL streamSong(String id) {
+        return dataSource.getStreamUrl(id);
+    }
+
+    public Single<Song> getSong(final String id) {
         return songDao.loadSongById(id);
     }
 
     public String getAlbumName(String id) {
         return albumDao.loadAlbumName(id);
     }
+
+
 }

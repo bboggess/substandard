@@ -14,10 +14,18 @@ import com.example.substandard.player.server.MusicService;
 
 import java.util.List;
 
+/**
+ * Helper class which exposes client functionality for the MediaPlayer server. Encapsulates
+ * the {@link MediaBrowserCompat}, {@link MediaControllerCompat}, and various needed
+ * callbacks of which the user can be blissfully ignorant. By extending this class and
+ * implementing certain empty methods, functionality can be customized to suit UI needs.
+ *
+ * {@method getTransportControl} can be used to control the MediaPlayer from the UI.
+ */
 public class BaseMediaBrowserAdapter {
     private static final String TAG = BaseMediaBrowserAdapter.class.getSimpleName();
 
-    private Context context;
+    private final Context context;
 
     private MediaBrowserCompat browser;
 
@@ -34,25 +42,47 @@ public class BaseMediaBrowserAdapter {
         controllerCallback = new MediaControllerCallback();
     }
 
+    /**
+     * Override this method to set behavior for a change in playback state, e.g. when the player
+     * is paused.
+     */
     public void onPlaybackStateChanged() {
 
     }
 
+    /**
+     * Override this method to set behavior for when the MediaBrowser loads.
+     */
     public void onChildrenLoaded() {
 
     }
 
+    /**
+     * All setup behavior needed to be performed from the onStart method of the Activity using
+     * this class. Make sure to call!
+     */
     public void onStart() {
         ComponentName browserComponent = new ComponentName(context, MusicService.class);
         browser = new MediaBrowserCompat(context, browserComponent, connectionCallback, null);
         browser.connect();
     }
 
+    /**
+     * All cleanup needed to be performed from the onStop method of the Activity using
+     * this class. You MUST call this when you are done using the BaseMediaBrowserAdapter.
+     */
     public void onStop() {
         browser.disconnect();
-        controller.unregisterCallback(controllerCallback);
+        if (null != controller) {
+            controller.unregisterCallback(controllerCallback);
+        }
     }
 
+    /**
+     * This provides the interface for controlling the session's media playback. The returned
+     * TransportControls can be used to play media, control the play queue, stop playback, etc.
+     * @return null if controller is not yet connected
+     */
     public MediaControllerCompat.TransportControls getTransportControl() {
         if (null == controller) {
             return null;
@@ -61,6 +91,9 @@ public class BaseMediaBrowserAdapter {
         return controller.getTransportControls();
     }
 
+    /**
+     * Handles all callbacks when the media browser connects to the media server.
+     */
     private class MediaConnectionCallback extends MediaBrowserCompat.ConnectionCallback {
         @Override
         public void onConnected() {
@@ -85,6 +118,11 @@ public class BaseMediaBrowserAdapter {
         }
     }
 
+    /**
+     * This class is used for interactions between the app and the media session. Playback
+     * commands can be sent from the app to the session, and the session will inform registered
+     * callbacks of any state changes or media metadata.
+     */
     private class MediaControllerCallback extends MediaControllerCompat.Callback {
         @Override
         public void onPlaybackStateChanged(PlaybackStateCompat state) {

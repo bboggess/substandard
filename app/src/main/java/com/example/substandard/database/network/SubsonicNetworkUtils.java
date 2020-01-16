@@ -548,4 +548,12 @@ public class SubsonicNetworkUtils {
         URL requestUrl = buildUrl(request);
         return SubsonicJsonParseUtils.parseGetAlbum(sendRequest(requestUrl));
     }
+
+    public static URL getStream(String songId, SubsonicUser requestUser) {
+        Map<String, String> optionalParams = new HashMap<>();
+        optionalParams.put(ID_QUERY, songId);
+        SubsonicServerRequest request = new SubsonicServerRequest(requestUser,
+                SubsonicService.STREAM, optionalParams);
+        return buildUrl(request);
+    }
 }

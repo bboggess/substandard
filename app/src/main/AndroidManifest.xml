@@ -3,6 +3,7 @@
     package="com.example.substandard">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -22,6 +23,20 @@
         <service android:name=".service.CoverArtDownloadIntentService" />
         <service android:name=".service.LoginIntentService" />
         <service android:name=".service.LibraryRefreshIntentService" />
+        <service android:name=".player.server.MusicService">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON"/>
+                <action android:name="android.media.AUDIO_BECOMING_NOISY"/>
+                <action android:name="android.media.browse.MediaBrowserService"/>
+            </intent-filter>
+        </service>
+        <service android:name=".service.download.MusicDownloadService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.exoplayer.downloadService.action.RESTART" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

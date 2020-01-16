@@ -18,6 +18,11 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     testOptions {
         unitTests.returnDefaultValues = true
     }
@@ -50,6 +55,11 @@ dependencies {
 
     // Room API for database management
     implementation "androidx.room:room-runtime:2.2.3"
+    implementation "androidx.room:room-rxjava2:2.2.3"
     annotationProcessor "androidx.room:room-compiler:2.2.3"
     implementation 'androidx.viewpager:viewpager:1.0.0'
+
+    // Exo Player
+    implementation 'com.google.android.exoplayer:exoplayer:2.11.1'
+
 }

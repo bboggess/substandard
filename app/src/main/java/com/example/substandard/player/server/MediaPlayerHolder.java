@@ -7,25 +7,32 @@ import android.content.IntentFilter;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.support.v4.media.MediaMetadataCompat;
 import android.util.Log;
 
+import com.example.substandard.R;
 import com.example.substandard.database.LocalMusicLibrary;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 
+
 /**
- * Exposes the necessary functionality of the MediaPlayer to rest of code.
+ * Exposes the necessary functionality of the MediaPlayer to rest of app.
  */
 public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFocusChangeListener {
     private final static String TAG = MediaPlayerHolder.class.getSimpleName();
 
     private final Context context;
-    private MediaPlayer player;
+    private ExoPlayer player;
 
     // Listens for change in headphone state
     private BroadcastReceiver noisyReceiver = new BroadcastReceiver() {
@@ -46,9 +53,10 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
      * all resources are released. Thus it is very possible that the player is null, so
      * use this before loading media.
      */
-    public void initializeMediaPlayer() {
+    private void initializeMediaPlayer() {
         if (null == player) {
-            player = new MediaPlayer();
+            Log.d(TAG, "instantiating media player");
+            player = new SimpleExoPlayer.Builder(context).build();
         }
     }
 
@@ -56,46 +64,39 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
     public void playFromMedia(MediaMetadataCompat metadata) {
         String id = metadata.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID);
         LocalMusicLibrary library = LocalMusicLibrary.getInstance(context);
-        playFromFile(library.getSongFile(id));
+        Uri streamUri = Uri.parse(library.getStream(id).toString());
+        playFromUri(streamUri);
     }
 
-    private void playFromFile(File file) {
+    //TODO abstract away distinction between playing from file and from URL
+
+    public void playFromUrl(URL url) {
+        playFromUri(Uri.parse(url.toString()));
+    }
+
+    private void playFromUri(Uri uri) {
+        Log.d(TAG, "playFromUrl: " + uri.toString());
+
         initializeMediaPlayer();
 
-        try {
-            player.setDataSource(file.getAbsolutePath());
-            player.prepare();
-        } catch (IOException e) {
-            Log.d(TAG, "playFromFile: failed to read from file " + file);
-        }
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context,
+                Util.getUserAgent(context, context.getString(R.string.app_name)));
+        MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(uri);
+        player.prepare(mediaSource);
+        Log.d(TAG, "set data source");
 
         play();
-    }
 
-    private void playFromUrl(URL url) {
-        initializeMediaPlayer();
-
-        try {
-            player.setDataSource(url.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                play();
-            }
-        });
-        player.prepareAsync();
     }
 
     @Override
     public void play() {
+        Log.d(TAG, "player starting");
         if (null != player && !player.isPlaying()) {
             if (getAudioFocus()) {
                 registerNoisyReceiver();
-                player.start();
+                player.setPlayWhenReady(true);
             }
         }
     }
@@ -103,12 +104,13 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
     @Override
     public void pause() {
         if (null != player && player.isPlaying()) {
-            player.pause();
+            player.setPlayWhenReady(false);
         }
     }
 
     @Override
     public void stop() {
+        Log.d(TAG, "stopping player");
         if (null != player && player.isPlaying()) {
             player.stop();
             removeAudioFocus();
@@ -118,6 +120,7 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
 
     @Override
     public void release() {
+        Log.d(TAG, "releasing player");
         if (null != player) {
             player.release();
             player = null;
@@ -128,7 +131,7 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
     public void seekTo(long position) {
         if (null != player && player.isPlaying()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                player.seekTo(position, MediaPlayer.SEEK_CLOSEST_SYNC);
+                player.seekTo(position);
             }
         }
     }
@@ -144,18 +147,22 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
 
     @Override
     public void reset() {
+        Log.d(TAG, "resetting player");
         if (null != player) {
-            player.reset();
+//            player.reset();
         }
     }
 
     @Override
     public void setVolume(float volume) {
         if (null != player) {
-            player.setVolume(volume, volume);
+//            player.setVolume(volume, volume);
         }
     }
 
+    /**
+     * Registers headphone listener
+     */
     private void registerNoisyReceiver() {
         IntentFilter filter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         context.registerReceiver(noisyReceiver, filter);
@@ -165,6 +172,15 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
         context.unregisterReceiver(noisyReceiver);
     }
 
+
+
+    // For some reason removing the audio focus requires passing in the same request you
+    // originally sent in, so we have to save this.
+    private AudioFocusRequest audioFocusRequest;
+
+    /**
+     * As a courtesy, make sure to remove the focus when the music is done
+     */
     private void removeAudioFocus() {
         AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
@@ -175,10 +191,12 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
             manager.abandonAudioFocus(this);
         }
     }
-
-    private AudioFocusRequest audioFocusRequest;
-
+    /**
+     * Requests audio focus from the system.
+     * @return true if the request was granted
+     */
     private boolean getAudioFocus() {
+        Log.d(TAG, "asking for audio focus");
         AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         int result;
 

@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">SubStandard</string>
+    
+    <!-- Used in media notification -->
+    <string name="prev_track">Previous</string>
+    <string name="next_track">Next</string>
+    <string name="pause">Pause</string>
 
     <!-- Used in Navigation Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>

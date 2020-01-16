@@ -1,25 +1,32 @@
 package com.example.substandard.database;
 
 import android.content.Context;
-import android.support.v4.media.MediaMetadataCompat;
+import android.util.Log;
 
 import com.example.substandard.database.data.Song;
 import com.example.substandard.utility.InjectorUtils;
 
 import java.io.File;
+import java.net.URL;
+
+import io.reactivex.Scheduler;
+import io.reactivex.SingleObserver;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Handles all interfacing between the database and local files. This allows the music player to
  * be completely ignorant of the distinction between online and local files. You simply ask
  * LocalMusicLibrary for a song (by giving the ID) and it does whatever needs to be done to get
- * the file to you.
+ * the file to you. (this is not yet implemented though)
  *
  * Call getInstance to use this class.
  */
 public class LocalMusicLibrary {
+    private static final String TAG = LocalMusicLibrary.class.getSimpleName();
 
-    private static final String SONG_DIR = "song/";
     private static final String COVER_DIR = "cover/";
+
+    private static final String ROOT = "root";
 
     private static final Object LOCK = new Object();
 
@@ -42,38 +49,32 @@ public class LocalMusicLibrary {
         return instance;
     }
 
-    private String getFileExtension(String id) {
-        return repository.getSongSuffix(id);
-    }
-
-    private File getSongStorageDir() {
-        return new File(context.getFilesDir(), SONG_DIR);
-    }
-
     private File getCoverArtStorageDir() {
         return new File(context.getFilesDir(), COVER_DIR);
     }
 
-    private void addSongToLocalLibrary(String id) {
-        repository.downloadSong(id, getSongFile(id));
+    public String getRoot() {
+        return ROOT;
     }
 
-    public File getSongFile(String id) {
-        return new File(getSongStorageDir(), id + getFileExtension(id));
+    public URL getStream(String id) {
+        return repository.streamSong(id);
     }
 
-    public String getSongFilename(String id) {
-        return getSongFile(id).getAbsolutePath();
+    public void processSongRequest(SongLoadRequest request) {
+        Log.d(TAG, "processSongRequest: " + request.getSongId());
+        Scheduler ioScheduler = Schedulers.io();
+        repository.getSong(request.getSongId()).subscribeOn(ioScheduler).subscribe(request);
     }
 
-    public MediaMetadataCompat getMetadata(String id, MediaMetadataCompat.Builder builder) {
-        Song song = repository.getSong(id);
-        String albumName = repository.getAlbumName(song.getAlbumId());
-        return builder.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, id)
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, song.getArtistName())
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, albumName)
-                .putString(MediaMetadataCompat.METADATA_KEY_GENRE, song.getGenre())
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.getTitle())
-                .build();
+
+    /**
+     * All requests to load a song from the library must implement this interface.
+     * getSongId() should return the id of the requested song, and the Observer methods will
+     * be fired when the song is loaded.
+     */
+    public interface SongLoadRequest extends SingleObserver<Song> {
+        String getSongId();
     }
+
 }

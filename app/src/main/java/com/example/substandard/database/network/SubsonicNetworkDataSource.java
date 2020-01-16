@@ -18,6 +18,7 @@ import org.json.JSONException;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ public class SubsonicNetworkDataSource {
     }
 
     private final AppExecutors executors;
+    private final SubsonicNetworkUtils.SubsonicUser user;
 
     private SubsonicNetworkDataSource(Context context, AppExecutors executors) {
         this.context = context;
@@ -54,6 +56,7 @@ public class SubsonicNetworkDataSource {
         this.artists = new MutableLiveData<>();
         this.albums = new MutableLiveData<>();
         this.songs = new MutableLiveData<>();
+        user = SubsonicNetworkUtils.getSubsonicUserFromPreferences(context);
     }
 
     /**
@@ -117,8 +120,6 @@ public class SubsonicNetworkDataSource {
         AppExecutors.getInstance().networkIo().execute(new Runnable() {
             @Override
             public void run() {
-                SubsonicNetworkUtils.SubsonicUser user = SubsonicNetworkUtils.
-                        getSubsonicUserFromPreferences(context);
                 if (user.getServerAddress() == null || user.getServerAddress().equals("")) {
                     Log.d(TAG, "scheduleNetworkTask: no server found");
                     return;
@@ -157,8 +158,6 @@ public class SubsonicNetworkDataSource {
             @Override
             public void run() {
                 Log.d(TAG, "fetching artists");
-                SubsonicNetworkUtils.SubsonicUser user = SubsonicNetworkUtils
-                        .getSubsonicUserFromPreferences(context);
                 // Make sure we have a user present in preferences. Hacky
                 if (user.getServerAddress() == null || user.getServerAddress().equals("")) {
                     Log.d(TAG, "fetchArtists: no server address found");
@@ -191,8 +190,6 @@ public class SubsonicNetworkDataSource {
         AppExecutors.getInstance().networkIo().execute(new Runnable() {
             @Override
             public void run() {
-                SubsonicNetworkUtils.SubsonicUser user = SubsonicNetworkUtils
-                        .getSubsonicUserFromPreferences(context);
                 // Make sure we have a user present in preferences. Hacky
                 if (user.getServerAddress() == null || user.getServerAddress().equals("")) {
                     Log.d(TAG, "fetchArtists: no server address found");
@@ -233,8 +230,6 @@ public class SubsonicNetworkDataSource {
             @Override
             public void run() {
                 Log.d(TAG, "fetching albums by " + artist.getName());
-                SubsonicNetworkUtils.SubsonicUser user = SubsonicNetworkUtils
-                        .getSubsonicUserFromPreferences(context);
                 try {
                     List<Album> albumsByArtist = SubsonicNetworkUtils.getArtistAlbums(artist.getId(), user);
                     albums.postValue(albumsByArtist);
@@ -257,8 +252,6 @@ public class SubsonicNetworkDataSource {
             @Override
             public void run() {
                 Log.d(TAG, "fetching similar artists");
-                SubsonicNetworkUtils.SubsonicUser user = SubsonicNetworkUtils
-                        .getSubsonicUserFromPreferences(context);
                 try {
                     List<Artist> artists = SubsonicNetworkUtils.getSimilarArtists(artistId, user);
                     similarArtists.postValue(artists);
@@ -281,8 +274,7 @@ public class SubsonicNetworkDataSource {
             @Override
             public void run() {
                 Log.d(TAG, "fetching cover art for album: " + album.getName());
-                SubsonicNetworkUtils.SubsonicUser user = SubsonicNetworkUtils
-                        .getSubsonicUserFromPreferences(context);
+
                 try {
                     Bitmap downloadedArt = SubsonicNetworkUtils.getCoverArt(album, user);
                     coverArt.postValue(downloadedArt);
@@ -301,9 +293,6 @@ public class SubsonicNetworkDataSource {
         AppExecutors.getInstance().networkIo().execute(new Runnable() {
             @Override
             public void run() {
-                SubsonicNetworkUtils.SubsonicUser user = SubsonicNetworkUtils
-                        .getSubsonicUserFromPreferences(context);
-
                 try {
                     List<Song> downloadedSongs = SubsonicNetworkUtils.getAlbum(albumId, user);
                     songs.postValue(downloadedSongs);
@@ -348,13 +337,14 @@ public class SubsonicNetworkDataSource {
         AppExecutors.getInstance().networkIo().execute(new Runnable() {
             @Override
             public void run() {
-                SubsonicNetworkUtils.SubsonicUser user = SubsonicNetworkUtils
-                        .getSubsonicUserFromPreferences(context);
-
                 DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
                 SubsonicNetworkUtils.downloadSong(id, toWrite, downloadManager, user);
             }
         });
+    }
+
+    public URL getStreamUrl(String songId) {
+        return SubsonicNetworkUtils.getStream(songId, user);
     }
 
 }

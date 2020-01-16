@@ -2,6 +2,7 @@ package com.example.substandard.ui.main;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -17,6 +18,7 @@ import com.example.substandard.R;
 import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.Artist;
 import com.example.substandard.database.data.Song;
+import com.example.substandard.player.client.BaseMediaBrowserAdapter;
 import com.example.substandard.service.LibraryRefreshIntentService;
 import com.example.substandard.ui.OnMediaClickListener;
 import com.example.substandard.ui.settings.SettingsActivity;
@@ -29,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private DrawerLayout mDrawerLayout;
 
-//    private BaseMediaBrowserAdapter mediaBrowserAdapter;
+    private BaseMediaBrowserAdapter mediaBrowserAdapter;
     private boolean isPlaying;
 
 
@@ -38,27 +40,29 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // create and show the start screen, which is currently the list of artists
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(R.id.fragment_container, new ArtistsFragment(), "Artists");
         ft.commit();
 
+        // set up navigation drawer
         getSupportFragmentManager().addOnBackStackChangedListener(this);
         setUpNavigationDrawer();
         setupNavigationClickListener();
 
-//        mediaBrowserAdapter = new BaseMediaBrowserAdapter(this);
+        mediaBrowserAdapter = new BaseMediaBrowserAdapter(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-//        mediaBrowserAdapter.onStart();
+        mediaBrowserAdapter.onStart();
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-//        mediaBrowserAdapter.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
+        mediaBrowserAdapter.onStop();
     }
 
     /**
@@ -112,6 +116,9 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onSongClick(Song song) {
         // TODO play a song
+        // TODO add entire album to queue (this should be easy?)
+        MediaControllerCompat.TransportControls transportControls = mediaBrowserAdapter.getTransportControl();
+        transportControls.playFromMediaId(song.getId(), null);
     }
 
     @Override

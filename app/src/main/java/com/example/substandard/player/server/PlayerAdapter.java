@@ -4,7 +4,7 @@ import android.support.v4.media.MediaMetadataCompat;
 
 /**
  * Allows UI components to control the {@link MediaPlayerHolder} without exposing anything
- * we don't want to expose.
+ * we don't want to expose. I'm actually questioning what role this is playing.
  */
 public interface PlayerAdapter {
 

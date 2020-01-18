@@ -18,8 +18,6 @@ public interface PlayerAdapter {
 
     boolean isPlaying();
 
-    void reset();
-
     void release();
 
     void playFromMedia(MediaMetadataCompat metadata);

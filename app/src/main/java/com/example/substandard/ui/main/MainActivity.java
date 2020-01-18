@@ -2,12 +2,20 @@ package com.example.substandard.ui.main;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -23,16 +31,27 @@ import com.example.substandard.service.LibraryRefreshIntentService;
 import com.example.substandard.ui.OnMediaClickListener;
 import com.example.substandard.ui.settings.SettingsActivity;
 import com.google.android.material.navigation.NavigationView;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 public class MainActivity extends AppCompatActivity implements
         OnMediaClickListener,
         NavigationView.OnNavigationItemSelectedListener,
         FragmentManager.OnBackStackChangedListener {
 
-    private DrawerLayout mDrawerLayout;
+    private static final String TAG = MainActivity.class.getSimpleName();
+
+    private DrawerLayout drawerLayout;
+    private ImageView playButton;
+    private SlidingUpPanelLayout mediaPlayerSlidingPanel;
+    private MediaPlayerPanelListener slidingPanelListener;
+    private ConstraintLayout miniMediaControllerLayout;
+    private FrameLayout mediaPlayerLayout;
+
+    private TextView songTitleView;
+    private TextView artistNameView;
 
     private BaseMediaBrowserAdapter mediaBrowserAdapter;
-    private boolean isPlaying;
+    private int mediaState;
 
 
     @Override
@@ -50,7 +69,15 @@ public class MainActivity extends AppCompatActivity implements
         setUpNavigationDrawer();
         setupNavigationClickListener();
 
-        mediaBrowserAdapter = new BaseMediaBrowserAdapter(this);
+        // Initialize view member variables
+        songTitleView = findViewById(R.id.song_name_view);
+        artistNameView = findViewById(R.id.artist_name_view);
+        mediaPlayerSlidingPanel = findViewById(R.id.sliding_panel_media_player);
+        playButton = findViewById(R.id.play_button);
+        miniMediaControllerLayout = findViewById(R.id.mini_media_control_view);
+        mediaPlayerLayout = findViewById(R.id.media_view);
+
+        mediaBrowserAdapter = new MainActivityAudioBrowser();
     }
 
     @Override
@@ -63,18 +90,34 @@ public class MainActivity extends AppCompatActivity implements
     protected void onDestroy() {
         super.onDestroy();
         mediaBrowserAdapter.onStop();
+        mediaPlayerSlidingPanel.removePanelSlideListener(slidingPanelListener);
+    }
+
+    private void setupPlayerControlView(MediaControllerCompat controller) {
+        // Setup sliding panel
+        slidingPanelListener = new MediaPlayerPanelListener();
+        mediaPlayerSlidingPanel.addPanelSlideListener(slidingPanelListener);
+
+        // Populate mini player
+        playButton.setOnClickListener((l) -> {
+                if (mediaState == PlaybackStateCompat.STATE_PLAYING) {
+                    mediaBrowserAdapter.getTransportControl().pause();
+                } else if (mediaState == PlaybackStateCompat.STATE_PAUSED){
+                    mediaBrowserAdapter.getTransportControl().play();
+                }
+            });
     }
 
     /**
      * Helper method to configure the navigation drawer to open on swipe.
      */
     private void setUpNavigationDrawer() {
-        mDrawerLayout = findViewById(R.id.drawer_layout);
+        drawerLayout = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
-                mDrawerLayout,
+                drawerLayout,
                 R.string.navigation_drawer_open,
                 R.string.navigation_drawer_close);
-        mDrawerLayout.addDrawerListener(toggle);
+        drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
@@ -92,8 +135,8 @@ public class MainActivity extends AppCompatActivity implements
      */
     @Override
     public void onBackPressed() {
-        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-            mDrawerLayout.closeDrawer(GravityCompat.START);
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
@@ -115,7 +158,6 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onSongClick(Song song) {
-        // TODO play a song
         // TODO add entire album to queue (this should be easy?)
         MediaControllerCompat.TransportControls transportControls = mediaBrowserAdapter.getTransportControl();
         transportControls.playFromMediaId(song.getId(), null);
@@ -124,10 +166,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-                mDrawerLayout.closeDrawer(GravityCompat.START);
+            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.closeDrawer(GravityCompat.START);
             } else {
-                mDrawerLayout.openDrawer(GravityCompat.START);
+                drawerLayout.openDrawer(GravityCompat.START);
             }
             return true;
         }
@@ -161,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements
                 break;
         }
 
-        mDrawerLayout.closeDrawer(GravityCompat.START);
+        drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
@@ -172,4 +214,87 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    private void setPlayPauseButton() {
+        if (mediaState == PlaybackStateCompat.STATE_PLAYING) {
+            playButton.setImageDrawable(getDrawable(R.drawable.exo_controls_pause));
+        } else {
+            playButton.setImageDrawable(getDrawable(R.drawable.exo_controls_play));
+        }
+    }
+
+    /**
+     * Logic for transitioning from mini to full media player on sliding up
+     */
+    private class MediaPlayerPanelListener implements SlidingUpPanelLayout.PanelSlideListener {
+        private static final float OFFSET_THRESHOLD = 0.3f;
+
+        @Override
+        public void onPanelSlide(View panel, float slideOffset) {
+            ActionBar actionBar = getSupportActionBar();
+
+            if (slideOffset > OFFSET_THRESHOLD) {
+                if (actionBar.isShowing()) {
+                    actionBar.hide();
+                }
+            } else {
+                if (!actionBar.isShowing()) {
+                    actionBar.show();
+                }
+            }
+
+            // make mini player fade out as you slide, otherwise looks awkward
+            miniMediaControllerLayout.setAlpha(1 - slideOffset);
+        }
+
+        @Override
+        public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+            switch (newState) {
+                case EXPANDED:
+                    miniMediaControllerLayout.setVisibility(View.GONE);
+                    break;
+                case COLLAPSED:
+                    miniMediaControllerLayout.setVisibility(View.VISIBLE);
+                    break;
+                case HIDDEN:
+                case DRAGGING:
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Implements listeners for updating UI on various media session events
+     */
+    private class MainActivityAudioBrowser extends BaseMediaBrowserAdapter {
+        public MainActivityAudioBrowser() {
+            super(MainActivity.this);
+        }
+
+        @Override
+        public void onPlaybackStateChanged(PlaybackStateCompat state) {
+            // I think that null gets passed when nothing is playing
+            if (null == state) {
+                mediaState = PlaybackStateCompat.STATE_NONE;
+            } else {
+                mediaState = state.getState();
+            }
+            setPlayPauseButton();
+        }
+
+        @Override
+        public void onConnected(MediaControllerCompat controller) {
+            setupPlayerControlView(controller);
+        }
+
+        @Override
+        public void onMetadataChanged(MediaMetadataCompat metadata) {
+            if (null != metadata) {
+                songTitleView.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
+                artistNameView.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST));
+            } else {
+                songTitleView.setText("");
+                artistNameView.setText("");
+            }
+        }
+    }
 }

@@ -12,6 +12,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity
+            android:name=".ui.login.LoginActivity"
+            android:label="@string/title_activity_login"></activity>
+        <activity android:name=".ui.player.MediaPlayerActivity" />
         <activity android:name=".ui.settings.SettingsActivity" />
         <activity android:name=".ui.main.MainActivity">
             <intent-filter>
@@ -20,23 +24,33 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service android:name=".service.CoverArtDownloadIntentService" />
         <service android:name=".service.LoginIntentService" />
         <service android:name=".service.LibraryRefreshIntentService" />
         <service android:name=".player.server.MusicService">
             <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON"/>
-                <action android:name="android.media.AUDIO_BECOMING_NOISY"/>
-                <action android:name="android.media.browse.MediaBrowserService"/>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+                <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
-        <service android:name=".service.download.MusicDownloadService"
+        <service
+            android:name=".service.download.MusicDownloadService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.exoplayer.downloadService.action.RESTART" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>
+
+        <receiver android:name="androidx.media.session.MediaButtonReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

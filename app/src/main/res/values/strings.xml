@@ -1,10 +1,11 @@
 <resources>
     <string name="app_name">SubStandard</string>
-    
+
     <!-- Used in media notification -->
     <string name="prev_track">Previous</string>
     <string name="next_track">Next</string>
     <string name="pause">Pause</string>
+    <string name="play">Play</string>
 
     <!-- Used in Navigation Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -12,6 +13,10 @@
 
     <string name="navigation_settings">Settings</string>
     <string name="navigation_rescan">Rescan Library</string>
+
+    <!-- Used in Main Activity -->
+    <string name="nothing_playing_song" translatable="false">-</string>
+    <string name="nothing_playing_artist" translatable="false"> </string>
 
     <!-- Used in Artist View activity -->
     <string name="albums">Albums</string>
@@ -35,14 +40,18 @@
 
     <string name="pref_db_initialized_key" translatable="false">db_init</string>
 
-    <string name="login_failed_toast_message">Login failed</string>
-
     <!-- Used in login dialog -->
     <string name="login">Log in</string>
     <string name="cancel">Cancel</string>
     <string name="password">Password</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_login">Sign in</string>
+    <string name="prompt_server">Server Address</string>
+    <string name="prompt_user">User</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Login successful!"</string>
+    <string name="login_failed">"Login failed"</string>
 
 </resources>

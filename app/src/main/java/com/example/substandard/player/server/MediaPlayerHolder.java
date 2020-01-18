@@ -10,11 +10,11 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
 import com.example.substandard.R;
 import com.example.substandard.database.LocalMusicLibrary;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
@@ -32,7 +32,11 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
     private final static String TAG = MediaPlayerHolder.class.getSimpleName();
 
     private final Context context;
-    private ExoPlayer player;
+    private SimpleExoPlayer player;
+
+    private PlaybackStateListener listener;
+
+    private int playbackState;
 
     // Listens for change in headphone state
     private BroadcastReceiver noisyReceiver = new BroadcastReceiver() {
@@ -44,8 +48,9 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
         }
     };
 
-    public MediaPlayerHolder(Context context) {
+    public MediaPlayerHolder(Context context, PlaybackStateListener listener) {
         this.context = context.getApplicationContext();
+        this.listener = listener;
     }
 
     /**
@@ -64,13 +69,12 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
     public void playFromMedia(MediaMetadataCompat metadata) {
         String id = metadata.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID);
         LocalMusicLibrary library = LocalMusicLibrary.getInstance(context);
-        Uri streamUri = Uri.parse(library.getStream(id).toString());
-        playFromUri(streamUri);
+        playFromUrl(library.getStream(id));
     }
 
     //TODO abstract away distinction between playing from file and from URL
 
-    public void playFromUrl(URL url) {
+    private void playFromUrl(URL url) {
         playFromUri(Uri.parse(url.toString()));
     }
 
@@ -97,6 +101,7 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
             if (getAudioFocus()) {
                 registerNoisyReceiver();
                 player.setPlayWhenReady(true);
+                setPlaybackState(PlaybackStateCompat.STATE_PLAYING);
             }
         }
     }
@@ -105,6 +110,7 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
     public void pause() {
         if (null != player && player.isPlaying()) {
             player.setPlayWhenReady(false);
+            setPlaybackState(PlaybackStateCompat.STATE_PAUSED);
         }
     }
 
@@ -115,6 +121,7 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
             player.stop();
             removeAudioFocus();
             unregisterNoisyReceiver();
+            setPlaybackState(PlaybackStateCompat.STATE_STOPPED);
         }
     }
 
@@ -146,20 +153,19 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
     }
 
     @Override
-    public void reset() {
-        Log.d(TAG, "resetting player");
-        if (null != player) {
-//            player.reset();
-        }
-    }
-
-    @Override
     public void setVolume(float volume) {
         if (null != player) {
-//            player.setVolume(volume, volume);
+            player.setVolume(volume);
         }
     }
 
+    private void setPlaybackState(@PlaybackStateCompat.State int newState) {
+        playbackState = newState;
+        PlaybackStateCompat.Builder builder = new PlaybackStateCompat.Builder();
+        long trackPosition = (null == player) ? 0 : player.getCurrentPosition();
+        builder.setState(newState, trackPosition, 1.0f);
+        listener.onPlaybackStateChanged(builder.build());
+    }
     /**
      * Registers headphone listener
      */

@@ -23,17 +23,15 @@ public class AudioNotificationUtils {
         return (int) System.currentTimeMillis();
     }
 
-    public static NotificationCompat.Builder buildNotification(Context context, MediaSessionCompat mediaSession) {
+    public static NotificationCompat.Builder buildNotification(Context context,
+                                                               MediaSessionCompat mediaSession,
+                                                               PlaybackStateCompat playbackState) {
         NotificationCompat.Action prevAction =
                 new NotificationCompat.Action(R.drawable.exo_controls_previous,
                         context.getString(R.string.prev_track),
                         MediaButtonReceiver.buildMediaButtonPendingIntent(
                                 context, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS));
-        NotificationCompat.Action pauseAction =
-                new NotificationCompat.Action(R.drawable.exo_controls_pause,
-                        context.getString(R.string.pause),
-                        MediaButtonReceiver.buildMediaButtonPendingIntent(
-                                context, PlaybackStateCompat.ACTION_PLAY_PAUSE));
+        NotificationCompat.Action playPauseAction = getPausePlayAction(context, playbackState);
         NotificationCompat.Action nextAction =
                 new NotificationCompat.Action(R.drawable.exo_controls_next,
                         context.getString(R.string.next_track),
@@ -51,7 +49,7 @@ public class AudioNotificationUtils {
                 .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context,
                         PlaybackStateCompat.ACTION_STOP))
                 .addAction(prevAction)
-                .addAction(pauseAction)
+                .addAction(playPauseAction)
                 .addAction(nextAction)
                 .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(mediaSession.getSessionToken())
@@ -73,6 +71,24 @@ public class AudioNotificationUtils {
         }
 
         return builder;
+    }
+
+    private static NotificationCompat.Action getPausePlayAction(Context context, PlaybackStateCompat playbackState) {
+        int state = playbackState.getState();
+        NotificationCompat.Action playPauseAction;
+        if (state == PlaybackStateCompat.STATE_PAUSED) {
+            playPauseAction = new NotificationCompat.Action(R.drawable.exo_controls_play,
+                    context.getString(R.string.play),
+                    MediaButtonReceiver.buildMediaButtonPendingIntent(
+                            context, PlaybackStateCompat.ACTION_PLAY));
+        } else {
+            playPauseAction = new NotificationCompat.Action(R.drawable.exo_controls_pause,
+                    context.getString(R.string.pause),
+                    MediaButtonReceiver.buildMediaButtonPendingIntent(
+                            context, PlaybackStateCompat.ACTION_PLAY_PAUSE));
+        }
+
+        return playPauseAction;
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

@@ -18,7 +18,8 @@ import java.util.List;
  * Helper class which exposes client functionality for the MediaPlayer server. Encapsulates
  * the {@link MediaBrowserCompat}, {@link MediaControllerCompat}, and various needed
  * callbacks of which the user can be blissfully ignorant. By extending this class and
- * implementing certain empty methods, functionality can be customized to suit UI needs.
+ * implementing certain empty methods, functionality can be customized to suit UI needs
+ * without having to create your own callbacks to the browser or controller.
  *
  * {@method getTransportControl} can be used to control the MediaPlayer from the UI.
  */
@@ -46,7 +47,7 @@ public class BaseMediaBrowserAdapter {
      * Override this method to set behavior for a change in playback state, e.g. when the player
      * is paused.
      */
-    public void onPlaybackStateChanged() {
+    public void onPlaybackStateChanged(PlaybackStateCompat state) {
 
     }
 
@@ -54,6 +55,17 @@ public class BaseMediaBrowserAdapter {
      * Override this method to set behavior for when the MediaBrowser loads.
      */
     public void onChildrenLoaded() {
+
+    }
+
+    /**
+     * Override this method to perform setup upon connection to media session
+     */
+    public void onConnected(MediaControllerCompat controller) {
+
+    }
+
+    public void onMetadataChanged(MediaMetadataCompat metadata) {
 
     }
 
@@ -101,6 +113,11 @@ public class BaseMediaBrowserAdapter {
             try {
                 controller = new MediaControllerCompat(context, browser.getSessionToken());
                 controller.registerCallback(controllerCallback);
+                BaseMediaBrowserAdapter.this.onConnected(controller);
+
+                // Sync with the UI
+                controllerCallback.onMetadataChanged(controller.getMetadata());
+                controllerCallback.onPlaybackStateChanged(controller.getPlaybackState());
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
@@ -127,8 +144,7 @@ public class BaseMediaBrowserAdapter {
         @Override
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
             super.onPlaybackStateChanged(state);
-
-            BaseMediaBrowserAdapter.this.onPlaybackStateChanged();
+            BaseMediaBrowserAdapter.this.onPlaybackStateChanged(state);
         }
 
         @Override
@@ -139,6 +155,7 @@ public class BaseMediaBrowserAdapter {
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             super.onMetadataChanged(metadata);
+            BaseMediaBrowserAdapter.this.onMetadataChanged(metadata);
         }
     }
 

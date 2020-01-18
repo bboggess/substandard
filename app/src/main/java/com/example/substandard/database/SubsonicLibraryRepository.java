@@ -220,16 +220,22 @@ public class SubsonicLibraryRepository {
     /**
      *
      * @param id
-     * @return the URL that has the song we are looking for
+     * @return URL from which to stream
      */
     public URL streamSong(String id) {
         return dataSource.getStreamUrl(id);
     }
 
-    public Single<Song> getSong(final String id) {
+    /**
+     * Loads a song as an Observable
+     * @param id
+     * @return
+     */
+    public Single<Song> getSong(String id) {
         return songDao.loadSongById(id);
     }
 
+    // TODO replace return type in DAO with Single<String>
     public String getAlbumName(String id) {
         return albumDao.loadAlbumName(id);
     }

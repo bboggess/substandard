@@ -1,6 +1,9 @@
 package com.example.substandard.player.server;
 
 import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.media.MediaMetadata;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
@@ -8,13 +11,16 @@ import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.media.MediaBrowserServiceCompat;
+import androidx.media.session.MediaButtonReceiver;
 
+import com.example.substandard.AppExecutors;
 import com.example.substandard.database.LocalMusicLibrary;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.player.AudioNotificationUtils;
@@ -32,7 +38,7 @@ public class MusicService extends MediaBrowserServiceCompat {
     private static final String TAG = MusicService.class.getSimpleName();
 
     private MediaSessionCompat mediaSession;
-    private MediaPlayerHolder holder;
+    private PlayerAdapter player;
     private MediaSessionCallback callback;
 
     // These get used repeatedly, and Android recommends caching them
@@ -42,14 +48,33 @@ public class MusicService extends MediaBrowserServiceCompat {
     @Override
     public void onCreate() {
         super.onCreate();
-        mediaSession = new MediaSessionCompat(getApplicationContext(), MusicService.class.getSimpleName());
+        initializeMediaSession();
+        registerActionMediaButtons();
+        playbackStateBuilder = new PlaybackState.Builder();
+        metadataBuilder = new MediaMetadataCompat.Builder();
+    }
+
+    private void initializeMediaSession() {
+        ComponentName mediaButtonReceiver = new ComponentName(getApplicationContext(), MediaButtonReceiver.class);
+        mediaSession = new MediaSessionCompat(getApplicationContext(),
+                MusicService.class.getSimpleName(), mediaButtonReceiver, null);
         callback = new MediaSessionCallback();
         mediaSession.setCallback(callback);
         setSessionToken(mediaSession.getSessionToken());
-        holder = new MediaPlayerHolder(this);
+        player = new MediaPlayerHolder(this, new MediaPlayerListener());
+    }
 
-        playbackStateBuilder = new PlaybackState.Builder();
-        metadataBuilder = new MediaMetadataCompat.Builder();
+    private void registerActionMediaButtons() {
+        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        mediaButtonIntent.setClass(this, MediaButtonReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, mediaButtonIntent, 0);
+        mediaSession.setMediaButtonReceiver(pendingIntent);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        MediaButtonReceiver.handleIntent(mediaSession, intent);
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Nullable
@@ -68,7 +93,7 @@ public class MusicService extends MediaBrowserServiceCompat {
 
     @Override
     public void onDestroy() {
-        holder.release();
+        player.release();
         mediaSession.release();
     }
 
@@ -101,19 +126,20 @@ public class MusicService extends MediaBrowserServiceCompat {
                 loadMedia();
             }
 
-            holder.playFromMedia(loadedMedia);
+            player.playFromMedia(loadedMedia);
         }
 
         @Override
         public void onStop() {
-            holder.stop();
+            Log.d(TAG, "onStop called");
+            player.stop();
             mediaSession.setActive(false);
-            removeNotification();
         }
 
         @Override
         public void onPause() {
-            holder.pause();
+            Log.d(TAG, "onPause called");
+            player.pause();
         }
 
         @Override
@@ -151,7 +177,7 @@ public class MusicService extends MediaBrowserServiceCompat {
 
         @Override
         public void onSeekTo(long pos) {
-            holder.seekTo(pos);
+            player.seekTo(pos);
         }
 
         private void loadMedia() {
@@ -170,21 +196,11 @@ public class MusicService extends MediaBrowserServiceCompat {
             this.loadedMedia = loadedMedia;
         }
 
-        private int notificationId;
+        void onReadyToPlayLoadedMedia() {
+            player.playFromMedia(loadedMedia);
 
-        void showNotification() {
-            Notification notification = AudioNotificationUtils
-                    .buildNotification(MusicService.this, mediaSession)
-                    .build();
-            notificationId = AudioNotificationUtils.createNotificationId();
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MusicService.this);
-            notificationManager.notify(notificationId, notification);
         }
 
-        private void removeNotification() {
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MusicService.this);
-            notificationManager.cancel(notificationId);
-        }
     }
 
     /**
@@ -210,10 +226,10 @@ public class MusicService extends MediaBrowserServiceCompat {
                 mediaSession.setActive(true);
             }
 
-            LocalMusicLibrary library = LocalMusicLibrary.getInstance(MusicService.this);
-            // TODO replace with call to holder.playFromMedia
-            holder.playFromUrl(library.getStream(songId));
-            callback.showNotification();
+            // EOPlayer gets angry about being used on a background thread
+            // so for now let's do this until I come up with a more permanent fix
+            AppExecutors.getInstance().mainThread().execute(
+                    () -> callback.onReadyToPlayLoadedMedia() );
         }
 
         private MediaMetadataCompat convertSongToMediaMetadata(Song song) {
@@ -239,5 +255,38 @@ public class MusicService extends MediaBrowserServiceCompat {
             this.songId = songId;
         }
 
+    }
+
+    public class MediaPlayerListener implements PlaybackStateListener {
+        @Override
+        public void onPlaybackStateChanged(PlaybackStateCompat playbackState) {
+            mediaSession.setPlaybackState(playbackState);
+
+            switch (playbackState.getState()) {
+                case PlaybackStateCompat.STATE_PLAYING:
+                case PlaybackStateCompat.STATE_PAUSED:
+                    showNotification(playbackState);
+                    break;
+                default:
+                    removeNotification();
+                    break;
+            }
+        }
+
+        private int notificationId;
+
+        void showNotification(PlaybackStateCompat state) {
+            Notification notification = AudioNotificationUtils
+                    .buildNotification(MusicService.this, mediaSession, state)
+                    .build();
+            notificationId = AudioNotificationUtils.createNotificationId();
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MusicService.this);
+            notificationManager.notify(notificationId, notification);
+        }
+
+        private void removeNotification() {
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MusicService.this);
+            notificationManager.cancel(notificationId);
+        }
     }
 }

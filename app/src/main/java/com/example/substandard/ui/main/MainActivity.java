@@ -2,20 +2,14 @@ package com.example.substandard.ui.main;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -41,23 +35,18 @@ public class MainActivity extends AppCompatActivity implements
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private DrawerLayout drawerLayout;
-    private ImageView playButton;
-    private SlidingUpPanelLayout mediaPlayerSlidingPanel;
     private MediaPlayerPanelListener slidingPanelListener;
-    private ConstraintLayout miniMediaControllerLayout;
-    private FrameLayout mediaPlayerLayout;
-
-    private TextView songTitleView;
-    private TextView artistNameView;
+    private SlidingUpPanelLayout mediaPlayerSlidingPanel;
+    private MediaPlayerLayout mediaPlayerLayout;
 
     private BaseMediaBrowserAdapter mediaBrowserAdapter;
-    private int mediaState;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setSupportActionBar(findViewById(R.id.main_toolbar));
 
         // create and show the start screen, which is currently the list of artists
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -70,14 +59,12 @@ public class MainActivity extends AppCompatActivity implements
         setupNavigationClickListener();
 
         // Initialize view member variables
-        songTitleView = findViewById(R.id.song_name_view);
-        artistNameView = findViewById(R.id.artist_name_view);
+        mediaPlayerLayout = findViewById(R.id.media_player_layout);
         mediaPlayerSlidingPanel = findViewById(R.id.sliding_panel_media_player);
-        playButton = findViewById(R.id.play_button);
-        miniMediaControllerLayout = findViewById(R.id.mini_media_control_view);
-        mediaPlayerLayout = findViewById(R.id.media_view);
 
         mediaBrowserAdapter = new MainActivityAudioBrowser();
+        mediaPlayerLayout.setMediaBrowser(mediaBrowserAdapter);
+
     }
 
     @Override
@@ -89,23 +76,16 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        getSupportFragmentManager().removeOnBackStackChangedListener(this);
         mediaBrowserAdapter.onStop();
+        mediaPlayerLayout.disconnectController();
         mediaPlayerSlidingPanel.removePanelSlideListener(slidingPanelListener);
     }
 
-    private void setupPlayerControlView(MediaControllerCompat controller) {
+    private void setupPlayerControlView() {
         // Setup sliding panel
         slidingPanelListener = new MediaPlayerPanelListener();
         mediaPlayerSlidingPanel.addPanelSlideListener(slidingPanelListener);
-
-        // Populate mini player
-        playButton.setOnClickListener((l) -> {
-                if (mediaState == PlaybackStateCompat.STATE_PLAYING) {
-                    mediaBrowserAdapter.getTransportControl().pause();
-                } else if (mediaState == PlaybackStateCompat.STATE_PAUSED){
-                    mediaBrowserAdapter.getTransportControl().play();
-                }
-            });
     }
 
     /**
@@ -214,14 +194,6 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void setPlayPauseButton() {
-        if (mediaState == PlaybackStateCompat.STATE_PLAYING) {
-            playButton.setImageDrawable(getDrawable(R.drawable.exo_controls_pause));
-        } else {
-            playButton.setImageDrawable(getDrawable(R.drawable.exo_controls_play));
-        }
-    }
-
     /**
      * Logic for transitioning from mini to full media player on sliding up
      */
@@ -230,8 +202,8 @@ public class MainActivity extends AppCompatActivity implements
 
         @Override
         public void onPanelSlide(View panel, float slideOffset) {
+            // deals with removing the action bar
             ActionBar actionBar = getSupportActionBar();
-
             if (slideOffset > OFFSET_THRESHOLD) {
                 if (actionBar.isShowing()) {
                     actionBar.hide();
@@ -241,19 +213,20 @@ public class MainActivity extends AppCompatActivity implements
                     actionBar.show();
                 }
             }
-
             // make mini player fade out as you slide, otherwise looks awkward
-            miniMediaControllerLayout.setAlpha(1 - slideOffset);
+            mediaPlayerLayout.setMiniPlayerAlpha(1 - slideOffset);
         }
 
         @Override
         public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
             switch (newState) {
                 case EXPANDED:
-                    miniMediaControllerLayout.setVisibility(View.GONE);
+                    drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    mediaPlayerLayout.onExpanded();
                     break;
                 case COLLAPSED:
-                    miniMediaControllerLayout.setVisibility(View.VISIBLE);
+                    drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                    mediaPlayerLayout.onCollapsed();
                     break;
                 case HIDDEN:
                 case DRAGGING:
@@ -271,30 +244,10 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         @Override
-        public void onPlaybackStateChanged(PlaybackStateCompat state) {
-            // I think that null gets passed when nothing is playing
-            if (null == state) {
-                mediaState = PlaybackStateCompat.STATE_NONE;
-            } else {
-                mediaState = state.getState();
-            }
-            setPlayPauseButton();
-        }
-
-        @Override
         public void onConnected(MediaControllerCompat controller) {
-            setupPlayerControlView(controller);
+            setupPlayerControlView();
+            mediaPlayerLayout.setController(controller);
         }
 
-        @Override
-        public void onMetadataChanged(MediaMetadataCompat metadata) {
-            if (null != metadata) {
-                songTitleView.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
-                artistNameView.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST));
-            } else {
-                songTitleView.setText("");
-                artistNameView.setText("");
-            }
-        }
     }
 }

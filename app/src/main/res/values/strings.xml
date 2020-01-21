@@ -40,6 +40,9 @@
 
     <string name="pref_db_initialized_key" translatable="false">db_init</string>
 
+    <!-- Used in media player -->
+    <string name="track_time_default" translatable="false">-:--</string>
+
     <!-- Used in login dialog -->
     <string name="login">Log in</string>
     <string name="cancel">Cancel</string>

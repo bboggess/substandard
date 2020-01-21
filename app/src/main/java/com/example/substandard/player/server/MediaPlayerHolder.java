@@ -38,6 +38,9 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
 
     private int playbackState;
 
+    // Android recommends caching this, as it is used constantly
+    private PlaybackStateCompat.Builder builder;
+
     // Listens for change in headphone state
     private BroadcastReceiver noisyReceiver = new BroadcastReceiver() {
         @Override
@@ -51,6 +54,7 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
     public MediaPlayerHolder(Context context, PlaybackStateListener listener) {
         this.context = context.getApplicationContext();
         this.listener = listener;
+        this.builder = new PlaybackStateCompat.Builder();
     }
 
     /**
@@ -71,8 +75,6 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
         LocalMusicLibrary library = LocalMusicLibrary.getInstance(context);
         playFromUrl(library.getStream(id));
     }
-
-    //TODO abstract away distinction between playing from file and from URL
 
     private void playFromUrl(URL url) {
         playFromUri(Uri.parse(url.toString()));
@@ -97,7 +99,8 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
     @Override
     public void play() {
         Log.d(TAG, "player starting");
-        if (null != player && !player.isPlaying()) {
+        // TODO figure out what happens when player.isPlaying() is true
+        if (null != player) {
             if (getAudioFocus()) {
                 registerNoisyReceiver();
                 player.setPlayWhenReady(true);
@@ -159,13 +162,17 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
         }
     }
 
+    /**
+     * Update the saved playback state and notify listener
+     * @param newState
+     */
     private void setPlaybackState(@PlaybackStateCompat.State int newState) {
         playbackState = newState;
-        PlaybackStateCompat.Builder builder = new PlaybackStateCompat.Builder();
         long trackPosition = (null == player) ? 0 : player.getCurrentPosition();
         builder.setState(newState, trackPosition, 1.0f);
         listener.onPlaybackStateChanged(builder.build());
     }
+
     /**
      * Registers headphone listener
      */
@@ -206,7 +213,7 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
         AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         int result;
 
-        // The former approach only works in version 26, and the latter becomes deprecated
+        // The former approach only works in version 26, and the latter is deprecated
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             AudioAttributes attributes = new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_MEDIA)

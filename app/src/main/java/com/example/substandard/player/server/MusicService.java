@@ -4,9 +4,10 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.media.MediaMetadata;
-import android.media.session.PlaybackState;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
@@ -24,6 +25,8 @@ import com.example.substandard.AppExecutors;
 import com.example.substandard.database.LocalMusicLibrary;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.player.AudioNotificationUtils;
+import com.example.substandard.service.CoverArtDownloadIntentService;
+import com.example.substandard.service.CoverArtResultReceiver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +44,8 @@ public class MusicService extends MediaBrowserServiceCompat {
     private PlayerAdapter player;
     private MediaSessionCallback callback;
 
+    private PlaybackStateCompat playbackState;
     // These get used repeatedly, and Android recommends caching them
-    private PlaybackState.Builder playbackStateBuilder;
     private MediaMetadataCompat.Builder metadataBuilder;
 
     @Override
@@ -50,7 +53,6 @@ public class MusicService extends MediaBrowserServiceCompat {
         super.onCreate();
         initializeMediaSession();
         registerActionMediaButtons();
-        playbackStateBuilder = new PlaybackState.Builder();
         metadataBuilder = new MediaMetadataCompat.Builder();
     }
 
@@ -209,18 +211,33 @@ public class MusicService extends MediaBrowserServiceCompat {
      */
     public class SongPlayRequest implements LocalMusicLibrary.SongLoadRequest {
         private String songId;
+        private CoverArtResultReceiver coverArtResultReceiver = new CoverArtResultReceiver(new Handler());
 
         @Override
         public void onSubscribe(Disposable d) {
             Log.d(TAG, "request subscribed");
+
+            // go ahead and load the album art to add to the metadata
+            Intent coverArtIntent = new Intent(MusicService.this, CoverArtDownloadIntentService.class);
+            coverArtIntent.putExtra(CoverArtDownloadIntentService.IMAGE_PATH_EXTRA_KEY, songId);
+            coverArtIntent.putExtra(CoverArtDownloadIntentService.RESULT_RECEIVER_EXTRA_KEY, coverArtResultReceiver);
+            startService(coverArtIntent);
+
+            coverArtResultReceiver.setReceiver((resultCode, resultData) -> {
+                if (resultCode == CoverArtDownloadIntentService.STATUS_SUCCESS) {
+                    Bitmap coverArt = resultData.getParcelable(CoverArtDownloadIntentService.BITMAP_EXTRA_KEY);
+                    metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, coverArt);
+                    MediaMetadataCompat updated = metadataBuilder.build();
+                    updateMetadata(updated);
+                }
+            });
         }
 
         @Override
         public void onSuccess(Song song) {
             Log.d(TAG, "loaded song: " + song.getTitle());
             MediaMetadataCompat metadata = convertSongToMediaMetadata(song);
-            mediaSession.setMetadata(metadata);
-            callback.setLoadedMedia(metadata);
+            updateMetadata(metadata);
 
             if (!mediaSession.isActive()) {
                 mediaSession.setActive(true);
@@ -257,15 +274,19 @@ public class MusicService extends MediaBrowserServiceCompat {
 
     }
 
+    /**
+     * Listens for state changes to the media player to notify the media session
+     */
     public class MediaPlayerListener implements PlaybackStateListener {
         @Override
         public void onPlaybackStateChanged(PlaybackStateCompat playbackState) {
+            MusicService.this.playbackState = playbackState;
             mediaSession.setPlaybackState(playbackState);
 
             switch (playbackState.getState()) {
                 case PlaybackStateCompat.STATE_PLAYING:
                 case PlaybackStateCompat.STATE_PAUSED:
-                    showNotification(playbackState);
+                    showNotification();
                     break;
                 default:
                     removeNotification();
@@ -273,20 +294,36 @@ public class MusicService extends MediaBrowserServiceCompat {
             }
         }
 
-        private int notificationId;
+    }
 
-        void showNotification(PlaybackStateCompat state) {
-            Notification notification = AudioNotificationUtils
-                    .buildNotification(MusicService.this, mediaSession, state)
-                    .build();
-            notificationId = AudioNotificationUtils.createNotificationId();
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MusicService.this);
-            notificationManager.notify(notificationId, notification);
-        }
+    /**
+     * Updates notifications and session metadata, and triggers callbacks.
+     * @param metadata
+     */
+    private void updateMetadata(MediaMetadataCompat metadata) {
+        mediaSession.setMetadata(metadata);
+        callback.setLoadedMedia(metadata);
+        showNotification();
+    }
 
-        private void removeNotification() {
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MusicService.this);
-            notificationManager.cancel(notificationId);
-        }
+
+    // keep the same id throughout session's life, so that we update the existing notification
+    // rather than creating new ones
+    private int notificationId = AudioNotificationUtils.createNotificationId();
+
+    /**
+     * Shows/updates notification based on state of the session
+     */
+    private void showNotification() {
+        Notification notification = AudioNotificationUtils
+                .buildNotification(MusicService.this, mediaSession, playbackState)
+                .build();
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MusicService.this);
+        notificationManager.notify(notificationId, notification);
+    }
+
+    private void removeNotification() {
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MusicService.this);
+        notificationManager.cancel(notificationId);
     }
 }

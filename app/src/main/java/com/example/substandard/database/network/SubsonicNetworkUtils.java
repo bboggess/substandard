@@ -9,10 +9,10 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.example.substandard.data.SubstandardPreferences;
 import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.Artist;
 import com.example.substandard.database.data.Song;
+import com.example.substandard.utility.SubstandardPreferences;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;

@@ -7,8 +7,8 @@ import android.os.ResultReceiver;
 
 import androidx.annotation.Nullable;
 
-import com.example.substandard.data.SubstandardPreferences;
 import com.example.substandard.database.network.SubsonicNetworkUtils;
+import com.example.substandard.utility.SubstandardPreferences;
 
 /**
  * Background service to verify login information. If the login is successful,

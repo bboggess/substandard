@@ -1,4 +1,4 @@
-package com.example.substandard.data;
+package com.example.substandard.utility;
 
 import android.content.Context;
 import android.content.SharedPreferences;

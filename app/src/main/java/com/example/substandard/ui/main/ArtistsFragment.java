@@ -1,6 +1,5 @@
 package com.example.substandard.ui.main;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,12 +9,13 @@ import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
 import com.example.substandard.database.data.Artist;
-import com.example.substandard.ui.OnMediaClickListener;
 import com.example.substandard.ui.model.ArtistViewModel;
 import com.example.substandard.ui.model.ArtistViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
@@ -32,8 +32,6 @@ public class ArtistsFragment extends Fragment implements ViewHolderItemClickList
 
     private ArtistAdapter artistAdapter;
     private RecyclerView recyclerView;
-
-    private OnMediaClickListener mListener;
 
     private ArtistViewModel artistViewModel;
 
@@ -93,26 +91,12 @@ public class ArtistsFragment extends Fragment implements ViewHolderItemClickList
         return rootView;
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnMediaClickListener) {
-            mListener = (OnMediaClickListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnMediaClickListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
 
     @Override
     public void onItemClick(Artist artist) {
-        mListener.onArtistClick(artist);
+//        mListener.onArtistClick(artist);
+        NavDirections directions = ArtistsFragmentDirections.actionMainFragmentToArtistViewFragment(artist.getId());
+        Navigation.findNavController(getView()).navigate(directions);
     }
 
 }

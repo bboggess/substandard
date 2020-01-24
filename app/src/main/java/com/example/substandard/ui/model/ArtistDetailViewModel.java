@@ -4,14 +4,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.substandard.database.SubsonicLibraryRepository;
-import com.example.substandard.database.data.Artist;
+import com.example.substandard.database.data.ArtistAndAllAlbums;
 
 public class ArtistDetailViewModel extends ViewModel {
-    private final LiveData<Artist> artist;
+    private final LiveData<ArtistAndAllAlbums> artist;
 
     ArtistDetailViewModel(String artistId, SubsonicLibraryRepository repository) {
-        artist = repository.getArtistById(artistId);
+        artist = repository.getArtistAndAllAlbums(artistId);
     }
 
-    public LiveData<Artist> getArtist() { return artist; }
+    public LiveData<ArtistAndAllAlbums> getArtist() { return artist; }
 }

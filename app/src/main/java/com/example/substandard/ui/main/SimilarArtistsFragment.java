@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -38,6 +40,8 @@ public class SimilarArtistsFragment extends AbstractArtistViewFragment implement
                              Bundle savedInstanceState) {
         Log.d(TAG, "created View");
         View rootView = inflater.inflate(R.layout.fragment_similar_artists, container, false);
+        AbstractArtistViewFragment parent = (ArtistViewFragment) getParentFragment();
+        setArtist(parent.getArtistAndAllAlbums());
         setUpRecyclerView(rootView);
         setUpArtistsViewModel();
         return rootView;
@@ -71,7 +75,8 @@ public class SimilarArtistsFragment extends AbstractArtistViewFragment implement
 
     @Override
     public void onItemClick(Artist artist) {
-        getListener().onArtistClick(artist);
+        NavDirections directions = ArtistViewFragmentDirections.actionArtistViewFragmentSelf(artist.getId());
+        Navigation.findNavController(getView()).navigate(directions);
     }
 
 }

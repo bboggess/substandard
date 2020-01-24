@@ -1,20 +1,19 @@
 package com.example.substandard.ui.main;
 
-import android.content.Context;
-
 import androidx.fragment.app.Fragment;
 
+import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.Artist;
-import com.example.substandard.ui.OnMediaClickListener;
+import com.example.substandard.database.data.ArtistAndAllAlbums;
+
+import java.util.List;
 
 /**
  * Abstract Fragment that all Fragments being used for views belonging to a specific artist
  * should extend. This saves a lot of pointless boilerplate I had before.
  */
 public abstract class AbstractArtistViewFragment extends Fragment {
-    private OnMediaClickListener mListener;
-
-    private Artist artist;
+    private ArtistAndAllAlbums artist;
 
     public AbstractArtistViewFragment() {
         // Required empty public constructor
@@ -23,7 +22,6 @@ public abstract class AbstractArtistViewFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
         artist = null;
     }
 
@@ -35,23 +33,12 @@ public abstract class AbstractArtistViewFragment extends Fragment {
      */
     public static AbstractArtistViewFragment newInstance(Artist artist) {
         ArtistViewFragment fragment = new ArtistViewFragment();
-        fragment.setArtist(artist);
+//        fragment.setArtist(artist);
         return fragment;
     }
 
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnMediaClickListener) {
-            mListener = (OnMediaClickListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnMediaClickListener");
-        }
-    }
-
-    void setArtist(Artist artist) {
+    void setArtist(ArtistAndAllAlbums artist) {
         this.artist = artist;
     }
 
@@ -60,12 +47,16 @@ public abstract class AbstractArtistViewFragment extends Fragment {
      * @return Artist to whom the Fragment is associated.
      */
     public Artist getArtist() {
+        return artist.getArtist();
+    }
+
+    public ArtistAndAllAlbums getArtistAndAllAlbums() {
         return artist;
     }
 
-
-    public OnMediaClickListener getListener() {
-        return mListener;
+    public List<Album> getAlbums() {
+        return artist.getAlbums();
     }
+
 
 }

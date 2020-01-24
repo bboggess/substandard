@@ -33,20 +33,21 @@ public class Song {
     @ColumnInfo(name="album_id")
     private String albumId;
     private String genre;
-    @Ignore
     private long duration;
-    @Ignore
     private int trackNum;
     private String suffix;
     private boolean offline;
 
-    public Song(String id, String title, String artistName, String albumId, String genre, String suffix, boolean offline) {
+    @Ignore
+    public Song(String id, String title, String artistName, String albumId, String genre, String suffix, int trackNum, int duration, boolean offline) {
         this.id = id;
         this.title = title;
         this.artistName = artistName;
         this.albumId = albumId;
         this.genre = genre;
         this.suffix = suffix;
+        this.trackNum = trackNum;
+        this.duration = duration;
         this.offline = offline;
     }
 

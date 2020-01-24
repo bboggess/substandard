@@ -8,5 +8,45 @@
         android:id="@+id/mainFragment"
         android:name="com.example.substandard.ui.main.ArtistsFragment"
         android:label="fragment_main"
-        tools:layout="@layout/fragment_artists" />
+        tools:layout="@layout/fragment_artists" >
+        <action
+            android:id="@+id/action_mainFragment_to_artistViewFragment"
+            app:destination="@id/artistViewFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/artistViewFragment"
+        android:name="com.example.substandard.ui.main.ArtistViewFragment"
+        android:label="fragment_artist_view"
+        tools:layout="@layout/fragment_artist_view" >
+        <action
+            android:id="@+id/action_artistViewFragment_to_songListFragment"
+            app:destination="@id/songListFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_artistViewFragment_self"
+            app:destination="@id/artistViewFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <argument
+            android:name="artistId"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/songListFragment"
+        android:name="com.example.substandard.ui.main.SongListFragment"
+        android:label="song_list_fragment"
+        tools:layout="@layout/song_list_fragment" >
+        <argument
+            android:name="albumId"
+            app:argType="string" />
+    </fragment>
 </navigation>

@@ -31,10 +31,8 @@
             android:layout_height="wrap_content"
             android:padding="2dp"
             tools:text="Song Title"
-            android:textSize="16sp"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:text="@string/nothing_playing_song"
+            style="@style/TextAppearance.MaterialComponents.Subtitle1"
+            android:textColor="@color/secondaryTextColor"
             android:layout_marginLeft="10dp"
             app:layout_constraintLeft_toRightOf="@+id/album_art_view"
             app:layout_constraintTop_toTopOf="@id/album_art_view"
@@ -45,10 +43,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="Artist Name"
-            android:textSize="12sp"
-            android:text="@string/nothing_playing_artist"
-            android:singleLine="true"
-            android:ellipsize="end"
+            style="@style/TextAppearance.MaterialComponents.Body2"
+            android:textColor="@color/secondaryTextColor"
             android:padding="2dp"
             app:layout_constraintLeft_toLeftOf="@id/song_name_view"
             app:layout_constraintTop_toBottomOf="@id/song_name_view"
@@ -70,7 +66,6 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:background="@color/colorPrimary"
         android:id="@+id/media_player">
 
         <ImageView
@@ -85,7 +80,6 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_gravity="top|center"
-            android:background="@color/backgroundLight"
             android:visibility="invisible"
             android:alpha="0.7">
 
@@ -99,10 +93,7 @@
                 android:paddingStart="5dp"
                 android:paddingEnd="5dp"
                 android:paddingBottom="5dp"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:singleLine="true"
-                android:ellipsize="end"
+                style="@style/TextAppearance.MaterialComponents.Subtitle1"
                 tools:text="Song Name"/>
             <TextView
                 android:id="@+id/artist_name_view_media_player"
@@ -112,9 +103,7 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="5dp"
                 android:paddingEnd="5dp"
-                android:textSize="12sp"
-                android:singleLine="true"
-                android:ellipsize="end"
+                style="@style/TextAppearance.MaterialComponents.Body2"
                 tools:text="Artist name"/>
 
             <ImageButton
@@ -131,7 +120,6 @@
             android:layout_width="match_parent"
             android:layout_height="85dp"
             android:layout_gravity="bottom|center"
-            android:background="@color/backgroundLight"
             android:alpha="0.7">
             <SeekBar
                 android:id="@+id/seek_bar"
@@ -149,7 +137,7 @@
                 android:textAlignment="center"
                 app:layout_constraintTop_toBottomOf="@id/seek_bar"
                 app:layout_constraintStart_toStartOf="@id/seek_bar"
-                android:textSize="12sp"
+                style="@style/TextAppearance.MaterialComponents.Caption"
                 android:text="@string/track_time_default"
                 tools:text="0:00"/>
             <TextView
@@ -161,7 +149,7 @@
                 android:textAlignment="center"
                 app:layout_constraintTop_toBottomOf="@id/seek_bar"
                 app:layout_constraintEnd_toEndOf="@id/seek_bar"
-                android:textSize="12sp"
+                style="@style/TextAppearance.MaterialComponents.Caption"
                 android:text="@string/track_time_default"
                 tools:text="3:53"/>
             <ImageButton

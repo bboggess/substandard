@@ -1,6 +1,5 @@
 package com.example.substandard.ui.main;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,19 +8,17 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
 import com.example.substandard.database.data.Album;
-import com.example.substandard.ui.OnMediaClickListener;
 import com.example.substandard.ui.model.AlbumsByArtistViewModel;
 import com.example.substandard.ui.model.AlbumsByArtistViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
-
-import java.util.List;
 
 /**
  * A {@link Fragment} to display a list of all albums by an artist, within the artist view
@@ -37,19 +34,6 @@ public class AlbumsByArtistFragment extends AbstractArtistViewFragment implement
     private AlbumsByArtistViewModel albumsViewModel;
     private AlbumAdapter albumAdapter;
 
-    private OnMediaClickListener albumClickListener;
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnMediaClickListener) {
-            albumClickListener = (OnMediaClickListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnMediaClickListener");
-        }
-    }
-
     /**
      * Helper method for all setup needed to get a RecyclerView running
      * @param rootView the Fragment view
@@ -64,6 +48,7 @@ public class AlbumsByArtistFragment extends AbstractArtistViewFragment implement
 
         albumAdapter = new AlbumAdapter(getContext(), this);
         albumsView.setAdapter(albumAdapter);
+        albumAdapter.setAlbums(getArtistAndAllAlbums().getAlbums());
     }
 
     @Override
@@ -82,14 +67,11 @@ public class AlbumsByArtistFragment extends AbstractArtistViewFragment implement
                 .provideAlbumsByArtistViewModelFactory(getContext(), getArtist());
         albumsViewModel = new ViewModelProvider(this, factory)
                 .get(AlbumsByArtistViewModel.class);
-        albumsViewModel.getAlbums().observe(this, new Observer<List<Album>>() {
-            @Override
-            public void onChanged(List<Album> albums) {
+        albumsViewModel.getAlbums().observe(this, (albums) -> {
                 Log.d(TAG, "fetched albums: " + albums.toString());
                 albumAdapter.setAlbums(albums);
                 progressBar.setVisibility(View.INVISIBLE);
-            }
-        });
+            });
     }
 
     @Override
@@ -97,16 +79,20 @@ public class AlbumsByArtistFragment extends AbstractArtistViewFragment implement
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_albums_by_artist, container, false);
-//        Log.d(TAG, "created album list fragment for artist " + getArtist().getName());
+        AbstractArtistViewFragment parentFragment = (ArtistViewFragment) getParentFragment();
+        setArtist(parentFragment.getArtistAndAllAlbums());
+
         progressBar = rootView.findViewById(R.id.albums_by_artist_pb);
         setUpRecyclerView(rootView);
-        setUpArtistsViewModel();
+//        setUpArtistsViewModel();
         return rootView;
     }
 
     @Override
     public void onItemClick(Album album) {
         Log.d(TAG, "clicked on album: " + album.getName());
-        albumClickListener.onAlbumClick(album);
+        NavDirections directions = ArtistViewFragmentDirections
+                .actionArtistViewFragmentToSongListFragment(album.getId());
+        Navigation.findNavController(getView()).navigate(directions);
     }
 }

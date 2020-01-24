@@ -11,11 +11,14 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.substandard.R;
-import com.example.substandard.database.data.Artist;
-import com.google.android.material.tabs.TabItem;
+import com.example.substandard.database.data.ArtistAndAllAlbums;
+import com.example.substandard.ui.model.ArtistDetailViewModel;
+import com.example.substandard.ui.model.ArtistDetailViewModelFactory;
+import com.example.substandard.utility.InjectorUtils;
 import com.google.android.material.tabs.TabLayout;
 
 public class ArtistViewFragment extends AbstractArtistViewFragment {
@@ -23,25 +26,18 @@ public class ArtistViewFragment extends AbstractArtistViewFragment {
 
     private View rootView;
 
-    // For tabs that let us switch between views
-    private TabLayout tabLayout;
-    private TabItem tabAlbums;
-    private TabItem tabSimilarArtists;
-    private ViewPager viewPager;
-    private PagerAdapter pagerAdapter;
+    private ArtistDetailViewModel artistDetailViewModel;
 
     /**
      * Helper method to set up ViewPager and tabs
      */
     private void setupViewPager() {
-        tabLayout = rootView.findViewById(R.id.tab_layout_artist_view);
-        tabAlbums = rootView.findViewById(R.id.tab_item_albums);
-        tabSimilarArtists = rootView.findViewById(R.id.tab_item_similar);
-        viewPager = rootView.findViewById(R.id.view_pager_artist_view);
+        TabLayout tabLayout = rootView.findViewById(R.id.tab_layout_artist_view);
+        ViewPager viewPager = rootView.findViewById(R.id.view_pager_artist_view);
 
         Log.d(TAG, "creating PageAdapter for: " + getArtist().getName());
-        pagerAdapter = new PagerAdapter(getChildFragmentManager(),
-                tabLayout.getTabCount(), getArtist());
+        PagerAdapter pagerAdapter = new PagerAdapter(getChildFragmentManager(),
+                tabLayout.getTabCount(), getArtistAndAllAlbums());
         viewPager.setAdapter(pagerAdapter);
         Log.d(TAG, "populated ViewPager with: " + pagerAdapter.getArtist());
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
@@ -58,8 +54,18 @@ public class ArtistViewFragment extends AbstractArtistViewFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_artist_view, container, false);
-        setupViewPager();
+        String artistId = ArtistViewFragmentArgs.fromBundle(getArguments()).getArtistId();
+        setUpArtistDetailViewModel(artistId);
         return rootView;
+    }
+
+    private void setUpArtistDetailViewModel(String artistId) {
+        ArtistDetailViewModelFactory factory = InjectorUtils.provideArtistDetailViewModelFactory(getContext(), artistId);
+        artistDetailViewModel = new ViewModelProvider(this, factory).get(ArtistDetailViewModel.class);
+        artistDetailViewModel.getArtist().observe(this, (artistAndAlbums) -> {
+            setArtist(artistAndAlbums);
+            setupViewPager();
+        });
     }
 
 
@@ -69,12 +75,12 @@ public class ArtistViewFragment extends AbstractArtistViewFragment {
     public class PagerAdapter extends FragmentStatePagerAdapter {
 
         private int numTabs;
-        private Artist artist;
+        private ArtistAndAllAlbums artist;
 
 
-        public PagerAdapter(FragmentManager fragmentManager, int numTabs, Artist artist) {
+        public PagerAdapter(FragmentManager fragmentManager, int numTabs, ArtistAndAllAlbums artist) {
             super(fragmentManager);
-            Log.d(TAG, "PagerAdapter constructor: " + artist.getName());
+            Log.d(TAG, "PagerAdapter constructor: " + artist.getArtist().getName());
             this.numTabs = numTabs;
             this.artist = artist;
         }
@@ -86,11 +92,9 @@ public class ArtistViewFragment extends AbstractArtistViewFragment {
             switch (position) {
                 case 0:
                     AlbumsByArtistFragment fragment = new AlbumsByArtistFragment();
-                    fragment.setArtist(artist);
                     return fragment;
                 case 1:
                     SimilarArtistsFragment artistsFragment = new SimilarArtistsFragment();
-                    artistsFragment.setArtist(artist);
                     return artistsFragment;
                 default:
                     return null;
@@ -110,7 +114,7 @@ public class ArtistViewFragment extends AbstractArtistViewFragment {
             }
         }
 
-        public Artist getArtist() {
+        public ArtistAndAllAlbums getArtist() {
             return artist;
         }
 

@@ -2,6 +2,7 @@ package com.example.substandard.ui.main;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,18 +13,18 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.substandard.R;
-import com.example.substandard.database.data.Album;
-import com.example.substandard.database.data.Artist;
+import com.example.substandard.database.data.AlbumAndAllSongs;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.player.client.BaseMediaBrowserAdapter;
 import com.example.substandard.service.LibraryRefreshIntentService;
 import com.example.substandard.ui.OnMediaClickListener;
 import com.example.substandard.ui.settings.SettingsActivity;
+import com.example.substandard.utility.MediaMetadataUtils;
 import com.google.android.material.navigation.NavigationView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -39,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements
     private SlidingUpPanelLayout mediaPlayerSlidingPanel;
     private MediaPlayerLayout mediaPlayerLayout;
 
+    private NavHostFragment navHost;
+
     private BaseMediaBrowserAdapter mediaBrowserAdapter;
 
 
@@ -48,13 +51,14 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.main_toolbar));
 
-        // create and show the start screen, which is currently the list of artists
+        navHost = NavHostFragment.create(R.navigation.nav_graph);
+
+
+        // create and show the start screen
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.add(R.id.fragment_container, new ArtistsFragment(), "Artists");
-        ft.commit();
+        ft.replace(R.id.fragment_container, navHost);
 
         // set up navigation drawer
-        getSupportFragmentManager().addOnBackStackChangedListener(this);
         setUpNavigationDrawer();
         setupNavigationClickListener();
 
@@ -117,30 +121,26 @@ public class MainActivity extends AppCompatActivity implements
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
+        } else if(mediaPlayerSlidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            mediaPlayerSlidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         } else {
             super.onBackPressed();
         }
     }
 
     @Override
-    public void onArtistClick(Artist artist) {
-        ArtistViewFragment fragment = new ArtistViewFragment();
-        fragment.setArtist(artist);
-        swapFragments(fragment);
-    }
-
-    @Override
-    public void onAlbumClick(Album album) {
-        SongListFragment fragment = SongListFragment.newInstance();
-        fragment.setAlbum(album);
-        swapFragments(fragment);
-    }
-
-    @Override
-    public void onSongClick(Song song) {
-        // TODO add entire album to queue (this should be easy?)
+    public void onSongClick(Song clickedSong, AlbumAndAllSongs albumAndAllSongs) {
         MediaControllerCompat.TransportControls transportControls = mediaBrowserAdapter.getTransportControl();
-        transportControls.playFromMediaId(song.getId(), null);
+//        transportControls.playFromMediaId(clickedSong.getId(), null);
+
+        mediaBrowserAdapter.clearQueue();
+        for (Song song : albumAndAllSongs.getSongs()) {
+            MediaDescriptionCompat description = MediaMetadataUtils.convertSongToMediaDescription(song);
+            mediaBrowserAdapter.addQueueItem(description);
+        }
+        transportControls.skipToQueueItem(Long.parseLong(clickedSong.getId()));
+
+        mediaPlayerSlidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
     }
 
     @Override
@@ -154,18 +154,6 @@ public class MainActivity extends AppCompatActivity implements
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * The interface consists of a main Activity containing a primary Fragment. This method swaps
-     * in a new primary Fragment, while adding the old Fragment to the back stack.
-     * @param newFragment
-     */
-    void swapFragments(Fragment newFragment) {
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fragment_container, newFragment);
-        ft.addToBackStack(null);
-        ft.commit();
     }
 
     @Override
@@ -246,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         public void onConnected(MediaControllerCompat controller) {
             setupPlayerControlView();
-            mediaPlayerLayout.setController(controller);
+            mediaPlayerLayout.setController();
         }
 
     }

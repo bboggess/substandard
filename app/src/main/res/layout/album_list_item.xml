@@ -1,51 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.MaterialComponents.CardView"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="5dp"
-    android:paddingLeft="1dp"
-    android:paddingRight="1dp">
-
-        <com.example.substandard.ui.CoverArtImageView
-            android:id="@+id/cover_art_view"
+    android:layout_marginTop="5dp"
+    android:layout_marginBottom="5dp"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+    app:cardCornerRadius="4dp"
+    android:elevation="2dp">
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/cover_art_description"
-            android:scaleType="centerCrop"
-            android:paddingLeft="1dp"
-            android:paddingRight="1dp"
-            android:paddingTop="1dp"
-            android:src="@drawable/ic_launcher_background"/>
+            android:orientation="vertical">
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                        <com.example.substandard.ui.CoverArtImageView
+                            android:id="@+id/cover_art_view"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@string/cover_art_description"
+                            android:scaleType="centerCrop"
+                            android:layout_marginLeft="1dp"
+                            android:layout_marginRight="1dp"
+                            android:layout_marginTop="1dp"
+                            android:src="@color/primaryColor"/>
 
-        <ProgressBar
-            android:id="@+id/album_cover_pb"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@id/cover_art_view"
-            android:layout_alignRight="@id/cover_art_view"
-            android:layout_centerInParent="true"
-            android:visibility="invisible"/>
+                        <ProgressBar
+                            android:id="@+id/album_cover_pb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal|center_vertical"
+                            android:visibility="invisible"/>
+                </FrameLayout>
+                <TextView
+                    android:id="@+id/album_name_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="2dp"
+                    style="@style/TextAppearance.MaterialComponents.Subtitle1"
+                    android:singleLine="true"
+                    android:textColor="@color/secondaryTextColor"
+                    android:gravity="center_vertical"
+                    android:text="album"/>
 
-        <TextView
-            android:id="@+id/album_name_tv"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="1dp"
-            android:textStyle="bold"
-            android:singleLine="true"
-            android:layout_below="@id/cover_art_view"
-            android:gravity="center_vertical"
-            android:text="album"/>
+                <TextView
+                    android:id="@+id/album_artist_name_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="2dp"
+                    style="@style/TextAppearance.MaterialComponents.Subtitle2"
+                    android:textColor="@color/secondaryTextColor"
+                    android:singleLine="true"
+                    android:gravity="center_vertical"
+                    android:text="artist"/>
 
-        <TextView
-            android:id="@+id/album_artist_name_tv"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/album_name_tv"
-            android:padding="1dp"
-            android:singleLine="true"
-            android:gravity="center_vertical"
-            android:text="artist"/>
-
-
-</RelativeLayout>
+        </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

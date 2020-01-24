@@ -26,6 +26,8 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+
+    apply plugin: "androidx.navigation.safeargs"
 }
 
 dependencies {
@@ -62,6 +64,7 @@ dependencies {
 
     // Exo Player
     implementation 'com.google.android.exoplayer:exoplayer:2.11.1'
+
 
     // For sliding up panel
     repositories {

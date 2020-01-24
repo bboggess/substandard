@@ -8,8 +8,10 @@ import androidx.lifecycle.Observer;
 
 import com.example.substandard.AppExecutors;
 import com.example.substandard.database.data.Album;
+import com.example.substandard.database.data.AlbumAndAllSongs;
 import com.example.substandard.database.data.AlbumDao;
 import com.example.substandard.database.data.Artist;
+import com.example.substandard.database.data.ArtistAndAllAlbums;
 import com.example.substandard.database.data.ArtistDao;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.database.data.SongDao;
@@ -190,13 +192,17 @@ public class SubsonicLibraryRepository {
      * @param album Album to find songs from
      * @return list of all songs, wrapped in LiveData updated once processing finishes.
      */
-    public LiveData<List<Song>> getAlbum(Album album) {
+    public LiveData<AlbumAndAllSongs> getAlbum(Album album) {
         Log.d(TAG, "getting songs for: " + album.getName());
         return getAlbum(album.getId());
     }
 
-    public LiveData<List<Song>> getAlbum(String albumId) {
-        return songDao.loadSongsFromAlbumId(albumId);
+    public LiveData<AlbumAndAllSongs> getAlbum(String albumId) {
+        return albumDao.getAlbumWithAllSongs(albumId);
+    }
+
+    public LiveData<ArtistAndAllAlbums> getArtistAndAllAlbums(String artistId) {
+        return artistDao.loadArtistAndAllAlbums(artistId);
     }
 
     public LiveData<String> getSongSuffix(String id) {

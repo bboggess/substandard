@@ -27,7 +27,7 @@ import com.example.substandard.player.client.BaseMediaBrowserAdapter;
  */
 public class MediaPlayerLayout extends LinearLayout {
 
-    private ImageButton playButton;
+    private ImageButton playButtonSmall;
     private ImageButton mediaPlayerPlayButton;
     private ConstraintLayout miniMediaControllerLayout;
     private ConstraintLayout mediaPlayerHeader;
@@ -42,7 +42,7 @@ public class MediaPlayerLayout extends LinearLayout {
     private ImageView albumArtViewSmall;
     private ImageView albumArtViewLarge;
 
-    private MediaControllerCompat controller;
+    // Save this so we can unregister on cleanup
     private MediaControllerCompat.Callback controllerCallback;
 
     private BaseMediaBrowserAdapter mediaBrowserAdapter;
@@ -63,13 +63,11 @@ public class MediaPlayerLayout extends LinearLayout {
         initializeViews();
     }
 
-    public void setController(MediaControllerCompat controller) {
-        if (null != controller) {
+    public void setController() {
+        if (null != mediaBrowserAdapter) {
             controllerCallback = new MediaPlayerControllerCallback();
-            controller.registerCallback(controllerCallback);
+            mediaBrowserAdapter.registerCallback(controllerCallback);
         }
-
-        this.controller = controller;
     }
 
     public void setMediaBrowser(BaseMediaBrowserAdapter browser) {
@@ -77,10 +75,8 @@ public class MediaPlayerLayout extends LinearLayout {
     }
 
     public void disconnectController() {
-        if (null != controller) {
-            controller.unregisterCallback(controllerCallback);
-            controller = null;
-            controllerCallback = null;
+        if (null != mediaBrowserAdapter) {
+            mediaBrowserAdapter.unregisterCallback(controllerCallback);
         }
     }
 
@@ -94,7 +90,7 @@ public class MediaPlayerLayout extends LinearLayout {
         artistNameView = view.findViewById(R.id.artist_name_view);
         mediaPlayerSongTileView = view.findViewById(R.id.song_name_view_media_player);
         mediaPlayerArtistNameView = view.findViewById(R.id.artist_name_view_media_player);
-        playButton = view.findViewById(R.id.play_button);
+        playButtonSmall = view.findViewById(R.id.play_button);
         mediaPlayerPlayButton = view.findViewById(R.id.media_player_play_pause);
         miniMediaControllerLayout = view.findViewById(R.id.mini_media_control_view);
         trackLength = view.findViewById(R.id.current_time);
@@ -103,14 +99,27 @@ public class MediaPlayerLayout extends LinearLayout {
         albumArtViewSmall = view.findViewById(R.id.album_art_view);
         albumArtViewLarge = view.findViewById(R.id.album_art_large);
 
+        // Don't need to keep references to these as they are never updated
+        ImageButton prevTrackButton = view.findViewById(R.id.media_player_prev);
+        ImageButton nextTrackButton = view.findViewById(R.id.media_player_next);
 
-        playButton.setOnClickListener((l) -> {
-            if (mediaState == PlaybackStateCompat.STATE_PLAYING) {
-                mediaBrowserAdapter.getTransportControl().pause();
-            } else if (mediaState == PlaybackStateCompat.STATE_PAUSED){
-                mediaBrowserAdapter.getTransportControl().play();
-            }
-        });
+        // Lambdas for click listeners
+        OnClickListener playPauseListener = (v) -> {
+                if (mediaState == PlaybackStateCompat.STATE_PLAYING) {
+                    mediaBrowserAdapter.getTransportControl().pause();
+                } else if (mediaState == PlaybackStateCompat.STATE_PAUSED){
+                    mediaBrowserAdapter.getTransportControl().play();
+                }
+            };
+        OnClickListener prevTrackListener = (v) ->
+                mediaBrowserAdapter.getTransportControl().skipToPrevious();
+        OnClickListener nextTrackListener = (v) ->
+                mediaBrowserAdapter.getTransportControl().skipToNext();
+
+        playButtonSmall.setOnClickListener(playPauseListener);
+        mediaPlayerPlayButton.setOnClickListener(playPauseListener);
+        prevTrackButton.setOnClickListener(prevTrackListener);
+        nextTrackButton.setOnClickListener(nextTrackListener);
     }
 
     /**
@@ -175,10 +184,10 @@ public class MediaPlayerLayout extends LinearLayout {
 
     private void setPlayPauseButton() {
         if (mediaState == PlaybackStateCompat.STATE_PLAYING) {
-            playButton.setImageDrawable(getContext().getDrawable(R.drawable.exo_controls_pause));
+            playButtonSmall.setImageDrawable(getContext().getDrawable(R.drawable.exo_controls_pause));
             mediaPlayerPlayButton.setImageDrawable(getContext().getDrawable(R.drawable.exo_controls_pause));
         } else {
-            playButton.setImageDrawable(getContext().getDrawable(R.drawable.exo_controls_play));
+            playButtonSmall.setImageDrawable(getContext().getDrawable(R.drawable.exo_controls_play));
             mediaPlayerPlayButton.setImageDrawable(getContext().getDrawable(R.drawable.exo_controls_play));
         }
     }

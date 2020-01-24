@@ -11,20 +11,17 @@ import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
-import com.example.substandard.database.data.Album;
+import com.example.substandard.database.data.AlbumAndAllSongs;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.ui.OnMediaClickListener;
 import com.example.substandard.ui.model.SongListViewModel;
 import com.example.substandard.ui.model.SongListViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
-
-import java.util.List;
 
 public class SongListFragment extends Fragment implements ViewHolderItemClickListener<Song> {
     private static final String TAG = SongListFragment.class.getSimpleName();
@@ -37,14 +34,17 @@ public class SongListFragment extends Fragment implements ViewHolderItemClickLis
 
     private OnMediaClickListener clickListener;
 
-    private Album album;
+    private String albumId;
+    private AlbumAndAllSongs album;
 
-    void setAlbum(Album album) {
-        this.album = album;
-    }
+    public static final String EXTRA_ALBUM_ID_KEY = "albumId";
 
-    public static SongListFragment newInstance() {
-        return new SongListFragment();
+    public static SongListFragment newInstance(String id) {
+        SongListFragment fragment = new SongListFragment();
+        Bundle args = new Bundle();
+        args.putString(EXTRA_ALBUM_ID_KEY, id);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -54,6 +54,7 @@ public class SongListFragment extends Fragment implements ViewHolderItemClickLis
         View rootView = inflater.inflate(R.layout.song_list_fragment, container, false);
         progressBar = rootView.findViewById(R.id.song_view_pb);
 
+        this.albumId = SongListFragmentArgs.fromBundle(getArguments()).getAlbumId();
         setupRecyclerView(rootView);
         setupSongsViewModel();
 
@@ -91,22 +92,21 @@ public class SongListFragment extends Fragment implements ViewHolderItemClickLis
         progressBar.setVisibility(View.VISIBLE);
 
         SongListViewModelFactory factory = InjectorUtils
-                .provideSongListViewModelFactory(getContext(), album.getId());
+                .provideSongListViewModelFactory(getContext(), albumId);
         songsViewModel = new ViewModelProvider(this, factory)
                 .get(SongListViewModel.class);
-        songsViewModel.getSongs().observe(this, new Observer<List<Song>>() {
-            @Override
-            public void onChanged(List<Song> songs) {
-                Log.d(TAG, "fetched albums: " + songs.toString());
-                adapter.setSongs(songs);
+        songsViewModel.getAlbum().observe(this, (album) -> {
+                Log.d(TAG, "fetched albums: " + album.toString());
+                this.album = album;
+                adapter.setSongs(album.getSongs());
                 progressBar.setVisibility(View.INVISIBLE);
-            }
-        });
+
+            });
     }
 
     @Override
     public void onItemClick(Song obj) {
         Log.d(TAG, "clicked on song: " + obj.getTitle());
-        clickListener.onSongClick(obj);
+        clickListener.onSongClick(obj, album);
     }
 }

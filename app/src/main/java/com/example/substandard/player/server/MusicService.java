@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.media.MediaMetadata;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.media.MediaBrowserCompat;
@@ -27,6 +26,7 @@ import com.example.substandard.database.data.Song;
 import com.example.substandard.player.AudioNotificationUtils;
 import com.example.substandard.service.CoverArtDownloadIntentService;
 import com.example.substandard.service.CoverArtResultReceiver;
+import com.example.substandard.utility.MediaMetadataUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,8 +62,14 @@ public class MusicService extends MediaBrowserServiceCompat {
                 MusicService.class.getSimpleName(), mediaButtonReceiver, null);
         callback = new MediaSessionCallback();
         mediaSession.setCallback(callback);
+        mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS);
         setSessionToken(mediaSession.getSessionToken());
         player = new MediaPlayerHolder(this, new MediaPlayerListener());
+
+        // I really don't want this to be null
+        playbackState = new PlaybackStateCompat.Builder()
+                .setState(PlaybackStateCompat.STATE_NONE, 0, 0)
+                .build();
     }
 
     private void registerActionMediaButtons() {
@@ -112,23 +118,21 @@ public class MusicService extends MediaBrowserServiceCompat {
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
             Log.d(TAG, "playing media: " + mediaId);
-            if (null == loadedMedia) {
-                loadMediaFromId(mediaId);
-            }
+            loadMediaFromId(mediaId);
         }
 
         @Override
         public void onPlay() {
             Log.d(TAG, "onPlay called");
-            if (playlist.isEmpty()) {
+            if (playlist.isEmpty() || nowPlaying < 0) {
                 return;
             }
 
             if (null == loadedMedia) {
-                loadMedia();
+                loadNowPlaying();
             }
 
-            player.playFromMedia(loadedMedia);
+//            player.playFromMedia(loadedMedia);
         }
 
         @Override
@@ -146,32 +150,55 @@ public class MusicService extends MediaBrowserServiceCompat {
 
         @Override
         public void onSkipToNext() {
-            nowPlaying = (nowPlaying + 1) % playlist.size();
-            loadedMedia = null;
-            onPlay();
+            skipToPlaylistPosition((nowPlaying + 1) % playlist.size());
         }
 
         @Override
         public void onSkipToPrevious() {
-            nowPlaying = (nowPlaying - 1) % playlist.size();
-            loadedMedia = null;
-            onPlay();
+            skipToPlaylistPosition((nowPlaying - 1) % playlist.size());
         }
 
         @Override
         public void onAddQueueItem(MediaDescriptionCompat description) {
             Log.d(TAG, "adding to play queue");
+            onAddQueueItem(description, playlist.size());
+        }
+
+        @Override
+        public void onAddQueueItem(MediaDescriptionCompat description, int index) {
             MediaSessionCompat.QueueItem track = new MediaSessionCompat.QueueItem(description,
-                    description.hashCode());
-            playlist.add(track);
+                    Long.parseLong(description.getMediaId()));
+            playlist.add(index, track);
             nowPlaying = (nowPlaying < 0) ? 0 : nowPlaying;
             mediaSession.setQueue(playlist);
         }
 
         @Override
+        public void onSkipToQueueItem(long id) {
+            for (MediaSessionCompat.QueueItem item : playlist) {
+                if (item.getQueueId() == id) {
+                    skipToPlaylistPosition(playlist.indexOf(item));
+                    return;
+                }
+            }
+
+            Log.d(TAG, "onSkipToQueueItem: item not found");
+        }
+
+        /**
+         * Plays the QueueItem in a given spot in the queue
+         * @param pos
+         */
+        private void skipToPlaylistPosition(int pos) {
+            nowPlaying = pos;
+            loadedMedia = null;
+            onPlay();
+        }
+
+        @Override
         public void onRemoveQueueItem(MediaDescriptionCompat description) {
             MediaSessionCompat.QueueItem track = new MediaSessionCompat.QueueItem(description,
-                    description.hashCode());
+                    Long.parseLong(description.getMediaId()));
             playlist.remove(track);
             nowPlaying = (playlist.isEmpty()) ? -1 : nowPlaying;
             mediaSession.setQueue(playlist);
@@ -182,12 +209,6 @@ public class MusicService extends MediaBrowserServiceCompat {
             player.seekTo(pos);
         }
 
-        private void loadMedia() {
-            Log.d(TAG, "loading media");
-            MediaSessionCompat.QueueItem toPlay = playlist.get(nowPlaying);
-            String mediaId = toPlay.getDescription().getMediaId();
-        }
-
         private void loadMediaFromId(String id) {
             Log.d(TAG, "loading media: " + id);
             SongPlayRequest request = new SongPlayRequest(id);
@@ -196,6 +217,11 @@ public class MusicService extends MediaBrowserServiceCompat {
 
         void setLoadedMedia(MediaMetadataCompat loadedMedia) {
             this.loadedMedia = loadedMedia;
+        }
+
+        private void loadNowPlaying() {
+            String nowPlayingId = playlist.get(nowPlaying).getDescription().getMediaId();
+            loadMediaFromId(nowPlayingId);
         }
 
         void onReadyToPlayLoadedMedia() {
@@ -236,7 +262,7 @@ public class MusicService extends MediaBrowserServiceCompat {
         @Override
         public void onSuccess(Song song) {
             Log.d(TAG, "loaded song: " + song.getTitle());
-            MediaMetadataCompat metadata = convertSongToMediaMetadata(song);
+            MediaMetadataCompat metadata = MediaMetadataUtils.convertSongToMediaMetadata(song);
             updateMetadata(metadata);
 
             if (!mediaSession.isActive()) {
@@ -249,15 +275,7 @@ public class MusicService extends MediaBrowserServiceCompat {
                     () -> callback.onReadyToPlayLoadedMedia() );
         }
 
-        private MediaMetadataCompat convertSongToMediaMetadata(Song song) {
-            // TODO Song needs a more convenient way of keeping track of album name
-            return metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, song.getId())
-                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, song.getArtistName())
-                    .putString(MediaMetadataCompat.METADATA_KEY_GENRE, song.getGenre())
-                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.getTitle())
-                    .putLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, song.getTrackNum())
-                    .build();
-        }
+
 
         @Override
         public void onError(Throwable e) {

@@ -1,7 +1,6 @@
 package com.example.substandard.ui;
 
-import com.example.substandard.database.data.Album;
-import com.example.substandard.database.data.Artist;
+import com.example.substandard.database.data.AlbumAndAllSongs;
 import com.example.substandard.database.data.Song;
 
 /**
@@ -9,7 +8,7 @@ import com.example.substandard.database.data.Song;
  * songs. These all must be handled differently, no doubt, and so we need three methods.
  */
 public interface OnMediaClickListener {
-    void onArtistClick(Artist artist);
-    void onAlbumClick(Album album);
-    void onSongClick(Song song);
+    // The second argument is needed because the UI should play an entire
+    // album when any song is clicked
+    void onSongClick(Song song, AlbumAndAllSongs album);
 }

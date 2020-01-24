@@ -3,6 +3,7 @@ package com.example.substandard.database.data;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Query;
+import androidx.room.Transaction;
 
 import java.util.List;
 
@@ -19,4 +20,8 @@ public interface ArtistDao extends BaseDao<Artist> {
 
     @Query("SELECT * FROM artists WHERE id = :id")
     LiveData<Artist> loadArtistById(String id);
+
+    @Transaction
+    @Query("SELECT * FROM artists WHERE id = :id")
+    LiveData<ArtistAndAllAlbums> loadArtistAndAllAlbums(String id);
 }

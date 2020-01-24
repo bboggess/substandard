@@ -4,14 +4,17 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
 import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
 import androidx.annotation.NonNull;
 
 import com.example.substandard.player.server.MusicService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -92,7 +95,7 @@ public class BaseMediaBrowserAdapter {
 
     /**
      * This provides the interface for controlling the session's media playback. The returned
-     * TransportControls can be used to play media, control the play queue, stop playback, etc.
+     * TransportControls can be used to play media, navigate the play queue, stop playback, etc.
      * @return null if controller is not yet connected
      */
     public MediaControllerCompat.TransportControls getTransportControl() {
@@ -101,6 +104,80 @@ public class BaseMediaBrowserAdapter {
         }
 
         return controller.getTransportControls();
+    }
+
+    public void addQueueItem(MediaDescriptionCompat media) {
+        if (null != controller) {
+            controller.addQueueItem(media);
+        }
+    }
+
+    public void addQueueItem(MediaMetadataCompat metadata) {
+        addQueueItem(metadata.getDescription());
+    }
+
+    public void addQueueItem(MediaDescriptionCompat media, int index) {
+        if (null != controller) {
+            controller.addQueueItem(media, index);
+        }
+    }
+
+    public void removeQueueItem(MediaDescriptionCompat media) {
+        if (null != controller) {
+            controller.removeQueueItem(media);
+        }
+    }
+
+    public void clearQueue() {
+        if (null != controller && controller.getQueue() != null) {
+            for (MediaSessionCompat.QueueItem queueItem : controller.getQueue()) {
+                controller.removeQueueItem(queueItem.getDescription());
+            }
+        }
+    }
+
+    public MediaMetadataCompat getMetadata() {
+        if (null == controller) {
+            return null;
+        }
+
+        return controller.getMetadata();
+    }
+
+    public List<MediaSessionCompat.QueueItem> getQueue() {
+        if (null == controller) {
+            return new ArrayList<>();
+        }
+
+        return controller.getQueue();
+    }
+
+    public int getRepeatMode() {
+        if (null == controller) {
+            return PlaybackStateCompat.REPEAT_MODE_INVALID;
+        }
+
+        return controller.getRepeatMode();
+    }
+
+    public int getShuffleMode() {
+        if (null == controller) {
+            return PlaybackStateCompat.SHUFFLE_MODE_INVALID;
+        }
+
+        return controller.getShuffleMode();
+    }
+
+    public void registerCallback(MediaControllerCompat.Callback callback) {
+        if (null != controller) {
+            controller.registerCallback(callback);
+        }
+    }
+
+    public void unregisterCallback(MediaControllerCompat.Callback callback) {
+        if (null != controller) {
+            controller.unregisterCallback(callback);
+        }
     }
 
     /**

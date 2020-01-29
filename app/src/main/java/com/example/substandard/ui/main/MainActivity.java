@@ -1,37 +1,36 @@
 package com.example.substandard.ui.main;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.session.MediaControllerCompat;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 
 import com.example.substandard.R;
 import com.example.substandard.database.data.AlbumAndAllSongs;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.player.client.BaseMediaBrowserAdapter;
-import com.example.substandard.service.LibraryRefreshIntentService;
 import com.example.substandard.ui.OnMediaClickListener;
-import com.example.substandard.ui.settings.SettingsActivity;
 import com.example.substandard.utility.MediaMetadataUtils;
 import com.google.android.material.navigation.NavigationView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 public class MainActivity extends AppCompatActivity implements
-        OnMediaClickListener,
-        NavigationView.OnNavigationItemSelectedListener,
-        FragmentManager.OnBackStackChangedListener {
+        OnMediaClickListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -41,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements
     private MediaPlayerLayout mediaPlayerLayout;
 
     private NavHostFragment navHost;
+    private NavController navController;
+    private Toolbar toolbar;
 
     private BaseMediaBrowserAdapter mediaBrowserAdapter;
 
@@ -49,18 +50,16 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setSupportActionBar(findViewById(R.id.main_toolbar));
+        toolbar = findViewById(R.id.main_toolbar);
+        setSupportActionBar(toolbar);
 
         navHost = NavHostFragment.create(R.navigation.nav_graph);
-
 
         // create and show the start screen
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, navHost);
 
-        // set up navigation drawer
         setUpNavigationDrawer();
-        setupNavigationClickListener();
 
         // Initialize view member variables
         mediaPlayerLayout = findViewById(R.id.media_player_layout);
@@ -80,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        getSupportFragmentManager().removeOnBackStackChangedListener(this);
+//        getSupportFragmentManager().removeOnBackStackChangedListener(this);
         mediaBrowserAdapter.onStop();
         mediaPlayerLayout.disconnectController();
         mediaPlayerSlidingPanel.removePanelSlideListener(slidingPanelListener);
@@ -97,21 +96,16 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void setUpNavigationDrawer() {
         drawerLayout = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
-                drawerLayout,
-                R.string.navigation_drawer_open,
-                R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    }
+        navController = Navigation.findNavController(this, R.id.fragment_container);
 
-    /**
-     * Helper method to add click functionality to navigation drawer.
-     */
-    private void setupNavigationClickListener() {
-        NavigationView navigationView = findViewById(R.id.nav_drawer);
-        navigationView.setNavigationItemSelectedListener(this);
+        NavigationView navView = findViewById(R.id.nav_drawer);
+        AppBarConfiguration appBarConfiguration =
+                new AppBarConfiguration.Builder(navController.getGraph())
+                        .setDrawerLayout(drawerLayout)
+                        .build();
+
+        NavigationUI.setupWithNavController(navView, navController);
+        NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
     }
 
     /*
@@ -126,6 +120,12 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.navigation_menu, menu);
+        return true;
     }
 
     @Override
@@ -145,41 +145,14 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                drawerLayout.closeDrawer(GravityCompat.START);
-            } else {
-                drawerLayout.openDrawer(GravityCompat.START);
-            }
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return NavigationUI.onNavDestinationSelected(item, navController)
+                || super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-        switch (menuItem.getItemId()) {
-            case R.id.item_settings:
-                Intent settingsIntent = new Intent(this, SettingsActivity.class);
-                startActivity(settingsIntent);
-                break;
-            case R.id.item_rescan:
-                Intent rescanIntent = new Intent(this, LibraryRefreshIntentService.class);
-                startService(rescanIntent);
-                break;
-            default:
-                break;
-        }
-
-        drawerLayout.closeDrawer(GravityCompat.START);
-        return true;
-    }
 
     @Override
-    public void onBackStackChanged() {
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
+    public boolean onSupportNavigateUp() {
+        return navController.navigateUp() || super.onSupportNavigateUp();
     }
 
     /**

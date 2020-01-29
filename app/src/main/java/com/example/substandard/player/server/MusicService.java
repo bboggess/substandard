@@ -262,7 +262,7 @@ public class MusicService extends MediaBrowserServiceCompat {
         @Override
         public void onSuccess(Song song) {
             Log.d(TAG, "loaded song: " + song.getTitle());
-            MediaMetadataCompat metadata = MediaMetadataUtils.convertSongToMediaMetadata(song);
+            MediaMetadataCompat metadata = MediaMetadataUtils.convertSongToMediaMetadata(song, metadataBuilder);
             updateMetadata(metadata);
 
             if (!mediaSession.isActive()) {

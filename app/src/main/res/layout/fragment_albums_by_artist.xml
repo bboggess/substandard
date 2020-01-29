@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.AlbumsByArtistFragment">
 
     <ProgressBar
@@ -14,5 +15,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_albums_by_artist"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        tools:listitem="@layout/album_list_item"/>
 </FrameLayout>

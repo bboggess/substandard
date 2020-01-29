@@ -2,7 +2,6 @@ package com.example.substandard.ui.settings;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
@@ -20,14 +19,8 @@ public class LoginDialogFragment extends DialogFragment {
 
     private LoginDialogListener listener;
 
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        if (context instanceof LoginDialogListener) {
-            listener = (LoginDialogListener) context;
-        } else {
-            throw new ClassCastException(context.toString() + " must implement LoginDialogListener");
-        }
+    public LoginDialogFragment(LoginDialogListener listener) {
+        this.listener = listener;
     }
 
     @NonNull

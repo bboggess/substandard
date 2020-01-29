@@ -1,33 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     style="@style/Widget.MaterialComponents.CardView"
+    android:layout_width="210dp"
+    android:layout_height="250dp">
+<com.google.android.material.card.MaterialCardView
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="5dp"
-    android:layout_marginBottom="5dp"
-    android:layout_marginLeft="5dp"
-    android:layout_marginRight="5dp"
-    app:cardCornerRadius="4dp"
-    android:elevation="2dp">
+    android:layout_height="match_parent"
+    android:layout_margin="16dp"
+    app:cardCornerRadius="8dp"
+    android:elevation="4dp">
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
                         <com.example.substandard.ui.CoverArtImageView
                             android:id="@+id/cover_art_view"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
+                            android:layout_width="178dp"
+                            android:layout_height="178dp"
                             android:contentDescription="@string/cover_art_description"
                             android:scaleType="centerCrop"
-                            android:layout_marginLeft="1dp"
-                            android:layout_marginRight="1dp"
-                            android:layout_marginTop="1dp"
-                            android:src="@color/primaryColor"/>
+                            android:src="@color/primaryLightColor"/>
 
                         <ProgressBar
                             android:id="@+id/album_cover_pb"
@@ -40,23 +38,26 @@
                     android:id="@+id/album_name_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="2dp"
+                    android:padding="8dp"
                     style="@style/TextAppearance.MaterialComponents.Subtitle1"
                     android:singleLine="true"
                     android:textColor="@color/secondaryTextColor"
                     android:gravity="center_vertical"
-                    android:text="album"/>
+                    tools:text="album"/>
 
                 <TextView
                     android:id="@+id/album_artist_name_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="2dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingBottom="8dp"
                     style="@style/TextAppearance.MaterialComponents.Subtitle2"
                     android:textColor="@color/secondaryTextColor"
                     android:singleLine="true"
                     android:gravity="center_vertical"
-                    android:text="artist"/>
+                    tools:text="artist"/>
 
         </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
+</FrameLayout>

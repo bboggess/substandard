@@ -1,18 +1,22 @@
 package com.example.substandard.ui.settings;
 
 
+import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.EditText;
 
 import androidx.fragment.app.DialogFragment;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 
 import com.example.substandard.R;
+import com.example.substandard.database.network.SubsonicNetworkUtils;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements
        Preference.OnPreferenceClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -46,16 +50,44 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
             }
         }
     }
+
+
+    private class DialogClickListener implements LoginDialogFragment.LoginDialogListener {
+        // TODO Use the Service to do this!
+        @Override
+        public void onDialogPositiveClick(DialogFragment dialog) {
+            if (dialog instanceof LoginDialogFragment) {
+                Dialog view = dialog.getDialog();
+                EditText usernameEditText = view.findViewById(R.id.username_edit_text);
+                EditText passwordEditText = view.findViewById(R.id.password_edit_text);
+                String username = usernameEditText.getText().toString();
+                String password = passwordEditText.getText().toString();
+                String salt = SubsonicNetworkUtils.createSalt();
+                String authToken = SubsonicNetworkUtils.createAuthToken(password, salt);
+
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString(getString(R.string.pref_salt_key), salt);
+                editor.putString(getString(R.string.pref_auth_token_key), authToken);
+                editor.putString(getString(R.string.pref_username_key), username);
+                editor.apply();
+            }
+        }
+
+        @Override
+        public void onDialogNegativeClick(DialogFragment dialog) {
+
+        }
 //
 
-
+    }
     /*
      * If the use clicks on the login setting, pop up a login dialog.
      */
     @Override
     public boolean onPreferenceClick(Preference preference) {
         if (preference.getKey().equals(getString(R.string.pref_login_key))) {
-            DialogFragment loginDialog = new LoginDialogFragment();
+            DialogFragment loginDialog = new LoginDialogFragment(new DialogClickListener());
             loginDialog.show(getFragmentManager(), getString(R.string.login));
         }
 

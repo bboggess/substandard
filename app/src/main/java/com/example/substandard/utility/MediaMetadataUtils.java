@@ -7,12 +7,11 @@ import android.support.v4.media.MediaMetadataCompat;
 import com.example.substandard.database.data.Song;
 
 public class MediaMetadataUtils {
-    private static final MediaMetadataCompat.Builder metadataBuilder = new MediaMetadataCompat.Builder();
     private static final MediaDescriptionCompat.Builder descriptionBuilder = new MediaDescriptionCompat.Builder();
 
-    public static MediaMetadataCompat convertSongToMediaMetadata(Song song) {
+    public static MediaMetadataCompat convertSongToMediaMetadata(Song song,  MediaMetadataCompat.Builder builder) {
         // TODO Song needs a more convenient way of keeping track of album name
-        return metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, song.getId())
+        return builder.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, song.getId())
                 .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, song.getArtistName())
                 .putString(MediaMetadataCompat.METADATA_KEY_GENRE, song.getGenre())
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.getTitle())

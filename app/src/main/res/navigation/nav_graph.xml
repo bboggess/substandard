@@ -49,4 +49,15 @@
             android:name="albumId"
             app:argType="string" />
     </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.substandard.ui.settings.SettingsFragment"
+        android:label="SettingsFragment" />
+    <action
+        android:id="@+id/open_settings_fragment"
+        app:destination="@+id/settingsFragment"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+        app:popExitAnim="@anim/nav_default_pop_exit_anim" />
 </navigation>

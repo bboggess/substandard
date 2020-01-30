@@ -72,11 +72,6 @@ public class SongListFragment extends Fragment implements ViewHolderItemClickLis
         }
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-    }
-
     private void setupRecyclerView(View rootView) {
         recyclerView = rootView.findViewById(R.id.rv_song_view);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());

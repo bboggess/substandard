@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
@@ -19,8 +18,6 @@ import com.example.substandard.database.data.Artist;
 import com.example.substandard.ui.model.ArtistViewModel;
 import com.example.substandard.ui.model.ArtistViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
-
-import java.util.List;
 
 
 /**
@@ -72,13 +69,10 @@ public class ArtistsFragment extends Fragment implements ViewHolderItemClickList
     private void setUpArtistsViewModel() {
         ArtistViewModelFactory factory = InjectorUtils.provideArtistViewModelFactory(getContext());
         artistViewModel = new ViewModelProvider(this, factory).get(ArtistViewModel.class);
-        artistViewModel.getArtists().observe(this, new Observer<List<Artist>>() {
-            @Override
-            public void onChanged(List<Artist> artists) {
+        artistViewModel.getArtists().observe(this, (artists) -> {
                 Log.d(TAG, "updating UI on database change");
                 artistAdapter.setArtists(artists);
-            }
-        });
+            });
     }
 
     @Override
@@ -94,8 +88,10 @@ public class ArtistsFragment extends Fragment implements ViewHolderItemClickList
 
     @Override
     public void onItemClick(Artist artist) {
-//        mListener.onArtistClick(artist);
-        NavDirections directions = ArtistsFragmentDirections.actionMainFragmentToArtistViewFragment(artist.getId());
+        // I am annoyed that I have to pass in the name as well, but otherwise the label
+        // isn't correctly updated
+        NavDirections directions = ArtistsFragmentDirections
+                .actionMainFragmentToArtistViewFragment(artist.getId(), artist.getName());
         Navigation.findNavController(getView()).navigate(directions);
     }
 

@@ -54,7 +54,6 @@ public class MainActivity extends AppCompatActivity implements
         setSupportActionBar(toolbar);
 
         navHost = NavHostFragment.create(R.navigation.nav_graph);
-
         // create and show the start screen
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, navHost);

@@ -2,10 +2,10 @@ package com.example.substandard.ui.main;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -16,9 +16,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.substandard.R;
 import com.example.substandard.player.client.BaseMediaBrowserAdapter;
+import com.example.substandard.ui.model.MediaPlayerViewModel;
+
+import java.util.List;
 
 /**
  * Layout containing the media player used in the main activity. All logic for updating the UI
@@ -29,6 +34,7 @@ public class MediaPlayerLayout extends LinearLayout {
 
     private ImageButton playButtonSmall;
     private ImageButton mediaPlayerPlayButton;
+    private ImageButton playlistButton;
     private ConstraintLayout miniMediaControllerLayout;
     private ConstraintLayout mediaPlayerHeader;
 
@@ -40,13 +46,16 @@ public class MediaPlayerLayout extends LinearLayout {
     private TextView trackLength;
 
     private ImageView albumArtViewSmall;
-    private ImageView albumArtViewLarge;
+
+    private MediaPlayerViewModel viewModel;
 
     // Save this so we can unregister on cleanup
     private MediaControllerCompat.Callback controllerCallback;
 
     private BaseMediaBrowserAdapter mediaBrowserAdapter;
     private int mediaState;
+
+    private boolean isPlaylistVisible;
 
     public MediaPlayerLayout(Context context) {
         super(context);
@@ -80,8 +89,14 @@ public class MediaPlayerLayout extends LinearLayout {
         }
     }
 
+    public void setViewModel(MediaPlayerViewModel viewModel) {
+        this.viewModel = viewModel;
+    }
+
     /**
-     * Loads all views (God there are so many) and sets onClickListeners
+     * Loads all views (God there are so many) and sets onClickListeners. Obviously some
+     * of this should be further delegated to new classes encapsulating the various pieces
+     * of the UI.
      */
     private void initializeViews() {
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -97,20 +112,31 @@ public class MediaPlayerLayout extends LinearLayout {
         trackProgress = view.findViewById(R.id.track_length);
         mediaPlayerHeader = view.findViewById(R.id.media_player_header);
         albumArtViewSmall = view.findViewById(R.id.album_art_view);
-        albumArtViewLarge = view.findViewById(R.id.album_art_large);
+        playlistButton = view.findViewById(R.id.playlist_button);
 
+        setupButtonListeners(view);
+
+        // hacky
+        isPlaylistVisible = true;
+        swapPlaylistFragment();
+    }
+
+    /**
+     * Sets click listeners for all UI buttons
+     * @param view the root view, so we can find buttons by ID
+     */
+    private void setupButtonListeners(View view) {
         // Don't need to keep references to these as they are never updated
         ImageButton prevTrackButton = view.findViewById(R.id.media_player_prev);
         ImageButton nextTrackButton = view.findViewById(R.id.media_player_next);
 
-        // Lambdas for click listeners
         OnClickListener playPauseListener = (v) -> {
-                if (mediaState == PlaybackStateCompat.STATE_PLAYING) {
-                    mediaBrowserAdapter.getTransportControl().pause();
-                } else if (mediaState == PlaybackStateCompat.STATE_PAUSED){
-                    mediaBrowserAdapter.getTransportControl().play();
-                }
-            };
+            if (mediaState == PlaybackStateCompat.STATE_PLAYING) {
+                mediaBrowserAdapter.getTransportControl().pause();
+            } else if (mediaState == PlaybackStateCompat.STATE_PAUSED){
+                mediaBrowserAdapter.getTransportControl().play();
+            }
+        };
         OnClickListener prevTrackListener = (v) ->
                 mediaBrowserAdapter.getTransportControl().skipToPrevious();
         OnClickListener nextTrackListener = (v) ->
@@ -120,11 +146,38 @@ public class MediaPlayerLayout extends LinearLayout {
         mediaPlayerPlayButton.setOnClickListener(playPauseListener);
         prevTrackButton.setOnClickListener(prevTrackListener);
         nextTrackButton.setOnClickListener(nextTrackListener);
+
+        playlistButton.setOnClickListener(v -> {
+            swapPlaylistFragment();
+        });
+    }
+
+    private void swapPlaylistFragment() {
+        // Need the activity to get the fragment manager. Don't think there's a better way?
+        Context context = getContext();
+        if (!(context instanceof MainActivity)) {
+            return;
+        }
+        MainActivity mainActivity = (MainActivity) context;
+
+        FragmentManager manager = mainActivity.getSupportFragmentManager();
+        Fragment fragment;
+        if (isPlaylistVisible) {
+            fragment = AlbumCoverFragment.newInstance();
+            isPlaylistVisible = false;
+        } else {
+            fragment = PlaylistFragment.newInstance();
+            isPlaylistVisible = true;
+        }
+        manager.beginTransaction()
+                .replace(R.id.media_player_fragment_holder, fragment)
+                .commit();
     }
 
     /**
      * Listens for changes in playback and updates the UI accordingly
      */
+    // This method is an absolute mess. Move everything into a ViewModel, please
     private class MediaPlayerControllerCallback extends MediaControllerCompat.Callback {
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
@@ -139,9 +192,7 @@ public class MediaPlayerLayout extends LinearLayout {
                 mediaPlayerSongTileView.setText(songTitle);
                 mediaPlayerArtistNameView.setText(artistName);
                 albumArtViewSmall.setImageBitmap(albumArtBitmap);
-                BitmapDrawable albumArtDrawable = new BitmapDrawable(getResources(), albumArtBitmap);
-                albumArtViewLarge.setBackground(albumArtDrawable);
-
+                viewModel.setAlbumArt(albumArtBitmap);
             } else {
                 // Erase metadata from UI -- nothing is playing!
                 songTitleView.setText("");
@@ -152,8 +203,15 @@ public class MediaPlayerLayout extends LinearLayout {
                 trackProgress.setText(R.string.track_time_default);
                 Drawable transparentDrawable = getContext().getDrawable(android.R.color.transparent);
                 albumArtViewSmall.setImageDrawable(transparentDrawable);
-                albumArtViewLarge.setImageDrawable(transparentDrawable);
+                viewModel.setAlbumArt(null);
             }
+        }
+
+        @Override
+        public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
+            // Update ViewModel
+            super.onQueueChanged(queue);
+            viewModel.setPlaylist(queue);
         }
 
         @Override
@@ -168,16 +226,26 @@ public class MediaPlayerLayout extends LinearLayout {
         }
     }
 
+    /**
+     * Call when the media player is given focus
+     */
     public void onExpanded() {
         miniMediaControllerLayout.setVisibility(View.GONE);
         mediaPlayerHeader.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Call when the media player is closed
+     */
     public void onCollapsed() {
         mediaPlayerHeader.setVisibility(View.INVISIBLE);
         miniMediaControllerLayout.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Sets the alpha value for the mini controller. Useful for fading out as you slide up.
+     * @param alpha
+     */
     void setMiniPlayerAlpha(float alpha) {
         miniMediaControllerLayout.setAlpha(alpha);
     }

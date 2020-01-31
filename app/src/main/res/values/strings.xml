@@ -18,7 +18,10 @@
     <string name="nothing_playing_song" translatable="false">-</string>
     <string name="nothing_playing_artist" translatable="false"> </string>
 
-    <!-- Used in Artist View activity -->
+    <!-- Used in Artists fragment -->
+    <string name="artists">Artists</string>
+
+    <!-- Used in Artist View fragment -->
     <string name="albums">Albums</string>
     <string name="similar_artists">Similar Artists</string>
 
@@ -56,5 +59,6 @@
     <string name="action_sign_in_short">Sign in</string>
     <string name="welcome">"Login successful!"</string>
     <string name="login_failed">"Login failed"</string>
+
 
 </resources>

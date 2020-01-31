@@ -14,6 +14,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
@@ -25,6 +26,8 @@ import com.example.substandard.database.data.AlbumAndAllSongs;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.player.client.BaseMediaBrowserAdapter;
 import com.example.substandard.ui.OnMediaClickListener;
+import com.example.substandard.ui.model.MediaPlayerViewModel;
+import com.example.substandard.ui.model.MediaPlayerViewModelFactory;
 import com.example.substandard.utility.MediaMetadataUtils;
 import com.google.android.material.navigation.NavigationView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -45,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements
 
     private BaseMediaBrowserAdapter mediaBrowserAdapter;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements
         setSupportActionBar(toolbar);
 
         navHost = NavHostFragment.create(R.navigation.nav_graph);
-
         // create and show the start screen
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, navHost);
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements
         mediaBrowserAdapter = new MainActivityAudioBrowser();
         mediaPlayerLayout.setMediaBrowser(mediaBrowserAdapter);
 
+        setupViewModel();
     }
 
     @Override
@@ -89,6 +91,13 @@ public class MainActivity extends AppCompatActivity implements
         // Setup sliding panel
         slidingPanelListener = new MediaPlayerPanelListener();
         mediaPlayerSlidingPanel.addPanelSlideListener(slidingPanelListener);
+    }
+
+
+    private void setupViewModel() {
+        MediaPlayerViewModelFactory factory = new MediaPlayerViewModelFactory();
+        MediaPlayerViewModel viewModel = new ViewModelProvider(this, factory).get(MediaPlayerViewModel.class);
+        mediaPlayerLayout.setViewModel(viewModel);
     }
 
     /**

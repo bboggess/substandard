@@ -75,7 +75,8 @@ public class SimilarArtistsFragment extends AbstractArtistViewFragment implement
 
     @Override
     public void onItemClick(Artist artist) {
-        NavDirections directions = ArtistViewFragmentDirections.actionArtistViewFragmentSelf(artist.getId());
+        NavDirections directions = ArtistViewFragmentDirections
+                .actionArtistViewFragmentSelf(artist.getId(), artist.getName());
         Navigation.findNavController(getView()).navigate(directions);
     }
 

@@ -7,8 +7,8 @@
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.example.substandard.ui.main.ArtistsFragment"
-        android:label="fragment_main"
-        tools:layout="@layout/fragment_artists" >
+        android:label="@string/artists"
+        tools:layout="@layout/fragment_artists">
         <action
             android:id="@+id/action_mainFragment_to_artistViewFragment"
             app:destination="@id/artistViewFragment"
@@ -20,7 +20,7 @@
     <fragment
         android:id="@+id/artistViewFragment"
         android:name="com.example.substandard.ui.main.ArtistViewFragment"
-        android:label="fragment_artist_view"
+        android:label="{artistName}"
         tools:layout="@layout/fragment_artist_view" >
         <action
             android:id="@+id/action_artistViewFragment_to_songListFragment"
@@ -39,14 +39,20 @@
         <argument
             android:name="artistId"
             app:argType="string" />
+        <argument
+            android:name="artistName"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/songListFragment"
         android:name="com.example.substandard.ui.main.SongListFragment"
-        android:label="song_list_fragment"
+        android:label="{albumName}"
         tools:layout="@layout/song_list_fragment" >
         <argument
             android:name="albumId"
+            app:argType="string" />
+        <argument
+            android:name="albumName"
             app:argType="string" />
     </fragment>
     <fragment

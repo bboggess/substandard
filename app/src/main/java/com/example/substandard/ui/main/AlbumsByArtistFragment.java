@@ -92,7 +92,7 @@ public class AlbumsByArtistFragment extends AbstractArtistViewFragment implement
     public void onItemClick(Album album) {
         Log.d(TAG, "clicked on album: " + album.getName());
         NavDirections directions = ArtistViewFragmentDirections
-                .actionArtistViewFragmentToSongListFragment(album.getId());
+                .actionArtistViewFragmentToSongListFragment(album.getId(), album.getName());
         Navigation.findNavController(getView()).navigate(directions);
     }
 }

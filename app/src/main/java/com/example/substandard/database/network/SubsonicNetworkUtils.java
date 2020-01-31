@@ -350,7 +350,7 @@ public class SubsonicNetworkUtils {
     /**
      * Builds a URL formatted for request to Subsonic server.
      * @param request The request we are building a URL to send
-     * @return A fully formed URL that can be authenticated by the server
+     * @return A fully formed URL that can be authenticated by the server, or null if malformed
      */
     private static URL buildUrl(SubsonicServerRequest request) {
         SubsonicUser requestUser = request.getUser();

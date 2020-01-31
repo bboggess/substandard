@@ -21,6 +21,7 @@ public class MediaMetadataUtils {
 
     public static MediaDescriptionCompat convertSongToMediaDescription(Song song) {
         return descriptionBuilder.setMediaId(song.getId())
+                .setTitle(song.getTitle())
                 .build();
     }
 }

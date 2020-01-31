@@ -26,8 +26,8 @@ import com.example.substandard.database.data.AlbumAndAllSongs;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.player.client.BaseMediaBrowserAdapter;
 import com.example.substandard.ui.OnMediaClickListener;
-import com.example.substandard.ui.model.PlaylistViewModel;
-import com.example.substandard.ui.model.PlaylistViewModelFactory;
+import com.example.substandard.ui.model.MediaPlayerViewModel;
+import com.example.substandard.ui.model.MediaPlayerViewModelFactory;
 import com.example.substandard.utility.MediaMetadataUtils;
 import com.google.android.material.navigation.NavigationView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -95,8 +95,8 @@ public class MainActivity extends AppCompatActivity implements
 
 
     private void setupViewModel() {
-        PlaylistViewModelFactory factory = new PlaylistViewModelFactory();
-        PlaylistViewModel viewModel = new ViewModelProvider(this, factory).get(PlaylistViewModel.class);
+        MediaPlayerViewModelFactory factory = new MediaPlayerViewModelFactory();
+        MediaPlayerViewModel viewModel = new ViewModelProvider(this, factory).get(MediaPlayerViewModel.class);
         mediaPlayerLayout.setViewModel(viewModel);
     }
 

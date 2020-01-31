@@ -119,13 +119,6 @@
             android:layout_alignTop="@id/media_player_header"
             android:layout_alignBottom="@id/media_player_controller">
 
-                <com.example.substandard.ui.CoverArtImageView
-                    android:id="@+id/album_art_large"
-                    android:layout_width="300dp"
-                    android:layout_height="300dp"
-                    android:layout_gravity="center_vertical|center_horizontal"
-                    android:scaleType="centerCrop"
-                    tools:src="@color/primaryLightColor" />
         </FrameLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout

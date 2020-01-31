@@ -13,12 +13,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
-import com.example.substandard.ui.model.PlaylistViewModel;
-import com.example.substandard.ui.model.PlaylistViewModelFactory;
+import com.example.substandard.ui.model.MediaPlayerViewModel;
+import com.example.substandard.ui.model.MediaPlayerViewModelFactory;
 
+/**
+ * Fragment which displays and allows editing of the currently playing playlist.
+ */
 public class PlaylistFragment extends Fragment {
 
-    private PlaylistViewModel viewModel;
+    private MediaPlayerViewModel viewModel;
     private RecyclerView recyclerView;
     private PlaylistAdapter adapter;
 
@@ -48,8 +51,8 @@ public class PlaylistFragment extends Fragment {
     }
 
     private void setupViewModel() {
-        PlaylistViewModelFactory factory = new PlaylistViewModelFactory();
-        viewModel = new ViewModelProvider(getActivity(), factory).get(PlaylistViewModel.class);
+        MediaPlayerViewModelFactory factory = new MediaPlayerViewModelFactory();
+        viewModel = new ViewModelProvider(getActivity(), factory).get(MediaPlayerViewModel.class);
         viewModel.getPlaylist().observe(getViewLifecycleOwner(), playlist -> {
             adapter.setQueue(playlist);
         });

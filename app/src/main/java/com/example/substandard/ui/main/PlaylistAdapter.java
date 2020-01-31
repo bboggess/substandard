@@ -17,6 +17,9 @@ import com.example.substandard.R;
 
 import java.util.List;
 
+/**
+ * Adapter for displaying list of songs in playlist fragment
+ */
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder> {
     private static final String TAG = PlaylistAdapter.class.getSimpleName();
 
@@ -42,6 +45,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         MediaDescriptionCompat currentItem = queue.get(position).getDescription();
         Log.d(TAG, "bound view holder: media item " + currentItem.getTitle());
         holder.trackNameView.setText(currentItem.getTitle());
+        // Not currently set up to support this. Oops.
 //        holder.albumCoverView.setImageBitmap(currentItem.getIconBitmap());
     }
 

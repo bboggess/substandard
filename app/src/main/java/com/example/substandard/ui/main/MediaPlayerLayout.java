@@ -10,7 +10,6 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -50,7 +49,6 @@ public class MediaPlayerLayout extends LinearLayout {
 
     private MediaPlayerViewModel viewModel;
 
-    private FrameLayout fragmentContainer;
     // Save this so we can unregister on cleanup
     private MediaControllerCompat.Callback controllerCallback;
 

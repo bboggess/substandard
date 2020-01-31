@@ -63,7 +63,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -73,7 +73,6 @@
             android:id="@+id/media_player_header"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_alignParentTop="true"
             android:visibility="invisible"
             android:alpha="0.7">
 
@@ -112,20 +111,18 @@
 
         <FrameLayout
             android:id="@+id/media_player_fragment_holder"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignTop="@id/media_player_header"
-            android:layout_alignBottom="@id/media_player_controller">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="5">
 
         </FrameLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="85dp"
-            android:layout_alignParentBottom="true"
             android:id="@+id/media_player_controller"
+            android:layout_gravity="bottom"
             android:alpha="0.7">
             <SeekBar
                 android:id="@+id/seek_bar"
@@ -190,5 +187,5 @@
                 android:background="@android:color/transparent"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </RelativeLayout>
+    </LinearLayout>
 </LinearLayout>

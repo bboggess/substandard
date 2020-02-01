@@ -1,4 +1,4 @@
-package com.example.substandard.ui.main;
+package com.example.substandard.ui.mediaplayer;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;

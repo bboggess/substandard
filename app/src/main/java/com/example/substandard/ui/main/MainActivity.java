@@ -26,6 +26,7 @@ import com.example.substandard.database.data.AlbumAndAllSongs;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.player.client.BaseMediaBrowserAdapter;
 import com.example.substandard.ui.OnMediaClickListener;
+import com.example.substandard.ui.mediaplayer.MediaPlayerLayout;
 import com.example.substandard.ui.model.MediaPlayerViewModel;
 import com.example.substandard.ui.model.MediaPlayerViewModelFactory;
 import com.example.substandard.utility.MediaMetadataUtils;

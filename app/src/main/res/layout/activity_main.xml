@@ -37,14 +37,14 @@
                 app:navGraph="@navigation/nav_graph"/>
         </FrameLayout>
 
-        <com.example.substandard.ui.main.MediaPlayerLayout
+        <com.example.substandard.ui.mediaplayer.MediaPlayerLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center|top"
             android:id="@+id/media_player_layout" >
 
-        </com.example.substandard.ui.main.MediaPlayerLayout>
+        </com.example.substandard.ui.mediaplayer.MediaPlayerLayout>
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
 

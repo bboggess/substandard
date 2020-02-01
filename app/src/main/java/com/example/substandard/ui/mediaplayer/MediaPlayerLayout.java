@@ -1,4 +1,4 @@
-package com.example.substandard.ui.main;
+package com.example.substandard.ui.mediaplayer;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -21,6 +21,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.example.substandard.R;
 import com.example.substandard.player.client.BaseMediaBrowserAdapter;
+import com.example.substandard.ui.main.MainActivity;
 import com.example.substandard.ui.model.MediaPlayerViewModel;
 
 import java.util.List;
@@ -246,7 +247,7 @@ public class MediaPlayerLayout extends LinearLayout {
      * Sets the alpha value for the mini controller. Useful for fading out as you slide up.
      * @param alpha
      */
-    void setMiniPlayerAlpha(float alpha) {
+    public void setMiniPlayerAlpha(float alpha) {
         miniMediaControllerLayout.setAlpha(alpha);
     }
 

@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
+ * An LRU disk cache to be used with Bitmaps. Use getInstance() to access.
  *
  * I learned about this from the example linked at
  * https://developer.android.com/topic/performance/graphics/cache-bitmap
@@ -53,9 +54,12 @@ public class BitmapDiskCache {
     private final long maxSize;
     private long size;
     private final File journalFile;
+    private final File cacheDirectory;
     private FileWriter journalWriter;
 
-    /**
+    private static BitmapDiskCache instance;
+
+    /*
      * Used to clear up cache space on a separate thread when we get past
      * the max space. It makes zero sense to make the user wait for space
      * to be cleared before having the new file inserted.
@@ -74,38 +78,81 @@ public class BitmapDiskCache {
         this.maxSize = maxSize;
         // .75f is default, but you can't just pass in initial capacity and accessOrder...
         entries = new LinkedHashMap<>(0, .75f, true);
-        journalFile = new File(cacheDirectory, JOURNAL);
+        journalFile = new File(cacheDirectory.getAbsolutePath() + "/" + JOURNAL);
+        this.cacheDirectory = cacheDirectory;
     }
 
-    public static BitmapDiskCache getCache(File cacheDirectory, long maxSize) throws IOException {
+    /**
+     * Only one instance of the cache is kept to avoid issues with thread access.
+     * @param cacheDirectory location on disk to cache files
+     * @param maxSize max space given of the cache. Will delete files based on least recent
+     *                access once the space used exceeds maxSize
+     * @return
+     * @throws IOException
+     */
+    public synchronized static BitmapDiskCache getCache(File cacheDirectory, long maxSize) throws IOException {
         Log.d(TAG, "Getting cache");
-        BitmapDiskCache cache = new BitmapDiskCache(maxSize, cacheDirectory);
-        if (cache.journalFile.exists()) {
-            cache.readJournal();
-            cache.processJournal();
-            cache.journalWriter = new FileWriter(cache.journalFile);
-        } else {
-            cache.journalFile.createNewFile();
+        if (null == instance) {
+            instance = new BitmapDiskCache(maxSize, cacheDirectory);
+            instance.loadJournal();
         }
 
-        return cache;
+        return instance;
     }
+
+    /**
+     * If the journal file already exists, read from it to initialize entries. If not, or if
+     * the journal is corrupt, set up a fresh directory.
+     * @throws IOException
+     */
+    private void loadJournal() throws IOException {
+        if (journalFile.exists()) {
+            Log.d(TAG, "cache journal found");
+            try {
+                readJournal();
+                processJournal();
+            } catch (IOException e) {
+                // This means journal is corrupt. Just kill everything
+                e.printStackTrace();
+                delete();
+                initializeCacheDirectory();
+            } finally {
+                journalWriter = new FileWriter(instance.journalFile);
+            }
+        } else {
+            Log.d(TAG, "no cache journal found");
+            initializeCacheDirectory();
+        }
+    }
+
+    /**
+     * Sets up a fresh cache directory, with a blank journal file.
+     * @throws IOException
+     */
+    private void initializeCacheDirectory() throws IOException {
+        cacheDirectory.mkdirs();
+        journalFile.createNewFile();
+        journalWriter = new FileWriter(instance.journalFile);
+    }
+
 
     /**
      * Literally just reconstructs the entries map from the journal file, line by line.
      */
-    private void readJournal() {
+    private void readJournal() throws IOException {
         Log.d(TAG, "reading cache journal");
-        try (BufferedReader reader = new BufferedReader(new FileReader(journalFile))) {
-            String currentLine;
-            while (null != (currentLine = reader.readLine())) {
-                readJournalLine(currentLine);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        BufferedReader reader = new BufferedReader(new FileReader(journalFile));
+        String currentLine;
+        while (null != (currentLine = reader.readLine())) {
+            readJournalLine(currentLine);
         }
     }
 
+    /**
+     * Reads a line from the journal and adds it to the entry list.
+     * @param line
+     * @throws IOException File is corrupted
+     */
     private void readJournalLine(String line) throws IOException {
         final String errorMessage = "unexpected journal line: " + line;
 
@@ -143,9 +190,15 @@ public class BitmapDiskCache {
         }
     }
 
+    /**
+     * Add an image to the cache
+     * @param key
+     * @param bitmap
+     * @throws IOException
+     */
     public synchronized void put(String key, Bitmap bitmap) throws IOException {
-        Log.d(TAG, "adding item to cache");
         String filename = getImageFilename(key);
+        Log.d(TAG, "adding item to cache: " + filename);
         try (FileOutputStream outputStream = new FileOutputStream(filename)) {
             bitmap.compress(IMAGE_FORMAT, IMAGE_QUALITY, outputStream);
         } catch (IOException e) {
@@ -160,11 +213,13 @@ public class BitmapDiskCache {
         size += bitmapSize;
         writeToJournal(entry, CREATE);
 
-        cacheCleanService.submit(cacheCleanCallable);
+        if (size > maxSize) {
+            cacheCleanService.submit(cacheCleanCallable);
+        }
     }
 
     private String getImageFilename(String key) {
-        return key + FILE_EXTENSION;
+        return cacheDirectory.getAbsolutePath() + "/" + key + FILE_EXTENSION;
     }
 
     // It is ridiculous to me that this isn't a LinkedHashMap method...
@@ -177,22 +232,45 @@ public class BitmapDiskCache {
         return oldestKey;
     }
 
+    /**
+     * Removes the file that was least recently accessed
+     * @throws IOException
+     */
     private void removeOldest() throws IOException {
         removeEntry(getOldestKey());
     }
 
+    /**
+     * Deletes file with given key from the cache
+     * @param key
+     * @throws IOException
+     */
     private synchronized void removeEntry(String key) throws IOException {
         Log.d(TAG, "removing entry from cache");
         Entry toRemove = entries.get(key);
         entries.remove(key);
         size -= toRemove.getSize();
+
+        new File(getImageFilename(key)).delete();
         writeToJournal(toRemove, REMOVE);
     }
 
+    /**
+     * Use this to check whether the given image is stored locally.
+     * @param key
+     * @return
+     */
     public boolean contains(String key) {
         return entries.containsKey(key);
     }
 
+    /**
+     * Load the cached bitmap from the disk. You should check with contains
+     * before calling this.
+     * @param key
+     * @return
+     * @throws IOException
+     */
     public synchronized Bitmap get(String key) throws IOException {
         Log.d(TAG, "retrieving image from cache");
         Entry entry = entries.get(key);
@@ -204,7 +282,6 @@ public class BitmapDiskCache {
         if (null == entry) {
             return null;
         }
-
         String filename = getImageFilename(entry.getId());
         return BitmapFactory.decodeFile(filename);
     }
@@ -216,9 +293,15 @@ public class BitmapDiskCache {
         }
     }
 
+    /**
+     * Log an action into the journal
+     * @param entry
+     * @param action Must be one of CREATE, READ, or REMOVE. If CREATE, also must supply a file size.
+     * @throws IOException
+     */
     private synchronized void writeToJournal(Entry entry, String action) throws IOException {
         Log.d(TAG, "writing to cache journal");
-        if (!CREATE.equals(action) || !READ.equals(action) || !REMOVE.equals(action)){
+        if (!CREATE.equals(action) && !READ.equals(action) && !REMOVE.equals(action)){
             throw new IllegalArgumentException("Not a valid journal entry: " +  action);
         }
 
@@ -231,7 +314,41 @@ public class BitmapDiskCache {
             toWrite += " " + entry.getSize();
         }
 
-        journalWriter.write(toWrite);
+        journalWriter.write(toWrite + '\n');
+        journalWriter.flush();
+    }
+
+    /**
+     * Deletes everything in the cache, e.g. if the journal is corrupt.
+     * @throws IOException
+     */
+    private void delete() throws IOException {
+        close();
+        clearDirectory(cacheDirectory);
+    }
+
+    /**
+     * Deletes all files in the directory, and then removes the directory
+     * @param directory directory to delete
+     */
+    private void clearDirectory(File directory) {
+        for (File file : directory.listFiles()) {
+            file.delete();
+        }
+
+        directory.delete();
+    }
+
+    /**
+     * Closes all open file operations.
+     * @throws IOException
+     */
+    private void close() throws IOException {
+        if (null != journalWriter) {
+            journalWriter.close();
+        }
+
+        journalWriter = null;
     }
 
     /**

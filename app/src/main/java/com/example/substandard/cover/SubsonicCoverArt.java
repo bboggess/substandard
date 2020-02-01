@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.example.substandard.AppExecutors;
 import com.example.substandard.database.network.SubsonicNetworkUtils;
 
 import java.io.IOException;
@@ -38,7 +39,13 @@ public class SubsonicCoverArt extends CoverArt {
         SubsonicNetworkUtils.SubsonicUser requestUser = SubsonicNetworkUtils
                 .getSubsonicUserFromPreferences(context);
         Bitmap toReturn = SubsonicNetworkUtils.getCoverArt(getUrl(), requestUser);
-        CacheManager.getInstance(context).addBitmapToCache(getUrl(), toReturn);
+        AppExecutors.getInstance().diskIO().execute(() -> {
+            try {
+                CacheManager.getInstance(context).addBitmapToCache(getUrl(), toReturn);
+            } catch (IOException e) {
+                Log.d(TAG, "failed to write to cache:  " + getUrl());
+            }
+        });
         return toReturn;
     }
 

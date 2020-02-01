@@ -8,7 +8,8 @@ import android.os.ResultReceiver;
 
 import androidx.annotation.Nullable;
 
-import com.example.substandard.database.network.SubsonicNetworkUtils;
+import com.example.substandard.cover.CacheManager;
+import com.example.substandard.cover.SubsonicCoverArt;
 
 import java.io.IOException;
 
@@ -41,14 +42,19 @@ public class CoverArtDownloadIntentService extends IntentService {
     protected void onHandleIntent(@Nullable Intent intent) {
         String path = intent.getStringExtra(IMAGE_PATH_EXTRA_KEY);
         ResultReceiver resultReceiver = intent.getParcelableExtra(RESULT_RECEIVER_EXTRA_KEY);
-        SubsonicNetworkUtils.SubsonicUser requestUser = SubsonicNetworkUtils
-                .getSubsonicUserFromPreferences(getApplicationContext());
 
         Bundle args = new Bundle();
         // We try to download the image. If successful, place Bitmap in the Bundle and
         // send to receiver. Else, send error message.
         try {
-            Bitmap albumCover = SubsonicNetworkUtils.getCoverArt(path, requestUser);
+            Bitmap albumCover;
+            CacheManager cache = CacheManager.getInstance(this);
+            if (cache.isBitmapInCache(path)) {
+                albumCover = cache.getBitmapFromCache(path);
+            } else {
+                SubsonicCoverArt onlineArt = new SubsonicCoverArt(path);
+                albumCover =  onlineArt.download(this);
+            }
             args.putParcelable(BITMAP_EXTRA_KEY, albumCover);
             resultReceiver.send(STATUS_SUCCESS, args);
         } catch (IOException e) {

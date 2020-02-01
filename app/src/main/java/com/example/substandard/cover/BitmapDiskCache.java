@@ -2,6 +2,7 @@ package com.example.substandard.cover;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -22,6 +23,8 @@ import java.util.concurrent.Executors;
  * https://developer.android.com/topic/performance/graphics/cache-bitmap
  */
 public class BitmapDiskCache {
+    private static final String TAG = BitmapDiskCache.class.getSimpleName();
+
     private static final String JOURNAL = "journal";
     private static final String READ = "READ";
     private static final String CREATE = "CREATE";
@@ -75,6 +78,7 @@ public class BitmapDiskCache {
     }
 
     public static BitmapDiskCache getCache(File cacheDirectory, long maxSize) throws IOException {
+        Log.d(TAG, "Getting cache");
         BitmapDiskCache cache = new BitmapDiskCache(maxSize, cacheDirectory);
         if (cache.journalFile.exists()) {
             cache.readJournal();
@@ -91,6 +95,7 @@ public class BitmapDiskCache {
      * Literally just reconstructs the entries map from the journal file, line by line.
      */
     private void readJournal() {
+        Log.d(TAG, "reading cache journal");
         try (BufferedReader reader = new BufferedReader(new FileReader(journalFile))) {
             String currentLine;
             while (null != (currentLine = reader.readLine())) {
@@ -139,6 +144,7 @@ public class BitmapDiskCache {
     }
 
     public synchronized void put(String key, Bitmap bitmap) throws IOException {
+        Log.d(TAG, "adding item to cache");
         String filename = getImageFilename(key);
         try (FileOutputStream outputStream = new FileOutputStream(filename)) {
             bitmap.compress(IMAGE_FORMAT, IMAGE_QUALITY, outputStream);
@@ -176,6 +182,7 @@ public class BitmapDiskCache {
     }
 
     private synchronized void removeEntry(String key) throws IOException {
+        Log.d(TAG, "removing entry from cache");
         Entry toRemove = entries.get(key);
         entries.remove(key);
         size -= toRemove.getSize();
@@ -187,6 +194,7 @@ public class BitmapDiskCache {
     }
 
     public synchronized Bitmap get(String key) throws IOException {
+        Log.d(TAG, "retrieving image from cache");
         Entry entry = entries.get(key);
         writeToJournal(entry, READ);
         return loadImageFromDisk(entry);
@@ -202,12 +210,14 @@ public class BitmapDiskCache {
     }
 
     private void clearCacheSpace() throws IOException {
+        Log.d(TAG, "making room in cache");
         while (size > maxSize) {
             removeOldest();
         }
     }
 
-    private synchronized  void writeToJournal(Entry entry, String action) throws IOException {
+    private synchronized void writeToJournal(Entry entry, String action) throws IOException {
+        Log.d(TAG, "writing to cache journal");
         if (!CREATE.equals(action) || !READ.equals(action) || !REMOVE.equals(action)){
             throw new IllegalArgumentException("Not a valid journal entry: " +  action);
         }

@@ -1,17 +1,19 @@
 package com.example.substandard.cover;
 
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
+import android.graphics.Bitmap;
+import android.util.Log;
 
-import com.example.substandard.service.CoverArtDownloadIntentService;
-import com.example.substandard.service.CoverArtResultReceiver;
+import com.example.substandard.database.network.SubsonicNetworkUtils;
+
+import java.io.IOException;
 
 /**
  * Represents cover art which exists on the server, and not on the local disk.
  */
-public class SubsonicCoverArt extends CoverArt implements CoverArtResultReceiver.CoverArtReceiver {
+public class SubsonicCoverArt extends CoverArt {
+    private static final String TAG = SubsonicCoverArt.class.getSimpleName();
+    private String path;
     @Override
     public boolean isOffline() {
         return false;
@@ -19,28 +21,25 @@ public class SubsonicCoverArt extends CoverArt implements CoverArtResultReceiver
 
     @Override
     public String getUrl() {
-        return null;
+        return path;
+    }
+
+    public SubsonicCoverArt(String path) {
+        this.path = path;
     }
 
     /**
-     * An online cover art must be downloaded to be used in the application.
+     * An online cover art must be downloaded to be used in the application. Do this
+     * off of the main thread, please.
      * @param context
      */
-    public void download(Context context) {
-        CoverArtResultReceiver resultReceiver = new CoverArtResultReceiver(new Handler());
-        resultReceiver.setReceiver(this);
-
-        Intent coverArtIntent = new Intent(context, CoverArtDownloadIntentService.class);
-        coverArtIntent.putExtra(CoverArtDownloadIntentService.IMAGE_PATH_EXTRA_KEY, getUrl());
-        coverArtIntent.putExtra(CoverArtDownloadIntentService.RESULT_RECEIVER_EXTRA_KEY, resultReceiver);
-        context.startService(coverArtIntent);
+    public Bitmap download(Context context) throws IOException {
+        Log.d(TAG, "downloading coverArt: " + getUrl());
+        SubsonicNetworkUtils.SubsonicUser requestUser = SubsonicNetworkUtils
+                .getSubsonicUserFromPreferences(context);
+        Bitmap toReturn = SubsonicNetworkUtils.getCoverArt(getUrl(), requestUser);
+        CacheManager.getInstance(context).addBitmapToCache(getUrl(), toReturn);
+        return toReturn;
     }
 
-    @Override
-    public void onReceiveResult(int resultCode, Bundle resultData) {
-        if (resultCode == CoverArtDownloadIntentService.STATUS_SUCCESS) {
-            setImage(resultData.getParcelable(CoverArtDownloadIntentService.BITMAP_EXTRA_KEY));
-            // TODO save to disk and register with cache manager
-        }
-    }
 }

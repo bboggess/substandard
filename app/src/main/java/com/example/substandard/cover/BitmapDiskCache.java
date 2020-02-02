@@ -199,10 +199,6 @@ public class BitmapDiskCache {
      * @throws IOException
      */
     public synchronized void put(String key, @NonNull Bitmap bitmap) throws IOException {
-        if (null == bitmap) {
-            throw new IllegalArgumentException();
-        }
-
         String filename = getImageFilename(key);
         Log.d(TAG, "adding item to cache: " + filename);
         try (FileOutputStream outputStream = new FileOutputStream(filename)) {
@@ -254,6 +250,9 @@ public class BitmapDiskCache {
     private synchronized void removeEntry(String key) throws IOException {
         Log.d(TAG, "removing entry from cache");
         Entry toRemove = entries.get(key);
+        if (null == toRemove) {
+            return;
+        }
         entries.remove(key);
         size -= toRemove.getSize();
 
@@ -387,7 +386,7 @@ public class BitmapDiskCache {
 
         @Override
         public boolean equals(@Nullable Object obj) {
-            if (null == obj || null == id || !(obj instanceof Entry)) {
+            if (null == id || !(obj instanceof Entry)) {
                 return false;
             }
 

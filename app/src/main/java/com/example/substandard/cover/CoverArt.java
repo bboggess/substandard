@@ -2,6 +2,7 @@ package com.example.substandard.cover;
 
 import android.graphics.Bitmap;
 
+// NOTE: this may not be needed due to shifting design
 public abstract class CoverArt {
     private Bitmap image;
 

@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.BufferedReader;
@@ -117,7 +118,7 @@ public class BitmapDiskCache {
                 delete();
                 initializeCacheDirectory();
             } finally {
-                journalWriter = new FileWriter(instance.journalFile);
+                journalWriter = new FileWriter(instance.journalFile, true);
             }
         } else {
             Log.d(TAG, "no cache journal found");
@@ -132,7 +133,8 @@ public class BitmapDiskCache {
     private void initializeCacheDirectory() throws IOException {
         cacheDirectory.mkdirs();
         journalFile.createNewFile();
-        journalWriter = new FileWriter(instance.journalFile);
+        journalWriter = new FileWriter(instance.journalFile, true);
+        entries.clear();
     }
 
 
@@ -196,7 +198,11 @@ public class BitmapDiskCache {
      * @param bitmap
      * @throws IOException
      */
-    public synchronized void put(String key, Bitmap bitmap) throws IOException {
+    public synchronized void put(String key, @NonNull Bitmap bitmap) throws IOException {
+        if (null == bitmap) {
+            throw new IllegalArgumentException();
+        }
+
         String filename = getImageFilename(key);
         Log.d(TAG, "adding item to cache: " + filename);
         try (FileOutputStream outputStream = new FileOutputStream(filename)) {
@@ -208,7 +214,7 @@ public class BitmapDiskCache {
 
         long bitmapSize = bitmap.getByteCount();
 
-        Entry entry = new Entry(key);
+        Entry entry = new Entry(key, bitmapSize);
         entries.put(key, entry);
         size += bitmapSize;
         writeToJournal(entry, CREATE);
@@ -306,11 +312,11 @@ public class BitmapDiskCache {
         }
 
         if (null == journalWriter) {
-            journalWriter = new FileWriter(journalFile);
+            journalWriter = new FileWriter(journalFile, true);
         }
 
         String toWrite = action + " " + entry.getId();
-        if (CREATE.equals(toWrite)) {
+        if (CREATE.equals(action)) {
             toWrite += " " + entry.getSize();
         }
 
@@ -360,6 +366,11 @@ public class BitmapDiskCache {
 
         public Entry(String id) {
             this.id = id;
+        }
+
+        public Entry(String id, long size) {
+            this.id = id;
+            this.size = size;
         }
 
         public String getId() {

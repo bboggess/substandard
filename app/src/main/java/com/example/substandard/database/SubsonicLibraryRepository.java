@@ -18,6 +18,7 @@ import com.example.substandard.database.data.SongDao;
 import com.example.substandard.database.network.SubsonicNetworkDataSource;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
@@ -228,7 +229,7 @@ public class SubsonicLibraryRepository {
      * @param id
      * @return URL from which to stream
      */
-    public URL streamSong(String id) {
+    public URL streamSong(String id) throws MalformedURLException {
         return dataSource.getStreamUrl(id);
     }
 

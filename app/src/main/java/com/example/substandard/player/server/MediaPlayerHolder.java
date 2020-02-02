@@ -22,6 +22,7 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 
@@ -73,7 +74,13 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
     public void playFromMedia(MediaMetadataCompat metadata) {
         String id = metadata.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID);
         LocalMusicLibrary library = LocalMusicLibrary.getInstance(context);
-        playFromUrl(library.getStream(id));
+        try {
+            playFromUrl(library.getStream(id));
+        } catch (MalformedURLException e) {
+            Log.d(TAG, "unable to download media: "
+                    + metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
+            e.printStackTrace();
+        }
     }
 
     private void playFromUrl(URL url) {

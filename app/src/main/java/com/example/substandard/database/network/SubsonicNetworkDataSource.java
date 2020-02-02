@@ -18,6 +18,7 @@ import org.json.JSONException;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +49,7 @@ public class SubsonicNetworkDataSource {
     }
 
     private final AppExecutors executors;
-    private final SubsonicNetworkUtils.SubsonicUser user;
+    private final SubsonicUser user;
 
     private SubsonicNetworkDataSource(Context context, AppExecutors executors) {
         this.context = context;
@@ -315,7 +316,7 @@ public class SubsonicNetworkDataSource {
         return fetchAlbum(album.getId());
     }
 
-    public LiveData<Boolean> authenticateUser(final SubsonicNetworkUtils.SubsonicUser user) {
+    public LiveData<Boolean> authenticateUser(final SubsonicUser user) {
         final MutableLiveData<Boolean> isSuccessful = new MutableLiveData<>();
         AppExecutors.getInstance().networkIo().execute(new Runnable() {
             @Override
@@ -338,12 +339,17 @@ public class SubsonicNetworkDataSource {
             @Override
             public void run() {
                 DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-                SubsonicNetworkUtils.downloadSong(id, toWrite, downloadManager, user);
+                try {
+                    SubsonicNetworkUtils.downloadSong(id, toWrite, downloadManager, user);
+                } catch (MalformedURLException e) {
+                    Log.d(TAG, "failed to download file: " + id);
+                    e.printStackTrace();
+                }
             }
         });
     }
 
-    public URL getStreamUrl(String songId) {
+    public URL getStreamUrl(String songId) throws MalformedURLException{
         return SubsonicNetworkUtils.getStream(songId, user);
     }
 

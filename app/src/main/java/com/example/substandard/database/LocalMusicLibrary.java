@@ -7,6 +7,7 @@ import com.example.substandard.database.data.Song;
 import com.example.substandard.utility.InjectorUtils;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import io.reactivex.Scheduler;
@@ -57,7 +58,7 @@ public class LocalMusicLibrary {
         return ROOT;
     }
 
-    public URL getStream(String id) {
+    public URL getStream(String id) throws MalformedURLException {
         return repository.streamSong(id);
     }
 

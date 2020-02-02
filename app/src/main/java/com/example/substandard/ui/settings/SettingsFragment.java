@@ -12,11 +12,11 @@ import androidx.preference.CheckBoxPreference;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 
 import com.example.substandard.R;
-import com.example.substandard.database.network.SubsonicNetworkUtils;
+import com.example.substandard.database.network.SubsonicUser;
+import com.example.substandard.utility.SubstandardPreferences;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements
        Preference.OnPreferenceClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -62,15 +62,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                 EditText passwordEditText = view.findViewById(R.id.password_edit_text);
                 String username = usernameEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
-                String salt = SubsonicNetworkUtils.createSalt();
-                String authToken = SubsonicNetworkUtils.createAuthToken(password, salt);
-
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString(getString(R.string.pref_salt_key), salt);
-                editor.putString(getString(R.string.pref_auth_token_key), authToken);
-                editor.putString(getString(R.string.pref_username_key), username);
-                editor.apply();
+                String prefServer = SubstandardPreferences.getPreferredServerAddress(getContext());
+                SubsonicUser user = new SubsonicUser(prefServer, username, password);
+                SubstandardPreferences.writePreferredUser(getContext(), user);
             }
         }
 

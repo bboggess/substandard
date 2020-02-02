@@ -8,6 +8,7 @@ import android.os.ResultReceiver;
 import androidx.annotation.Nullable;
 
 import com.example.substandard.database.network.SubsonicNetworkUtils;
+import com.example.substandard.database.network.SubsonicUser;
 import com.example.substandard.utility.SubstandardPreferences;
 
 /**
@@ -43,12 +44,12 @@ public class LoginIntentService extends IntentService {
      * @param intent Intent that was used to start this service
      * @return SubsonicUser with all required info for login
      */
-    private SubsonicNetworkUtils.SubsonicUser getUserFromIntent(Intent intent) {
+    private SubsonicUser getUserFromIntent(Intent intent) {
         String username = intent.getStringExtra(USERNAME_EXTRA_KEY);
         String server = intent.getStringExtra(SERVER_EXTRA_KEY);
         String password = intent.getStringExtra(PASSWORD_EXTRA_KEY);
 
-        return new SubsonicNetworkUtils.SubsonicUser(server, username, password);
+        return new SubsonicUser(server, username, password);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class LoginIntentService extends IntentService {
         // used to alert UI of the result of login attempt
         ResultReceiver resultReceiver = intent.getParcelableExtra(RECEIVER_EXTRA_KEY);
 
-        SubsonicNetworkUtils.SubsonicUser user = getUserFromIntent(intent);
+        SubsonicUser user = getUserFromIntent(intent);
         boolean loginSuccessful = SubsonicNetworkUtils.authenticate(user);
 
         // the ResultReceiver requires that we pass in an argument Bundle

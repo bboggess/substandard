@@ -7,7 +7,7 @@ import android.util.Log;
 import androidx.preference.PreferenceManager;
 
 import com.example.substandard.R;
-import com.example.substandard.database.network.SubsonicNetworkUtils;
+import com.example.substandard.database.network.SubsonicUser;
 
 /**
  * Helper class for interacting with SharedPreferences
@@ -84,7 +84,7 @@ public class SubstandardPreferences {
      * @param context
      * @param user
      */
-    public static void writePreferredUser(Context context, SubsonicNetworkUtils.SubsonicUser user) {
+    public static void writePreferredUser(Context context, SubsonicUser user) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(context.getString(R.string.pref_salt_key), user.getSalt());

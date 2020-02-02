@@ -14,9 +14,14 @@ import com.example.substandard.cover.SubsonicCoverArt;
 import java.io.IOException;
 
 /**
- * IntentService to download album cover from the server. You must pass in a CoverArtResultReceiver
- * and the path used to request the album cover to the Intent. E.g. call getAlbumCover() on your
- * Album object and send that to the Intent.
+ * IntentService to obtain the image. As of now, this does not necessarily mean downloading
+ * from the Subsonic server. Once downloaded, the cover will be cached, and the service will
+ * decide whether to get the image locally or remotely. As the user, this distinction doesn't
+ * matter to you.
+ *
+ * To use this, you need to register a receiver. There are two required extras: a string
+ * with the ID of the album art, and the result receiver. The loaded album art Bitmap will be
+ * stored as an extra in the result receiver.
  */
 public class CoverArtDownloadIntentService extends IntentService {
     private static final String TAG = CoverArtDownloadIntentService.class.getSimpleName();
@@ -44,7 +49,7 @@ public class CoverArtDownloadIntentService extends IntentService {
         ResultReceiver resultReceiver = intent.getParcelableExtra(RESULT_RECEIVER_EXTRA_KEY);
 
         Bundle args = new Bundle();
-        // We try to download the image. If successful, place Bitmap in the Bundle and
+        // We try to load the image. If successful, place Bitmap in the Bundle and
         // send to receiver. Else, send error message.
         try {
             Bitmap albumCover;

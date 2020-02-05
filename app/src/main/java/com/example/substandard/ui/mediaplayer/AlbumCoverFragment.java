@@ -1,6 +1,5 @@
 package com.example.substandard.ui.mediaplayer;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +19,7 @@ import com.example.substandard.ui.model.MediaPlayerViewModelFactory;
  * A Fragment which merely holds an album cover, dead center
  */
 public class AlbumCoverFragment extends Fragment {
+    private static final String TAG = AlbumCoverFragment.class.getSimpleName();
 
     private MediaPlayerViewModel viewModel;
     private ImageView coverArtView;
@@ -47,10 +47,10 @@ public class AlbumCoverFragment extends Fragment {
         // Subscribe to updates on now playing album art, and update the album cover
         viewModel.getAlbumArt().observe(getActivity(), image -> {
             if (null == image) {
-                Drawable transparentDrawable = getContext().getDrawable(android.R.color.transparent);
-                coverArtView.setImageDrawable(transparentDrawable);
+                coverArtView.setVisibility(View.INVISIBLE);
             } else {
                 coverArtView.setImageBitmap(image);
+                coverArtView.setVisibility(View.VISIBLE);
             }
         });
     }

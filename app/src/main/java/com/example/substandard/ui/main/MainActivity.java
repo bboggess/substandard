@@ -145,16 +145,21 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onSongClick(Song clickedSong, AlbumAndAllSongs albumAndAllSongs) {
         MediaControllerCompat.TransportControls transportControls = mediaBrowserAdapter.getTransportControl();
-//        transportControls.playFromMediaId(clickedSong.getId(), null);
+        queueAlbum(albumAndAllSongs);
+        transportControls.skipToQueueItem(Long.parseLong(clickedSong.getId()));
+        mediaPlayerSlidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+    }
 
+    /**
+     * Replaces the current play queue with the given album
+     * @param albumAndAllSongs
+     */
+    private void queueAlbum(AlbumAndAllSongs albumAndAllSongs) {
         mediaBrowserAdapter.clearQueue();
         for (Song song : albumAndAllSongs.getSongs()) {
             MediaDescriptionCompat description = MediaMetadataUtils.convertSongToMediaDescription(song);
             mediaBrowserAdapter.addQueueItem(description);
         }
-        transportControls.skipToQueueItem(Long.parseLong(clickedSong.getId()));
-
-        mediaPlayerSlidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
     }
 
     @Override

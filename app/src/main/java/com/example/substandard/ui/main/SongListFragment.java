@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
@@ -25,6 +24,7 @@ import com.example.substandard.ui.OnMediaClickListener;
 import com.example.substandard.ui.model.SongListViewModel;
 import com.example.substandard.ui.model.SongListViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class SongListFragment extends Fragment implements ViewHolderItemClickListener<Song> {
     private static final String TAG = SongListFragment.class.getSimpleName();
@@ -32,7 +32,6 @@ public class SongListFragment extends Fragment implements ViewHolderItemClickLis
     private SongListViewModel songsViewModel;
 
     private RecyclerView recyclerView;
-    private ImageView coverArtView;
     private SongAdapter adapter;
     private ProgressBar progressBar;
 
@@ -57,7 +56,9 @@ public class SongListFragment extends Fragment implements ViewHolderItemClickLis
 
         View rootView = inflater.inflate(R.layout.song_list_fragment, container, false);
         progressBar = rootView.findViewById(R.id.song_view_pb);
-//        coverArtView = rootView.findViewById(R.id.album_detail_cover_art_view);
+        FloatingActionButton fab = rootView.findViewById(R.id.play_album_fab);
+        // play starting from the first song...hacky?
+        fab.setOnClickListener(view -> onItemClick(album.getSongs().get(0)));
 
         this.albumId = SongListFragmentArgs.fromBundle(getArguments()).getAlbumId();
         setupRecyclerView(rootView);

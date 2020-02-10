@@ -1,9 +1,14 @@
 package com.example.substandard.database;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
 import com.example.substandard.AppExecutors;
@@ -16,6 +21,8 @@ import com.example.substandard.database.data.ArtistDao;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.database.data.SongDao;
 import com.example.substandard.database.network.SubsonicNetworkDataSource;
+import com.example.substandard.service.CoverArtDownloadIntentService;
+import com.example.substandard.service.CoverArtResultReceiver;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -183,9 +190,25 @@ public class SubsonicLibraryRepository {
      * @param album Album whose cover is requested
      * @return LiveData which will be updated with image once loaded
      */
-    public LiveData<Bitmap> getCoverArt(Album album) {
+    public LiveData<Bitmap> getCoverArt(Album album, Context context) {
         Log.d(TAG, "getting cover art");
-        return dataSource.fetchCoverArt(album);
+        final MutableLiveData<Bitmap> image = new MutableLiveData<>();
+        Intent coverArtIntent = new Intent(context, CoverArtDownloadIntentService.class);
+        coverArtIntent.putExtra(CoverArtDownloadIntentService.IMAGE_PATH_EXTRA_KEY, album.getCoverArt());
+        CoverArtResultReceiver resultReceiver = new CoverArtResultReceiver(new Handler()) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                if (resultCode == CoverArtDownloadIntentService.STATUS_SUCCESS) {
+                    Bitmap coverArt = resultData.getParcelable(CoverArtDownloadIntentService.BITMAP_EXTRA_KEY);
+                    image.postValue(coverArt);
+                } else {
+                    // TODO stock image or something
+                }
+            }
+        };
+        coverArtIntent.putExtra(CoverArtDownloadIntentService.RESULT_RECEIVER_EXTRA_KEY, resultReceiver);
+        context.startService(coverArtIntent);
+        return image;
     }
 
     /**
@@ -246,6 +269,4 @@ public class SubsonicLibraryRepository {
     public String getAlbumName(String id) {
         return albumDao.loadAlbumName(id);
     }
-
-
 }

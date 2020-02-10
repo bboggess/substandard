@@ -46,7 +46,7 @@ public class AlbumsByArtistFragment extends AbstractArtistViewFragment implement
         albumsView.setLayoutManager(layoutManager);
         albumsView.setHasFixedSize(true);
 
-        albumAdapter = new AlbumAdapter(getContext(), this);
+        albumAdapter = new AlbumAdapter(getContext(), this, this);
         albumsView.setAdapter(albumAdapter);
         albumAdapter.setAlbums(getArtistAndAllAlbums().getAlbums());
     }

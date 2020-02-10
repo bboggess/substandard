@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.example.substandard.AppExecutors;
 import com.example.substandard.database.network.SubsonicNetworkUtils;
+import com.example.substandard.database.network.SubsonicUser;
 
 import java.io.IOException;
 
@@ -36,7 +37,7 @@ public class SubsonicCoverArt extends CoverArt {
      */
     public Bitmap download(Context context) throws IOException {
         Log.d(TAG, "downloading coverArt: " + getUrl());
-        SubsonicNetworkUtils.SubsonicUser requestUser = SubsonicNetworkUtils
+        SubsonicUser requestUser = SubsonicNetworkUtils
                 .getSubsonicUserFromPreferences(context);
         Bitmap toReturn = SubsonicNetworkUtils.getCoverArt(getUrl(), requestUser);
         AppExecutors.getInstance().diskIO().execute(() -> {

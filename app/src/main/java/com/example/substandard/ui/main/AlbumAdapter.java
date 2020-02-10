@@ -1,10 +1,6 @@
 package com.example.substandard.ui.main;
 
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.os.Bundle;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +8,15 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
+import com.example.substandard.database.SubsonicLibraryRepository;
 import com.example.substandard.database.data.Album;
-import com.example.substandard.service.CoverArtDownloadIntentService;
-import com.example.substandard.service.CoverArtResultReceiver;
 import com.example.substandard.ui.CoverArtImageView;
+import com.example.substandard.ui.model.SongListViewModel;
+import com.example.substandard.utility.InjectorUtils;
 
 import java.util.List;
 
@@ -30,13 +28,15 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumAdapter
     private static final String TAG = AlbumAdapter.class.getSimpleName();
 
     private final Context context;
+    private final LifecycleOwner owner;
 
     private List<Album> albums;
     private ViewHolderItemClickListener<Album> clickListener;
 
-    AlbumAdapter(@NonNull Context context, ViewHolderItemClickListener<Album> clickListener) {
+    AlbumAdapter(@NonNull Context context, LifecycleOwner owner, ViewHolderItemClickListener<Album> clickListener) {
         this.context = context;
         this.clickListener = clickListener;
+        this.owner = owner;
     }
 
     @NonNull
@@ -54,10 +54,15 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumAdapter
         holder.albumView.setText(boundAlbum.getName());
 
         // Setup and start service to download cover art
-        Intent coverArtIntent = new Intent(context, CoverArtDownloadIntentService.class);
-        coverArtIntent.putExtra(CoverArtDownloadIntentService.IMAGE_PATH_EXTRA_KEY, boundAlbum.getCoverArt());
-        coverArtIntent.putExtra(CoverArtDownloadIntentService.RESULT_RECEIVER_EXTRA_KEY, holder.resultReceiver);
-        context.startService(coverArtIntent);
+        SongListViewModel viewModel = InjectorUtils
+                .provideSongListViewModelFactory(context, boundAlbum.getId())
+                .create(SongListViewModel.class);
+        SubsonicLibraryRepository repository = InjectorUtils.provideLibraryRepository(context);
+        viewModel.setCoverArt(repository.getCoverArt(boundAlbum, context));
+        viewModel.getCoverArt().observe(owner, bitmap -> {
+            holder.coverArtView.setImageBitmap(bitmap);
+            holder.coverArtLoading.setVisibility(View.INVISIBLE);
+        });
 
         // Loading bar for album cover
         holder.coverArtLoading.setVisibility(View.VISIBLE);
@@ -81,42 +86,24 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumAdapter
      * All Adapters need a ViewHolder
      */
     class AlbumAdapterViewHolder extends RecyclerView.ViewHolder implements
-            View.OnClickListener,
-            CoverArtResultReceiver.CoverArtReceiver {
+            View.OnClickListener {
         private TextView albumView;
         private CoverArtImageView coverArtView;
-        private TextView artistView;
-        private CoverArtResultReceiver resultReceiver;
         private ProgressBar coverArtLoading;
 
         AlbumAdapterViewHolder(View view) {
             super(view);
             albumView = view.findViewById(R.id.album_name_tv);
             coverArtView = view.findViewById(R.id.cover_art_view);
-            artistView = view.findViewById(R.id.album_artist_name_tv);
 
             coverArtLoading = view.findViewById(R.id.album_cover_pb);
             coverArtView.setOnClickListener(this);
-
-            resultReceiver = new CoverArtResultReceiver(new Handler());
-            resultReceiver.setReceiver(this);
         }
 
         @Override
         public void onClick(View v) {
             Album album = albums.get(getAdapterPosition());
             clickListener.onItemClick(album);
-        }
-
-        @Override
-        public void onReceiveResult(int resultCode, Bundle resultData) {
-            if (resultCode == CoverArtDownloadIntentService.STATUS_SUCCESS) {
-                Bitmap coverArt = resultData.getParcelable(CoverArtDownloadIntentService.BITMAP_EXTRA_KEY);
-                coverArtView.setImageBitmap(coverArt);
-                coverArtLoading.setVisibility(View.INVISIBLE);
-            } else {
-                // TODO stock image or something
-            }
         }
     }
 }

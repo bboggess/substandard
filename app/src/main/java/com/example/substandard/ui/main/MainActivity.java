@@ -114,6 +114,10 @@ public class MainActivity extends AppCompatActivity implements
                         .setDrawerLayout(drawerLayout)
                         .build();
 
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+
+        });
+
         NavigationUI.setupWithNavController(navView, navController);
         NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
     }

@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
@@ -16,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
+import com.example.substandard.database.SubsonicLibraryRepository;
+import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.AlbumAndAllSongs;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.ui.OnMediaClickListener;
@@ -29,6 +32,7 @@ public class SongListFragment extends Fragment implements ViewHolderItemClickLis
     private SongListViewModel songsViewModel;
 
     private RecyclerView recyclerView;
+    private ImageView coverArtView;
     private SongAdapter adapter;
     private ProgressBar progressBar;
 
@@ -53,6 +57,7 @@ public class SongListFragment extends Fragment implements ViewHolderItemClickLis
 
         View rootView = inflater.inflate(R.layout.song_list_fragment, container, false);
         progressBar = rootView.findViewById(R.id.song_view_pb);
+//        coverArtView = rootView.findViewById(R.id.album_detail_cover_art_view);
 
         this.albumId = SongListFragmentArgs.fromBundle(getArguments()).getAlbumId();
         setupRecyclerView(rootView);
@@ -82,20 +87,29 @@ public class SongListFragment extends Fragment implements ViewHolderItemClickLis
         recyclerView.setAdapter(adapter);
     }
 
+    // This is necessary because I haven't found a good way to share with calling fragment
+    private void loadImageToViewModel(Album album) {
+        SubsonicLibraryRepository repository = InjectorUtils.provideLibraryRepository(getContext());
+        songsViewModel.setCoverArt(repository.getCoverArt(album, getContext()));
+        songsViewModel.getCoverArt().observe(getViewLifecycleOwner(), bitmap -> {
+            adapter.setCoverArt(bitmap);
+        });
+    }
+
     private void setupSongsViewModel() {
         Log.d(TAG, "setting up song view model ");
         progressBar.setVisibility(View.VISIBLE);
 
-        SongListViewModelFactory factory = InjectorUtils
-                .provideSongListViewModelFactory(getContext(), albumId);
-        songsViewModel = new ViewModelProvider(this, factory)
-                .get(SongListViewModel.class);
-        songsViewModel.getAlbum().observe(this, (album) -> {
+        // TODO setup so whole nav graph is able to share a ViewModel
+        SongListViewModelFactory factory = InjectorUtils.provideSongListViewModelFactory(getContext(), albumId);
+        songsViewModel = new ViewModelProvider(this, factory).get(SongListViewModel.class);
+        songsViewModel.getAlbum().observe(getViewLifecycleOwner(), album -> {
                 Log.d(TAG, "fetched albums: " + album.toString());
                 this.album = album;
                 adapter.setSongs(album.getSongs());
                 progressBar.setVisibility(View.INVISIBLE);
-
+                // I really shouldn't have to go through loading this again...
+                loadImageToViewModel(album.getAlbum());
             });
     }
 

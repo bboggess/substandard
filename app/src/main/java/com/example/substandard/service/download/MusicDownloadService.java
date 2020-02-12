@@ -12,7 +12,6 @@ import com.google.android.exoplayer2.scheduler.PlatformScheduler;
 import com.google.android.exoplayer2.scheduler.Scheduler;
 import com.google.android.exoplayer2.ui.DownloadNotificationHelper;
 
-import java.io.File;
 import java.util.List;
 
 public class MusicDownloadService extends DownloadService {
@@ -37,10 +36,6 @@ public class MusicDownloadService extends DownloadService {
     public void onCreate() {
         super.onCreate();
         notificationHelper = new DownloadNotificationHelper(getApplicationContext(), NOTIFICATION_CHANNEL_ID);
-    }
-
-    private File getDownloadDirectory() {
-        return new File(getFilesDir().getAbsolutePath(), DOWNLOAD_DIRECTORY);
     }
 
     @Override

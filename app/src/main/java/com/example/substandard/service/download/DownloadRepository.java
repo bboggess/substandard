@@ -17,6 +17,7 @@ public class DownloadRepository {
     private Cache audioDownloadCache;
     private static final String DOWNLOAD_DIRECTORY = "songs/";
     private final Context context;
+    private final DownloadManager downloadManager;
 
     private static DownloadRepository instance;
     private static final Object LOCK = new Object();
@@ -25,6 +26,7 @@ public class DownloadRepository {
         this.context = context.getApplicationContext();
         ExoDatabaseProvider databaseProvider = new ExoDatabaseProvider(context);
         audioDownloadCache = new SimpleCache(getAudioDownloadDirectory(), new NoOpCacheEvictor(), databaseProvider);
+        downloadManager = createDownloadManager();
     }
 
     public static DownloadRepository getInstance(Context context) {
@@ -37,7 +39,7 @@ public class DownloadRepository {
         return instance;
     }
 
-    protected DownloadManager getDownloadManager() {
+    private DownloadManager createDownloadManager() {
         ExoDatabaseProvider databaseProvider = new ExoDatabaseProvider(context);
 
         SimpleCache simpleCache = new SimpleCache(getAudioDownloadDirectory(),
@@ -47,6 +49,10 @@ public class DownloadRepository {
                 new DefaultHttpDataSourceFactory(getUserAgent());
 
         return new DownloadManager(context, databaseProvider, simpleCache, dataSourceFactory);
+    }
+
+    protected DownloadManager getDownloadManager() {
+        return downloadManager;
     }
 
     private String getUserAgent() {

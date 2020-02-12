@@ -7,8 +7,8 @@ import android.os.ResultReceiver;
 
 import androidx.annotation.Nullable;
 
-import com.example.substandard.database.network.SubsonicNetworkUtils;
-import com.example.substandard.database.network.SubsonicUser;
+import com.example.substandard.database.network.subsonic.SubsonicNetworkUtils;
+import com.example.substandard.database.network.subsonic.SubsonicUser;
 import com.example.substandard.utility.SubstandardPreferences;
 
 /**

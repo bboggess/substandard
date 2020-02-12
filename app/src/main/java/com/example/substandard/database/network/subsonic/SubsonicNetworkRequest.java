@@ -1,7 +1,10 @@
-package com.example.substandard.database.network;
+package com.example.substandard.database.network.subsonic;
 
 import android.net.Uri;
 
+import com.example.substandard.database.network.AbstractNetworkRequest;
+
+import java.util.HashMap;
 import java.util.Map;
 
 public class SubsonicNetworkRequest extends AbstractNetworkRequest {
@@ -37,6 +40,16 @@ public class SubsonicNetworkRequest extends AbstractNetworkRequest {
     private final static String VERSION_QUERY = "v";
     private final static String CLIENT_QUERY = "c";
     private final static String FORMAT_QUERY = "f";
+
+    private final static Map<String, String> DEFAULT_PARAMS = getDefaultParams();
+
+    private static Map<String, String> getDefaultParams() {
+        Map<String, String> params = new HashMap();
+        params.put(CLIENT_QUERY, APP_NAME);
+        params.put(VERSION_QUERY, SUBSONIC_PROTOCOL_VERSION);
+        params.put(FORMAT_QUERY, REQUEST_RETURN_FORMAT);
+        return params;
+    }
 
     /*
      * Optional parameters needed for various services.
@@ -141,13 +154,15 @@ public class SubsonicNetworkRequest extends AbstractNetworkRequest {
     }
 
     public SubsonicNetworkRequest(SubsonicUser user, SubsonicService service) {
-        super(user);
+        super(user, DEFAULT_PARAMS);
         this.user = user;
         this.service = service;
     }
 
     public SubsonicNetworkRequest(SubsonicUser user, SubsonicService service, Map<String, String> additionalParam) {
         super(user, additionalParam);
+        // Go ahead and all default parameters to the optional ones
+        getAdditionalParams().putAll(DEFAULT_PARAMS);
         this.user = user;
         this.service = service;
     }
@@ -162,10 +177,7 @@ public class SubsonicNetworkRequest extends AbstractNetworkRequest {
     public Uri getBaseUrl() {
         Uri.Builder builder = Uri.parse(user.getServerAddress()).buildUpon()
                 .appendPath(SUBSONIC_REST_PATH)
-                .appendPath(service.getText())
-                .appendQueryParameter(CLIENT_QUERY, APP_NAME)
-                .appendQueryParameter(VERSION_QUERY, SUBSONIC_PROTOCOL_VERSION)
-                .appendQueryParameter(FORMAT_QUERY, REQUEST_RETURN_FORMAT);
+                .appendPath(service.getText());
         return builder.build();
     }
 }

@@ -1,6 +1,8 @@
-package com.example.substandard.database.network;
+package com.example.substandard.database.network.subsonic;
 
 import android.net.Uri;
+
+import com.example.substandard.database.network.AbstractNetworkRequest;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;

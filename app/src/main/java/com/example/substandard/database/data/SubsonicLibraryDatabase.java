@@ -10,7 +10,7 @@ import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.substandard.AppExecutors;
-import com.example.substandard.database.network.SubsonicNetworkDataSource;
+import com.example.substandard.database.network.subsonic.SubsonicNetworkDataSource;
 
 /**
  * This database holds tables for artists, albums, and songs in the library.

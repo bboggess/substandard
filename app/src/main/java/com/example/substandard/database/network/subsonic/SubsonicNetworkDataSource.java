@@ -1,4 +1,4 @@
-package com.example.substandard.database.network;
+package com.example.substandard.database.network.subsonic;
 
 
 import android.app.DownloadManager;

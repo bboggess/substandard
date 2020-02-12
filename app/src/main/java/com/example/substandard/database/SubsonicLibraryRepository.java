@@ -20,7 +20,7 @@ import com.example.substandard.database.data.ArtistAndAllAlbums;
 import com.example.substandard.database.data.ArtistDao;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.database.data.SongDao;
-import com.example.substandard.database.network.SubsonicNetworkDataSource;
+import com.example.substandard.database.network.subsonic.SubsonicNetworkDataSource;
 import com.example.substandard.service.CoverArtDownloadIntentService;
 import com.example.substandard.service.CoverArtResultReceiver;
 

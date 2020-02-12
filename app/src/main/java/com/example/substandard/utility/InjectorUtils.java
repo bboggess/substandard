@@ -9,7 +9,7 @@ import com.example.substandard.database.data.Artist;
 import com.example.substandard.database.data.ArtistDao;
 import com.example.substandard.database.data.SongDao;
 import com.example.substandard.database.data.SubsonicLibraryDatabase;
-import com.example.substandard.database.network.SubsonicNetworkDataSource;
+import com.example.substandard.database.network.subsonic.SubsonicNetworkDataSource;
 import com.example.substandard.ui.model.AlbumsByArtistViewModelFactory;
 import com.example.substandard.ui.model.ArtistDetailViewModelFactory;
 import com.example.substandard.ui.model.ArtistViewModelFactory;

@@ -1,4 +1,4 @@
-package com.example.substandard.database.network;
+package com.example.substandard.database.network.subsonic;
 
 import android.app.DownloadManager;
 import android.content.Context;
@@ -8,6 +8,7 @@ import android.net.Uri;
 import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.Artist;
 import com.example.substandard.database.data.Song;
+import com.example.substandard.database.network.NetworkRequestUtils;
 import com.example.substandard.utility.SubstandardPreferences;
 
 import org.json.JSONException;

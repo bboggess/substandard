@@ -16,12 +16,14 @@ import java.util.Scanner;
  * Static methods for sending network requests
  */
 public class NetworkRequestUtils {
-
+    private static final String USER_AGENT_KEY = "User-Agent";
+    private static final String USER_AGENT = "substandard-music-player/0.0.1 ( b.boggess727@gmail.com )";
 
     public static JSONObject sendRequest(AbstractNetworkRequest request) throws
             JSONException, IOException {
         URL requestUrl = request.buildUrl();
         HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
+        connection.setRequestProperty(USER_AGENT_KEY, USER_AGENT);
 
         String jsonString = null;
         try {

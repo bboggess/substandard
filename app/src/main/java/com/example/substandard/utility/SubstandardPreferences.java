@@ -7,7 +7,7 @@ import android.util.Log;
 import androidx.preference.PreferenceManager;
 
 import com.example.substandard.R;
-import com.example.substandard.database.network.SubsonicUser;
+import com.example.substandard.database.network.subsonic.SubsonicUser;
 
 /**
  * Helper class for interacting with SharedPreferences

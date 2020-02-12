@@ -15,7 +15,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 
 import com.example.substandard.R;
-import com.example.substandard.database.network.SubsonicUser;
+import com.example.substandard.database.network.subsonic.SubsonicUser;
 import com.example.substandard.utility.SubstandardPreferences;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements

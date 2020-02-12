@@ -5,8 +5,8 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.example.substandard.AppExecutors;
-import com.example.substandard.database.network.SubsonicNetworkUtils;
-import com.example.substandard.database.network.SubsonicUser;
+import com.example.substandard.database.network.subsonic.SubsonicNetworkUtils;
+import com.example.substandard.database.network.subsonic.SubsonicUser;
 
 import java.io.IOException;
 

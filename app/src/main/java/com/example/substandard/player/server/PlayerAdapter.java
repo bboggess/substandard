@@ -1,6 +1,7 @@
 package com.example.substandard.player.server;
 
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 
 /**
  * Allows UI components to control the {@link MediaPlayerHolder} without exposing anything
@@ -23,4 +24,6 @@ public interface PlayerAdapter {
     void playFromMedia(MediaMetadataCompat metadata);
 
     void setVolume(float volume);
+
+    void cacheMedia(MediaSessionCompat.QueueItem metadata);
 }

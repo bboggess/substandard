@@ -5,26 +5,23 @@ import android.app.Notification;
 import androidx.annotation.Nullable;
 
 import com.example.substandard.R;
-import com.google.android.exoplayer2.database.ExoDatabaseProvider;
 import com.google.android.exoplayer2.offline.Download;
 import com.google.android.exoplayer2.offline.DownloadManager;
 import com.google.android.exoplayer2.offline.DownloadService;
+import com.google.android.exoplayer2.scheduler.PlatformScheduler;
 import com.google.android.exoplayer2.scheduler.Scheduler;
 import com.google.android.exoplayer2.ui.DownloadNotificationHelper;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
-import com.google.android.exoplayer2.upstream.cache.NoOpCacheEvictor;
-import com.google.android.exoplayer2.upstream.cache.SimpleCache;
-import com.google.android.exoplayer2.util.Util;
 
 import java.io.File;
 import java.util.List;
 
 public class MusicDownloadService extends DownloadService {
     private static final int FOREGROUND_NOTIFICATION_ID = 1;
+    private static final int JOB_SCHEDULER_ID = 78124;
 
     private static final String NOTIFICATION_CHANNEL_ID = "service.musicDownload.channel";
 
-    private static final String DOWNLOAD_DIRECTORY = "songs";
+    private static final String DOWNLOAD_DIRECTORY = "songs/";
 
     private DownloadManager downloadManager;
 
@@ -42,27 +39,11 @@ public class MusicDownloadService extends DownloadService {
 
         notificationHelper = new DownloadNotificationHelper(this, NOTIFICATION_CHANNEL_ID);
 
-        createDownloadManager();
-    }
-
-    private void createDownloadManager() {
-        ExoDatabaseProvider databaseProvider = new ExoDatabaseProvider(this);
-
-        SimpleCache simpleCache = new SimpleCache(getDownloadDirectory(),
-                new NoOpCacheEvictor(), databaseProvider);
-
-        DefaultHttpDataSourceFactory dataSourceFactory =
-                new DefaultHttpDataSourceFactory(getUserAgent());
-
-        downloadManager = new DownloadManager(this, databaseProvider, simpleCache, dataSourceFactory);
+        downloadManager = DownloadRepository.getInstance(this).getDownloadManager();
     }
 
     private File getDownloadDirectory() {
-        return new File(getFilesDir(), DOWNLOAD_DIRECTORY);
-    }
-
-    private String getUserAgent() {
-        return Util.getUserAgent(this, getString(R.string.app_name));
+        return new File(getFilesDir().getAbsolutePath(), DOWNLOAD_DIRECTORY);
     }
 
     @Override
@@ -73,7 +54,7 @@ public class MusicDownloadService extends DownloadService {
     @Nullable
     @Override
     protected Scheduler getScheduler() {
-        return null;
+        return new PlatformScheduler(this, JOB_SCHEDULER_ID);
     }
 
     @Override

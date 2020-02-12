@@ -222,6 +222,7 @@ public class MusicService extends MediaBrowserServiceCompat {
         private void loadNowPlaying() {
             String nowPlayingId = playlist.get(nowPlaying).getDescription().getMediaId();
             loadMediaFromId(nowPlayingId);
+            player.cacheMedia(playlist.get(nowPlaying + 1));
         }
 
         void onReadyToPlayLoadedMedia() {

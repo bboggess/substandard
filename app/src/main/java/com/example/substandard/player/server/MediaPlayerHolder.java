@@ -10,16 +10,21 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
 import com.example.substandard.R;
 import com.example.substandard.database.LocalMusicLibrary;
+import com.example.substandard.service.download.DownloadRepository;
+import com.example.substandard.service.download.DownloadTracker;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.upstream.cache.Cache;
+import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
 import java.net.MalformedURLException;
@@ -39,6 +44,8 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
 
     private int playbackState;
 
+    private DownloadTracker downloadTracker;
+
     // Android recommends caching this, as it is used constantly
     private PlaybackStateCompat.Builder builder;
 
@@ -56,6 +63,7 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
         this.context = context.getApplicationContext();
         this.listener = listener;
         this.builder = new PlaybackStateCompat.Builder();
+        this.downloadTracker = new DownloadTracker(context);
     }
 
     /**
@@ -74,8 +82,9 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
     public void playFromMedia(MediaMetadataCompat metadata) {
         String id = metadata.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID);
         LocalMusicLibrary library = LocalMusicLibrary.getInstance(context);
+        boolean isOffline = downloadTracker.isDownloaded(id);
         try {
-            playFromUrl(library.getStream(id));
+            playFromUrl(library.getStream(id), isOffline);
         } catch (MalformedURLException e) {
             Log.d(TAG, "unable to download media: "
                     + metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
@@ -83,24 +92,44 @@ public class MediaPlayerHolder implements PlayerAdapter, AudioManager.OnAudioFoc
         }
     }
 
-    private void playFromUrl(URL url) {
-        playFromUri(Uri.parse(url.toString()));
+    private void playFromUrl(URL url, boolean offline) {
+        playFromUri(Uri.parse(url.toString()), offline);
     }
 
-    private void playFromUri(Uri uri) {
+    private void playFromUri(Uri uri, boolean isOffline) {
         Log.d(TAG, "playFromUrl: " + uri.toString());
 
         initializeMediaPlayer();
 
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context,
                 Util.getUserAgent(context, context.getString(R.string.app_name)));
+        if (isOffline) {
+            Cache audioCache = DownloadRepository.getInstance(context).getAudioDownloadCache();
+            dataSourceFactory = new CacheDataSourceFactory(audioCache, dataSourceFactory);
+        }
+
         MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
                 .createMediaSource(uri);
         player.prepare(mediaSource);
         Log.d(TAG, "set data source");
 
         play();
+    }
 
+    @Override
+    public void cacheMedia(MediaSessionCompat.QueueItem metadata) {
+        String id = metadata.getDescription().getMediaId();
+        if (downloadTracker.isDownloaded(id)) {
+            return;
+        }
+
+        LocalMusicLibrary library = LocalMusicLibrary.getInstance(context);
+        try {
+            downloadTracker.requestDownload(id, library.getStream(id));
+        } catch (MalformedURLException e){
+            Log.d(TAG, "cacheMedia: malformed URL " + id);
+            e.printStackTrace();
+        }
     }
 
     @Override

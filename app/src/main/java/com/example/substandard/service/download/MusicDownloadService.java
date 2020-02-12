@@ -18,17 +18,12 @@ import java.util.List;
 public class MusicDownloadService extends DownloadService {
     private static final int FOREGROUND_NOTIFICATION_ID = 1;
     private static final int JOB_SCHEDULER_ID = 78124;
-
     private static final String NOTIFICATION_CHANNEL_ID = "service.musicDownload.channel";
+    private static int nextNotificationId = FOREGROUND_NOTIFICATION_ID + 1;
 
     private static final String DOWNLOAD_DIRECTORY = "songs/";
 
-    private DownloadManager downloadManager;
-
-    private static int nextNotificationId = FOREGROUND_NOTIFICATION_ID + 1;
-
-
-    DownloadNotificationHelper notificationHelper;
+    private DownloadNotificationHelper notificationHelper;
 
     public MusicDownloadService() {
         super(FOREGROUND_NOTIFICATION_ID,
@@ -36,10 +31,12 @@ public class MusicDownloadService extends DownloadService {
                 NOTIFICATION_CHANNEL_ID,
                 R.string.exo_download_notification_channel_name,
                 R.string.exo_download_description);
+    }
 
-        notificationHelper = new DownloadNotificationHelper(this, NOTIFICATION_CHANNEL_ID);
-
-        downloadManager = DownloadRepository.getInstance(this).getDownloadManager();
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        notificationHelper = new DownloadNotificationHelper(getApplicationContext(), NOTIFICATION_CHANNEL_ID);
     }
 
     private File getDownloadDirectory() {
@@ -48,7 +45,7 @@ public class MusicDownloadService extends DownloadService {
 
     @Override
     protected DownloadManager getDownloadManager() {
-        return downloadManager;
+        return DownloadRepository.getInstance(this).getDownloadManager();
     }
 
     @Nullable

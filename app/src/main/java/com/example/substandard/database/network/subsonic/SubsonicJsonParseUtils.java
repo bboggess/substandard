@@ -408,6 +408,27 @@ class SubsonicJsonParseUtils {
         return similarArtists;
     }
 
+    private static final String MBID_KEY = "musicBrainzId";
+
+    static String parseMusicBrainzId(JSONObject json) throws JSONException {
+        if (!requestSuccessful(json)) {
+            return null;
+        }
+
+        JSONObject responseObject = json.getJSONObject(SUBSONIC_RESPONSE_KEY);
+        if (!responseObject.has(ARTIST_INFO_KEY)) {
+            Log.d(TAG, "parseGetSimilarArtists: incorrect JSON format. Did this come from getArtistInfo?");
+            return null;
+        }
+
+        JSONObject similarArtistObject = responseObject.getJSONObject(ARTIST_INFO_KEY);
+        String mbId = "";
+        if (similarArtistObject.has(MBID_KEY)) {
+            mbId = similarArtistObject.getString(MBID_KEY);
+        }
+        return mbId;
+    }
+
     /*
      ****************************************************************************
      * Parsing methods for getting tracks from an album, using getAlbum service.

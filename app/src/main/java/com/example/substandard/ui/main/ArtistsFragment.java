@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
 import com.example.substandard.database.data.Artist;
+import com.example.substandard.ui.ViewHolderItemClickListener;
 import com.example.substandard.ui.model.ArtistViewModel;
 import com.example.substandard.ui.model.ArtistViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
@@ -69,7 +70,7 @@ public class ArtistsFragment extends Fragment implements ViewHolderItemClickList
     private void setUpArtistsViewModel() {
         ArtistViewModelFactory factory = InjectorUtils.provideArtistViewModelFactory(getContext());
         artistViewModel = new ViewModelProvider(this, factory).get(ArtistViewModel.class);
-        artistViewModel.getArtists().observe(this, (artists) -> {
+        artistViewModel.getArtists().observe(getViewLifecycleOwner(), (artists) -> {
                 Log.d(TAG, "updating UI on database change");
                 artistAdapter.setArtists(artists);
             });

@@ -13,12 +13,17 @@ import com.google.android.exoplayer2.util.Util;
 
 import java.io.File;
 
+/**
+ * Holds DownloadManager, Cache, and other objects which need to be shared
+ * amongst components of download service.
+ */
 public class DownloadRepository {
     private final Cache audioDownloadCache;
     private static final String DOWNLOAD_DIRECTORY = "songs/";
     private final Context context;
     private final DownloadManager downloadManager;
 
+    // Single instantiation
     private static DownloadRepository instance;
     private static final Object LOCK = new Object();
 

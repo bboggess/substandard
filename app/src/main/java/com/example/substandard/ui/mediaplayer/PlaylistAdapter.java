@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
+import com.example.substandard.ui.ViewHolderItemClickListener;
 
 import java.util.List;
 
@@ -26,10 +27,13 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     private List<MediaSessionCompat.QueueItem> queue;
     private MediaSessionCompat.QueueItem currentTrack;
 
+    private ViewHolderItemClickListener<MediaSessionCompat.QueueItem> clickListener;
+
     private Context context;
 
-    public PlaylistAdapter(Context context) {
-        this.context = context;
+    public PlaylistAdapter(Context context, ViewHolderItemClickListener<MediaSessionCompat.QueueItem> listener) {
+        this.context = context.getApplicationContext();
+        this.clickListener = listener;
     }
 
     @NonNull
@@ -63,7 +67,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         this.currentTrack = currentTrack;
     }
 
-    public class PlaylistViewHolder extends RecyclerView.ViewHolder {
+    public class PlaylistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView trackNameView;
         private ImageView albumCoverView;
 
@@ -71,7 +75,13 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             super(view);
             trackNameView = view.findViewById(R.id.song_name_tv);
             albumCoverView = view.findViewById(R.id.album_art_view);
+            view.setOnClickListener(this);
         }
 
+        @Override
+        public void onClick(View v) {
+            MediaSessionCompat.QueueItem clicked = queue.get(getAdapterPosition());
+            clickListener.onItemClick(clicked);
+        }
     }
 }

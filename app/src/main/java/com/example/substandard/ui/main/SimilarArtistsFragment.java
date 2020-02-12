@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
 import com.example.substandard.database.data.Artist;
+import com.example.substandard.ui.ViewHolderItemClickListener;
 import com.example.substandard.ui.model.SimilarArtistsViewModel;
 import com.example.substandard.ui.model.SimilarArtistsViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
@@ -23,7 +24,7 @@ import java.util.List;
 
 
 public class SimilarArtistsFragment extends AbstractArtistViewFragment implements
-    ViewHolderItemClickListener<Artist> {
+        ViewHolderItemClickListener<Artist> {
     private static final String TAG = SimilarArtistsFragment.class.getSimpleName();
 
     private RecyclerView recyclerView;
@@ -64,7 +65,7 @@ public class SimilarArtistsFragment extends AbstractArtistViewFragment implement
                 .provideSimilarArtistsViewModelFactory(getContext(), getArtist().getId());
         viewModel = new ViewModelProvider(this, factory)
                 .get(SimilarArtistsViewModel.class);
-        viewModel.getSimilarArtists().observe(this, new Observer<List<Artist>>() {
+        viewModel.getSimilarArtists().observe(getViewLifecycleOwner(), new Observer<List<Artist>>() {
             @Override
             public void onChanged(List<Artist> artists) {
                 Log.d(TAG, "updating UI with similar artists");

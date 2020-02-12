@@ -21,6 +21,7 @@ import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.AlbumAndAllSongs;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.ui.OnMediaClickListener;
+import com.example.substandard.ui.ViewHolderItemClickListener;
 import com.example.substandard.ui.model.SongListViewModel;
 import com.example.substandard.ui.model.SongListViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
@@ -117,6 +118,7 @@ public class SongListFragment extends Fragment implements ViewHolderItemClickLis
     @Override
     public void onItemClick(Song obj) {
         Log.d(TAG, "clicked on song: " + obj.getTitle());
-        clickListener.onSongClick(obj, album);
+        clickListener.onLoadAlbum(album);
+        clickListener.onSongClick(obj.getId());
     }
 }

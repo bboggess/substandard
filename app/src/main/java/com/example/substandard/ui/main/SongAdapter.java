@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.substandard.R;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.ui.CoverArtImageView;
+import com.example.substandard.ui.ViewHolderItemClickListener;
 
 import java.util.List;
 

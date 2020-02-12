@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
 import com.example.substandard.database.data.Album;
+import com.example.substandard.ui.ViewHolderItemClickListener;
 import com.example.substandard.ui.model.AlbumsByArtistViewModel;
 import com.example.substandard.ui.model.AlbumsByArtistViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
@@ -25,7 +26,7 @@ import com.example.substandard.utility.InjectorUtils;
  * activity.
  */
 public class AlbumsByArtistFragment extends AbstractArtistViewFragment implements
-    ViewHolderItemClickListener<Album> {
+        ViewHolderItemClickListener<Album> {
     private final static String TAG = AlbumsByArtistFragment.class.getSimpleName();
 
     private RecyclerView albumsView;

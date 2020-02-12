@@ -15,6 +15,7 @@ import com.example.substandard.R;
 import com.example.substandard.database.SubsonicLibraryRepository;
 import com.example.substandard.database.data.Album;
 import com.example.substandard.ui.CoverArtImageView;
+import com.example.substandard.ui.ViewHolderItemClickListener;
 import com.example.substandard.ui.model.SongListViewModel;
 import com.example.substandard.utility.InjectorUtils;
 

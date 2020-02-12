@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
 import com.example.substandard.database.data.Artist;
+import com.example.substandard.ui.ViewHolderItemClickListener;
 
 import java.util.List;
 

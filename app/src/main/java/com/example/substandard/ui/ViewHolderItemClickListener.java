@@ -1,4 +1,4 @@
-package com.example.substandard.ui.main;
+package com.example.substandard.ui;
 
 /**
  * This UI uses many RecyclerViews, and each View in the ViewHolder is clickable. This

@@ -14,7 +14,7 @@ import com.google.android.exoplayer2.util.Util;
 import java.io.File;
 
 public class DownloadRepository {
-    private Cache audioDownloadCache;
+    private final Cache audioDownloadCache;
     private static final String DOWNLOAD_DIRECTORY = "songs/";
     private final Context context;
     private final DownloadManager downloadManager;
@@ -41,17 +41,12 @@ public class DownloadRepository {
 
     private DownloadManager createDownloadManager() {
         ExoDatabaseProvider databaseProvider = new ExoDatabaseProvider(context);
-
-        SimpleCache simpleCache = new SimpleCache(getAudioDownloadDirectory(),
-                new NoOpCacheEvictor(), databaseProvider);
-
         DefaultHttpDataSourceFactory dataSourceFactory =
                 new DefaultHttpDataSourceFactory(getUserAgent());
-
-        return new DownloadManager(context, databaseProvider, simpleCache, dataSourceFactory);
+        return new DownloadManager(context, databaseProvider, audioDownloadCache, dataSourceFactory);
     }
 
-    protected DownloadManager getDownloadManager() {
+    DownloadManager getDownloadManager() {
         return downloadManager;
     }
 

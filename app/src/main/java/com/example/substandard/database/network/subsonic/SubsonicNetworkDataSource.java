@@ -13,10 +13,12 @@ import com.example.substandard.AppExecutors;
 import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.Artist;
 import com.example.substandard.database.data.Song;
+import com.example.substandard.database.network.NetworkRequestUtils;
 
 import org.json.JSONException;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -180,6 +182,14 @@ public class SubsonicNetworkDataSource {
         });
     }
 
+    private void downloadArtistImage(Artist artist) throws IOException {
+        Bitmap image = NetworkRequestUtils.getBitmapFromURL(new URL(artist.getImageUrl()));
+        File cacheDir = new File(context.getFilesDir(), "artist_images/");
+        String filename = cacheDir.getAbsolutePath() + "/" + artist.getId() + ".png";
+        FileOutputStream file = new FileOutputStream(filename);
+        image.compress(Bitmap.CompressFormat.PNG, 100, file);
+    }
+
     /**
      * This does all of the work to initialize the library. Fetches all artists, and then
      * for each artist gets all of their albums, and for each album all of their songs. These
@@ -202,6 +212,7 @@ public class SubsonicNetworkDataSource {
                     List<Artist> downloadedArtistList = SubsonicNetworkUtils.getAllArtists(user);
                     artists.postValue(downloadedArtistList);
                     for (Artist artist : downloadedArtistList) {
+                        downloadArtistImage(artist);
                         List<Album> albumsByArtist = SubsonicNetworkUtils.getArtistAlbums(artist.getId(), user);
                         albums.postValue(albumsByArtist);
                         for (Album album : albumsByArtist) {

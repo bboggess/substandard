@@ -19,6 +19,14 @@ public class NetworkRequestUtils {
     private static final String USER_AGENT_KEY = "User-Agent";
     private static final String USER_AGENT = "substandard-music-player/0.0.1 ( b.boggess727@gmail.com )";
 
+    /**
+     * Sends a request to an online service which returns a JSON Object.
+     *
+     * @param request object containing info for building request URL
+     * @return JSON response from the online service
+     * @throws JSONException Request didn't receive a JSON response
+     * @throws IOException
+     */
     public static JSONObject sendRequest(AbstractNetworkRequest request) throws
             JSONException, IOException {
         URL requestUrl = request.buildUrl();
@@ -43,12 +51,33 @@ public class NetworkRequestUtils {
         return new JSONObject(jsonString);
     }
 
-    public static Bitmap getBitmapFromURL(AbstractNetworkRequest request) throws IOException {
-        URL requestUrl = request.buildUrl();
+    /**
+     * Used to download images when you already have a URL given to you, say when
+     * Subsonic gives you an artist image URL directly. Do not use unless another service
+     * directly hands you a URL.
+     *
+     * @param requestUrl URL where image can be found
+     * @return
+     * @throws IOException If unable to download image
+     */
+    public static Bitmap getBitmapFromURL(URL requestUrl) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
         connection.connect();
         Bitmap image = BitmapFactory.decodeStream(connection.getInputStream());
         connection.disconnect();
         return image;
+    }
+
+    /**
+     * Get a bitmap from a network request; to be used when you have to build your own
+     * URLs.
+     *
+     * @param request
+     * @return
+     * @throws IOException
+     */
+    public static Bitmap getBitmapFromURL(AbstractNetworkRequest request) throws IOException {
+        URL requestUrl = request.buildUrl();
+        return getBitmapFromURL(requestUrl);
     }
 }

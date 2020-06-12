@@ -7,6 +7,15 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Used to build requests from online services for JSON or image resources. A network request
+ * object contains all of the necessary information for building a request URL. The Authenticator
+ * builds authentication into the request (e.g. username/password or API key), and must be
+ * implemented on a service by service basis.
+ *
+ * You can fruitfully think of this as a box which takes in some request information and spits
+ * out the URL which will give you that information.
+ */
 public abstract class AbstractNetworkRequest {
     private Authenticator authenticator;
     private Map<String, String> additionalParams;
@@ -39,7 +48,12 @@ public abstract class AbstractNetworkRequest {
         return authenticator;
     }
 
-
+    /**
+     * This is the main purpose of the class, and is used in making network requests.
+     *
+     * @return valid URL to which a request may be sent
+     * @throws MalformedURLException
+     */
     public URL buildUrl() throws MalformedURLException {
         Uri.Builder builder = getBaseUrl().buildUpon();
         getAuthenticator().addAuthenticationParams(builder);
@@ -66,5 +80,8 @@ public abstract class AbstractNetworkRequest {
 
     public abstract Map<String, String> getAllQueryParameters();
 
+    /**
+     * @return base URL of the service, e.g. address of Subsonic server
+     */
     public abstract Uri getBaseUrl();
 }

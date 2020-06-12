@@ -16,12 +16,19 @@ public class Artist {
     private String name;
 //    @ColumnInfo(name = "cover_art")
 //    private String coverArt;
-//    @ColumnInfo(name = "image_url")
-//    private String imageUrl;
+    @ColumnInfo(name = "image_url")
+    private String imageUrl;
     @ColumnInfo(name = "album_count")
     private int albumCount;
 
-    public Artist(String id, String name, int albumCount) {
+    public Artist(String id, String name, int albumCount, String imageUrl) {
+        this.id = id;
+        this.name = name;
+        this.albumCount = albumCount;
+        this.imageUrl = imageUrl;
+    }
+
+    public Artist(@NonNull String id, String name, int albumCount) {
         this.id = id;
         this.name = name;
         this.albumCount = albumCount;
@@ -70,5 +77,17 @@ public class Artist {
     @Override
     public String toString() {
         return name;
+    }
+
+    /**
+     *
+     * @return URL from which to download an image of the artist
+     */
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

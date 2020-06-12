@@ -171,13 +171,13 @@ class SubsonicJsonParseUtils {
 //                if (artistObject.has(ARTIST_ART_KEY)) {
 //                    coverArt = artistObject.getString(ARTIST_ART_KEY);
 //                }
-//                String imageUrl = "";
-//                if (artistObject.has(ARTIST_IMAGE_URL_KEY)) {
-//                    imageUrl = artistObject.getString(ARTIST_IMAGE_URL_KEY);
-//                }
+                String imageUrl = "";
+                if (artistObject.has(ARTIST_IMAGE_URL_KEY)) {
+                    imageUrl = artistObject.getString(ARTIST_IMAGE_URL_KEY);
+                }
                 int albumCount = artistObject.getInt(ARTIST_ALBUM_COUNT);
 
-                artistList.add(new Artist(id, name, albumCount));
+                artistList.add(new Artist(id, name, albumCount, imageUrl));
             }
         }
 

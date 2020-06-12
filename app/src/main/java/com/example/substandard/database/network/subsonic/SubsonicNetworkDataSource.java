@@ -182,23 +182,40 @@ public class SubsonicNetworkDataSource {
         });
     }
 
-    private void downloadArtistImage(Artist artist) throws IOException {
+    /**
+     * Tries to download artist image. If there is no artist image, will use album cover as a
+     * backup.
+     *
+     * @param artist
+     * @param album
+     * @param user
+     * @throws IOException
+     */
+    private void downloadArtistImage(Artist artist, Album album, SubsonicUser user) throws IOException {
+        Bitmap image;
         try {
-            Bitmap image = NetworkRequestUtils.getBitmapFromURL(new URL(artist.getImageUrl()));
-            File cacheDir = new File(context.getFilesDir(), "artist_images/");
-            if (!cacheDir.exists()) {
-                cacheDir.mkdirs();
-            }
-            String filename = cacheDir.getAbsolutePath() + "/" + artist.getId() + ".png";
-            File file = new File(filename);
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            FileOutputStream stream = new FileOutputStream(file);
-            image.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            image = NetworkRequestUtils.getBitmapFromURL(new URL(artist.getImageUrl()));
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            image = SubsonicNetworkUtils.getCoverArt(album, user);
         }
+
+        // I guess sometimes I have neither in the library? Seem bad
+        if (image == null) {
+            Log.d(TAG, "downloadArtistImage: no bitmap for " + artist.getName() + album.getName());
+            return;
+        }
+
+        File cacheDir = new File(context.getFilesDir(), "artist_images/");
+        if (!cacheDir.exists()) {
+            cacheDir.mkdirs();
+        }
+        String filename = cacheDir.getAbsolutePath() + "/" + artist.getId() + ".png";
+        File file = new File(filename);
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        FileOutputStream stream = new FileOutputStream(file);
+        image.compress(Bitmap.CompressFormat.PNG, 100, stream);
 
     }
 
@@ -222,12 +239,12 @@ public class SubsonicNetworkDataSource {
                 List<Artist> downloadedArtistList = SubsonicNetworkUtils.getAllArtists(user);
                 artists.postValue(downloadedArtistList);
                 for (Artist artist : downloadedArtistList) {
-                    downloadArtistImage(artist);
                     List<Album> albumsByArtist = SubsonicNetworkUtils.getArtistAlbums(artist.getId(), user);
                     albums.postValue(albumsByArtist);
                     for (Album album : albumsByArtist) {
                         songs.postValue(SubsonicNetworkUtils.getAlbum(album.getId(), user));
                     }
+                    downloadArtistImage(artist, albumsByArtist.get(0), user);
                 }
             } catch (IOException e) {
                 Log.d(TAG, "fetchArtists: I/O error on server request");

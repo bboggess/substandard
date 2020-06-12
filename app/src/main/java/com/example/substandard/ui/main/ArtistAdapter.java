@@ -5,14 +5,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.substandard.R;
+import com.example.substandard.database.SubsonicLibraryRepository;
 import com.example.substandard.database.data.Artist;
 import com.example.substandard.ui.ViewHolderItemClickListener;
+import com.example.substandard.utility.InjectorUtils;
 
 import java.util.List;
 
@@ -24,12 +28,14 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistAdap
     private final static String TAG = ArtistAdapter.class.getSimpleName();
 
     private final Context context;
+    private final LifecycleOwner owner;
     private ViewHolderItemClickListener<Artist> clickListener;
 
     private List<Artist> artists;
 
-    public ArtistAdapter(@NonNull Context context, ViewHolderItemClickListener<Artist> listener) {
+    public ArtistAdapter(@NonNull Context context, LifecycleOwner owner, ViewHolderItemClickListener<Artist> listener) {
         this.context = context;
+        this.owner = owner;
         this.clickListener = listener;
     }
 
@@ -45,6 +51,10 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistAdap
     public void onBindViewHolder(@NonNull ArtistAdapterViewHolder holder, int position) {
         Artist boundArtist = artists.get(position);
         holder.artistTextView.setText(boundArtist.getName());
+        SubsonicLibraryRepository repository = InjectorUtils.provideLibraryRepository(context);
+        repository.getArtistImage(boundArtist, context).observe(owner, bitmap ->
+            holder.thumbnail.setImageBitmap(bitmap)
+        );
         Log.d(TAG, "bound view holder: " + boundArtist.getName());
 
     }
@@ -66,11 +76,13 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistAdap
 
     class ArtistAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView artistTextView;
+        private ImageView thumbnail;
 
         ArtistAdapterViewHolder(View view) {
             super(view);
             artistTextView = view.findViewById(R.id.artist_tv);
             artistTextView.setOnClickListener(this);
+            thumbnail = view.findViewById(R.id.artist_image_view);
         }
 
         @Override

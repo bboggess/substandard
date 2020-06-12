@@ -55,7 +55,7 @@ public class SimilarArtistsFragment extends AbstractArtistViewFragment implement
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
 
-        artistAdapter = new ArtistAdapter(getContext(), this);
+        artistAdapter = new ArtistAdapter(getContext(), this,this);
         recyclerView.setAdapter(artistAdapter);
         Log.d(TAG, "set up RecyclerView for: " + getArtist().getName());
     }

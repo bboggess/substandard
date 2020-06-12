@@ -3,6 +3,7 @@ package com.example.substandard.database.data;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
@@ -28,6 +29,7 @@ public class Artist {
         this.imageUrl = imageUrl;
     }
 
+    @Ignore
     public Artist(@NonNull String id, String name, int albumCount) {
         this.id = id;
         this.name = name;

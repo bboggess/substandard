@@ -3,6 +3,7 @@ package com.example.substandard.database;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -12,6 +13,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
 import com.example.substandard.AppExecutors;
+import com.example.substandard.R;
 import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.AlbumAndAllSongs;
 import com.example.substandard.database.data.AlbumDao;
@@ -208,6 +210,21 @@ public class SubsonicLibraryRepository {
         };
         coverArtIntent.putExtra(CoverArtDownloadIntentService.RESULT_RECEIVER_EXTRA_KEY, resultReceiver);
         context.startService(coverArtIntent);
+        return image;
+    }
+
+    public LiveData<Bitmap> getArtistImage(Artist artist, Context context) {
+        final MutableLiveData<Bitmap> image = new MutableLiveData<>();
+        String path = context.getFilesDir().getAbsolutePath() + "/artist_images/" + artist.getId() + ".png";
+        File imageFile = new File(path);
+        if (imageFile.exists()) {
+            Log.d(TAG, "loading image file: " + path);
+            image.postValue(BitmapFactory.decodeFile(path));
+        } else {
+            Log.d(TAG, "image not found");
+            image.postValue(BitmapFactory.decodeResource(context.getResources(),
+                                R.drawable.artist_not_found));
+        }
         return image;
     }
 

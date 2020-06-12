@@ -26,7 +26,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/primaryColor"
-                android:theme="@style/Widget.AppCompat.Light.ActionBar"/>
+                android:theme="@style/Widget.AppCompat.Light.ActionBar" />
             <fragment
                 android:layout_marginTop="?attr/actionBarSize"
                 android:id="@+id/fragment_container"

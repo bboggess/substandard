@@ -25,7 +25,8 @@
                             android:layout_height="178dp"
                             android:contentDescription="@string/cover_art_description"
                             android:scaleType="centerCrop"
-                            android:src="@color/primaryLightColor"/>
+                            android:src="@color/primaryLightColor"
+                            tools:src="@tools:sample/backgrounds/scenic"/>
 
                         <ProgressBar
                             android:id="@+id/album_cover_pb"

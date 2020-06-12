@@ -183,11 +183,23 @@ public class SubsonicNetworkDataSource {
     }
 
     private void downloadArtistImage(Artist artist) throws IOException {
-        Bitmap image = NetworkRequestUtils.getBitmapFromURL(new URL(artist.getImageUrl()));
-        File cacheDir = new File(context.getFilesDir(), "artist_images/");
-        String filename = cacheDir.getAbsolutePath() + "/" + artist.getId() + ".png";
-        FileOutputStream file = new FileOutputStream(filename);
-        image.compress(Bitmap.CompressFormat.PNG, 100, file);
+        try {
+            Bitmap image = NetworkRequestUtils.getBitmapFromURL(new URL(artist.getImageUrl()));
+            File cacheDir = new File(context.getFilesDir(), "artist_images/");
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs();
+            }
+            String filename = cacheDir.getAbsolutePath() + "/" + artist.getId() + ".png";
+            File file = new File(filename);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            FileOutputStream stream = new FileOutputStream(file);
+            image.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -198,35 +210,32 @@ public class SubsonicNetworkDataSource {
      * This is Subsonic's fault for not having an option to get all albums or all songs.
      */
     public void initializeLibrary() {
-        AppExecutors.getInstance().networkIo().execute(new Runnable() {
-            @Override
-            public void run() {
-                // Make sure we have a user present in preferences. Hacky
-                if (user.getServerAddress() == null || user.getServerAddress().equals("")) {
-                    Log.d(TAG, "fetchArtists: no server address found");
-                    return;
-                }
+        AppExecutors.getInstance().networkIo().execute(() -> {
+            // Make sure we have a user present in preferences. Hacky
+            if (user.getServerAddress() == null || user.getServerAddress().equals("")) {
+                Log.d(TAG, "fetchArtists: no server address found");
+                return;
+            }
 
-                // God forgive me for this
-                try {
-                    List<Artist> downloadedArtistList = SubsonicNetworkUtils.getAllArtists(user);
-                    artists.postValue(downloadedArtistList);
-                    for (Artist artist : downloadedArtistList) {
-                        downloadArtistImage(artist);
-                        List<Album> albumsByArtist = SubsonicNetworkUtils.getArtistAlbums(artist.getId(), user);
-                        albums.postValue(albumsByArtist);
-                        for (Album album : albumsByArtist) {
-                            songs.postValue(SubsonicNetworkUtils.getAlbum(album.getId(), user));
-                        }
+            // God forgive me for this
+            try {
+                List<Artist> downloadedArtistList = SubsonicNetworkUtils.getAllArtists(user);
+                artists.postValue(downloadedArtistList);
+                for (Artist artist : downloadedArtistList) {
+                    downloadArtistImage(artist);
+                    List<Album> albumsByArtist = SubsonicNetworkUtils.getArtistAlbums(artist.getId(), user);
+                    albums.postValue(albumsByArtist);
+                    for (Album album : albumsByArtist) {
+                        songs.postValue(SubsonicNetworkUtils.getAlbum(album.getId(), user));
                     }
-                } catch (IOException e) {
-                    Log.d(TAG, "fetchArtists: I/O error on server request");
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    Log.d(TAG, "fetchArtists: malformed JSON from server request." +
-                            "Did you pass correct address?");
-                    e.printStackTrace();
                 }
+            } catch (IOException e) {
+                Log.d(TAG, "fetchArtists: I/O error on server request");
+                e.printStackTrace();
+            } catch (JSONException e) {
+                Log.d(TAG, "fetchArtists: malformed JSON from server request." +
+                        "Did you pass correct address?");
+                e.printStackTrace();
             }
         });
     }

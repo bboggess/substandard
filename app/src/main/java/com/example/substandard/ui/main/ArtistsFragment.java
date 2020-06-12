@@ -43,7 +43,6 @@ public class ArtistsFragment extends Fragment implements ViewHolderItemClickList
      *
      * @return A new instance of fragment ArtistsFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static ArtistsFragment newInstance() {
         ArtistsFragment fragment = new ArtistsFragment();
         Bundle args = new Bundle();
@@ -63,7 +62,7 @@ public class ArtistsFragment extends Fragment implements ViewHolderItemClickList
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
 
-        artistAdapter = new ArtistAdapter(getContext(), this);
+        artistAdapter = new ArtistAdapter(getContext(), this,this);
         recyclerView.setAdapter(artistAdapter);
     }
 

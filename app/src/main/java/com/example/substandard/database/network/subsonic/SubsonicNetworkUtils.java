@@ -144,6 +144,23 @@ public class SubsonicNetworkUtils {
         return getCoverArt(song.getId(), requestUser);
     }
 
+    public static Song getTopSong(Artist artist, SubsonicUser requestUser) throws
+            IOException, JSONException {
+        Map<String, String> optionalParams = new HashMap<>();
+        optionalParams.put(SubsonicNetworkRequest.ARTIST_QUERY, artist.getName());
+        SubsonicNetworkRequest request = new SubsonicNetworkRequest(requestUser,
+                SubsonicNetworkRequest.SubsonicService.GET_TOP_SONGS, optionalParams);
+        return SubsonicJsonParseUtils.parseTopTrack(NetworkRequestUtils.sendRequest(request));
+    }
+
+    public static String getArtistThumbnail(Artist artist, SubsonicUser requestUser) throws
+            IOException, JSONException {
+        Map<String, String> optionalParams = new HashMap<>();
+        optionalParams.put(SubsonicNetworkRequest.ARTIST_QUERY, artist.getName());
+        SubsonicNetworkRequest request = new SubsonicNetworkRequest(requestUser,
+                SubsonicNetworkRequest.SubsonicService.GET_TOP_SONGS, optionalParams);
+        return SubsonicJsonParseUtils.parseArtistThumbnail(NetworkRequestUtils.sendRequest(request));
+    }
 
     /**
      * Downloads an audio file and then writes it to the given File

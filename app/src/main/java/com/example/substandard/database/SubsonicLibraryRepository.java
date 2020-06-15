@@ -215,7 +215,7 @@ public class SubsonicLibraryRepository {
 
     public LiveData<Bitmap> getArtistImage(Artist artist, Context context) {
         final MutableLiveData<Bitmap> image = new MutableLiveData<>();
-        String path = context.getFilesDir().getAbsolutePath() + "/artist_images/" + artist.getId() + ".png";
+        String path = context.getExternalFilesDir(null).getAbsolutePath() + "/artist_images/" + artist.getId() + ".png";
         File imageFile = new File(path);
         if (imageFile.exists()) {
             Log.d(TAG, "loading image file: " + path);

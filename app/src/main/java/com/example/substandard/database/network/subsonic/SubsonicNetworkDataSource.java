@@ -183,29 +183,13 @@ public class SubsonicNetworkDataSource {
     }
 
     /**
-     * Tries to download artist image. If there is no artist image, will use album cover as a
-     * backup.
-     *
+     * Writes an image to the disk to use as the artist's thumbnail
+     * @param image
      * @param artist
-     * @param album
-     * @param user
      * @throws IOException
-     */
-    private void downloadArtistImage(Artist artist, Album album, SubsonicUser user) throws IOException {
-        Bitmap image;
-        try {
-            image = NetworkRequestUtils.getBitmapFromURL(new URL(artist.getImageUrl()));
-        } catch (MalformedURLException e) {
-            image = SubsonicNetworkUtils.getCoverArt(album, user);
-        }
-
-        // I guess sometimes I have neither in the library? Seem bad
-        if (image == null) {
-            Log.d(TAG, "downloadArtistImage: no bitmap for " + artist.getName() + album.getName());
-            return;
-        }
-
-        File cacheDir = new File(context.getFilesDir(), "artist_images/");
+//     */
+    private void writeArtistImageToDisk(Bitmap image, Artist artist) throws IOException {
+        File cacheDir = new File(context.getExternalFilesDir(null), "artist_images/");
         if (!cacheDir.exists()) {
             cacheDir.mkdirs();
         }
@@ -216,7 +200,62 @@ public class SubsonicNetworkDataSource {
         }
         FileOutputStream stream = new FileOutputStream(file);
         image.compress(Bitmap.CompressFormat.PNG, 100, stream);
+    }
 
+    /**
+     * Tries to download artist image. If there is no artist image, will use album cover of track as a
+     * backup.
+     *
+     * @param artist
+     * @param topSong The top song by artist, for fetching album art
+     * @param user
+     * @throws IOException
+     */
+    private void downloadArtistImage(Artist artist, Song topSong, SubsonicUser user) throws IOException {
+        Bitmap image;
+        try {
+            image = NetworkRequestUtils.getBitmapFromURL(new URL(artist.getImageUrl()));
+        } catch (MalformedURLException e) {
+            image = SubsonicNetworkUtils.getCoverArt(topSong, user);
+        }
+
+        // I guess sometimes I have neither in the library? Seem bad
+        if (image == null) {
+            Log.d(TAG, "downloadArtistImage: no bitmap for " + artist.getName() + topSong.getTitle());
+            return;
+        }
+
+        writeArtistImageToDisk(image, artist);
+    }
+
+    /**
+     * Tries to download artist image, and will use album cover if cannot find. This is needed
+     * because some artists have no top tracks, but I also cannot just pass in an ID string because
+     * the rest API is so overloaded with IDs meaning different things that it doesn't know what
+     * I want and gives me garbage. I am probably partly to blame.
+     *
+     * @param artist
+     * @param backup
+     * @param user
+     * @throws IOException
+     */
+    private void downloadArtistImage(Artist artist, Album backup, SubsonicUser user) throws
+            IOException, JSONException {
+        Bitmap image;
+        try {
+            String url = SubsonicNetworkUtils.getArtistThumbnail(artist, user);
+            image = NetworkRequestUtils.getBitmapFromURL(new URL(url));
+        } catch (MalformedURLException e) {
+            image = SubsonicNetworkUtils.getCoverArt(backup, user);
+        }
+
+        // I guess sometimes I have neither in the library? Seem bad
+        if (image == null) {
+            Log.d(TAG, "downloadArtistImage: no bitmap for " + artist.getName() + backup.getName());
+            return;
+        }
+
+        writeArtistImageToDisk(image, artist);
     }
 
     /**
@@ -244,7 +283,14 @@ public class SubsonicNetworkDataSource {
                     for (Album album : albumsByArtist) {
                         songs.postValue(SubsonicNetworkUtils.getAlbum(album.getId(), user));
                     }
-                    downloadArtistImage(artist, albumsByArtist.get(0), user);
+
+                    // In a long line of inconsistencies, some artists don't even have top tracks
+                    Song topTrack = SubsonicNetworkUtils.getTopSong(artist, user);
+                    if (null != topTrack) {
+                        downloadArtistImage(artist, topTrack, user);
+                    } else {
+                        downloadArtistImage(artist, albumsByArtist.get(0), user);
+                    }
                 }
             } catch (IOException e) {
                 Log.d(TAG, "fetchArtists: I/O error on server request");

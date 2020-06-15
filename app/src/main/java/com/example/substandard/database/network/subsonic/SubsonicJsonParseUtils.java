@@ -171,13 +171,13 @@ class SubsonicJsonParseUtils {
 //                if (artistObject.has(ARTIST_ART_KEY)) {
 //                    coverArt = artistObject.getString(ARTIST_ART_KEY);
 //                }
-                String imageUrl = "";
-                if (artistObject.has(ARTIST_IMAGE_URL_KEY)) {
-                    imageUrl = artistObject.getString(ARTIST_IMAGE_URL_KEY);
-                }
+//                String imageUrl = "";
+//                if (artistObject.has(ARTIST_IMAGE_URL_KEY)) {
+//                    imageUrl = artistObject.getString(ARTIST_IMAGE_URL_KEY);
+//                }
                 int albumCount = artistObject.getInt(ARTIST_ALBUM_COUNT);
 
-                artistList.add(new Artist(id, name, albumCount, imageUrl));
+                artistList.add(new Artist(id, name, albumCount));
             }
         }
 
@@ -429,6 +429,34 @@ class SubsonicJsonParseUtils {
         return mbId;
     }
 
+    private static final String THUMBNAIL_KEY = "smallImageUrl";
+
+    /**
+     *
+     * @param json JSON returned by call to getArtistInfo2
+     * @return URL to download artist thumbnail
+     * @throws JSONException
+     */
+    public static String parseArtistThumbnail(JSONObject json) throws JSONException {
+        if (!requestSuccessful(json)) {
+            return null;
+        }
+
+        JSONObject responseObject = json.getJSONObject(SUBSONIC_RESPONSE_KEY);
+        if (!responseObject.has(ARTIST_INFO_KEY)) {
+            Log.d(TAG, "parseGetSimilarArtists: incorrect JSON format. Did this come from getArtistInfo?");
+            return null;
+        }
+
+        JSONObject infoObject = responseObject.getJSONObject(ARTIST_INFO_KEY);
+        String url = "";
+        if (infoObject.has(THUMBNAIL_KEY)) {
+            url = infoObject.getString(THUMBNAIL_KEY);
+        }
+
+        return url;
+    }
+
     /*
      ****************************************************************************
      * Parsing methods for getting tracks from an album, using getAlbum service.
@@ -503,6 +531,37 @@ class SubsonicJsonParseUtils {
         }
 
         return albumTracks;
+    }
+
+    private static final String TOP_SONGS_KEY = "topSongs";
+
+    /**
+     * After a call to getTopSongs service, returns the top track from an artist (according
+     * to Last.Fm data).
+     *
+     * @param json
+     * @return
+     * @throws JSONException
+     */
+    static Song parseTopTrack(JSONObject json) throws JSONException {
+        if (!requestSuccessful(json)) {
+            return null;
+        }
+
+        JSONObject responseObject = json.getJSONObject(SUBSONIC_RESPONSE_KEY);
+        if(!responseObject.has(TOP_SONGS_KEY)) {
+            Log.d(TAG, "parseTopTrack: incorrect JSON format. Did this come from a call to getTopTrack?");
+            return null;
+        }
+
+        JSONObject topTracks = responseObject.getJSONObject(TOP_SONGS_KEY);
+
+        if (!topTracks.has(SONG_ARRAY_KEY)) {
+            Log.d(TAG, "parseTopTrack: no top tracks!");
+            return null;
+        }
+        JSONObject toReturn = topTracks.getJSONArray(SONG_ARRAY_KEY).getJSONObject(0);
+        return parseSongObject(toReturn);
     }
 
     private static final String SONG_ID_KEY = "id";

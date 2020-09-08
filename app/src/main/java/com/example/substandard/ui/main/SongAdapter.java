@@ -72,6 +72,7 @@ public class SongAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     private Song getSong(int position) {
+        // kinda tricky because the header is in the 0th position
         return songs.get(position - 1);
     }
 
@@ -104,7 +105,7 @@ public class SongAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         @Override
         public void onClick(View v) {
-            Song clicked = songs.get(getAdapterPosition());
+            Song clicked = getSong(getAdapterPosition());
             clickListener.onItemClick(clicked);
         }
     }

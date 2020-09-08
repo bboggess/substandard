@@ -66,7 +66,7 @@ public class CacheManager {
     }
 
     private void addBitmapToMemCache(String key, Bitmap bitmap) {
-        if (getBitmapFromMemCache(key) == null) {
+        if (key != null && getBitmapFromMemCache(key) == null) {
             memoryCache.put(key, bitmap);
         }
     }

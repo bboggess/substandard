@@ -5,8 +5,4 @@
         android:key="@string/pref_server_key"
         android:title="@string/pref_server_value"/>
 
-    <Preference
-        android:key="@string/pref_login_key"
-        android:title="@string/pref_login_value"/>
-
 </PreferenceScreen>

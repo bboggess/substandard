@@ -11,11 +11,7 @@
         tools:layout="@layout/fragment_artists">
         <action
             android:id="@+id/action_mainFragment_to_artistViewFragment"
-            app:destination="@id/artistViewFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            app:destination="@id/artistViewFragment" />
     </fragment>
     <fragment
         android:id="@+id/artistViewFragment"
@@ -66,4 +62,8 @@
         app:exitAnim="@anim/nav_default_exit_anim"
         app:popEnterAnim="@anim/nav_default_pop_enter_anim"
         app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.substandard.ui.settings.LoginFragment"
+        android:label="LoginFragment" />
 </navigation>

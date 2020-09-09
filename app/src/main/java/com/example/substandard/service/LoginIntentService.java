@@ -18,7 +18,6 @@ import com.example.substandard.utility.SubstandardPreferences;
  * This Intent *must* have username, password, server address, and a ResultReceiver
  * passed in as extras.
  */
-// TODO rewrite Settings Activity to use this service to get user info
 public class LoginIntentService extends IntentService {
     /**
      * Keys for obtaining extras from the calling Intent

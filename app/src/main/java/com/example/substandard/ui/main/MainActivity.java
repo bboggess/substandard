@@ -30,6 +30,7 @@ import com.example.substandard.ui.mediaplayer.MediaPlayerLayout;
 import com.example.substandard.ui.model.MediaPlayerViewModel;
 import com.example.substandard.ui.model.MediaPlayerViewModelFactory;
 import com.example.substandard.utility.MediaMetadataUtils;
+import com.example.substandard.utility.SubstandardPreferences;
 import com.google.android.material.navigation.NavigationView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -71,6 +72,11 @@ public class MainActivity extends AppCompatActivity implements
         mediaPlayerLayout.setMediaBrowser(mediaBrowserAdapter);
 
         setupViewModel();
+
+        // if not logged in, we'd better handle that
+        if (!SubstandardPreferences.isLoggedIn(this)) {
+            navController.navigate(R.id.loginFragment);
+        }
     }
 
     @Override

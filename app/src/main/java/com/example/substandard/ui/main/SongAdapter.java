@@ -64,6 +64,7 @@ public class SongAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             SongAdapterViewHolder viewHolder = (SongAdapterViewHolder) holder;
             viewHolder.titleView.setText(boundSong.getTitle());
             // If you pass in an int, it is treated as a resource ID
+            // Guess how long it took to figure that one out?
             viewHolder.trackNumView.setText(Integer.toString(boundSong.getTrackNum()));
         } else if (holder instanceof SongAdapterHeader) {
             SongAdapterHeader header = (SongAdapterHeader) holder;
@@ -71,6 +72,14 @@ public class SongAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
+    /**
+     * Do not access the songs array directly. It will almost never do what you want,
+     * because the adapter position does not actually correspond to where you are in the
+     * list. Forgetting to use this has caused me great pain.
+     *
+     * @param position return value of getAdapterPosition()
+     * @return the corresponding song
+     */
     private Song getSong(int position) {
         // kinda tricky because the header is in the 0th position
         return songs.get(position - 1);

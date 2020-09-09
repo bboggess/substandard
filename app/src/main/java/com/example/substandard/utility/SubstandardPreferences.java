@@ -91,7 +91,20 @@ public class SubstandardPreferences {
         editor.putString(context.getString(R.string.pref_auth_token_key), user.getAuthToken());
         editor.putString(context.getString(R.string.pref_username_key), user.getUsername());
         editor.putString(context.getString(R.string.pref_server_key), user.getServerAddress());
+
+        editor.putBoolean(context.getString(R.string.pref_user_logged_in_key), true);
         editor.apply();
         Log.d(TAG, "writing preferred user");
+    }
+
+    /**
+     * Checks to see whether there is currently a user logged in
+     * @param context
+     * @return true if user info is saved, false otherwise
+     */
+    public static boolean isLoggedIn(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean(context.getString(R.string.pref_user_logged_in_key),
+                                                false);
     }
 }

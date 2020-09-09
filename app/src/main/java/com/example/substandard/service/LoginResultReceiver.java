@@ -11,7 +11,7 @@ public class LoginResultReceiver extends ResultReceiver {
         void onReceiveResult(int resultCode, Bundle resultData);
     }
 
-    LoginResultReceiver(Handler handler) {
+    public LoginResultReceiver(Handler handler) {
         super(handler);
     }
 

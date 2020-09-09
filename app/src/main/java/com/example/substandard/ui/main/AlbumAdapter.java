@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.substandard.R;
 import com.example.substandard.database.SubsonicLibraryRepository;
 import com.example.substandard.database.data.Album;
+import com.example.substandard.database.data.AlbumAndArtist;
+import com.example.substandard.database.data.Artist;
 import com.example.substandard.ui.CoverArtImageView;
 import com.example.substandard.ui.ViewHolderItemClickListener;
 import com.example.substandard.ui.model.SongListViewModel;
@@ -31,7 +33,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumAdapter
     private final Context context;
     private final LifecycleOwner owner;
 
-    private List<Album> albums;
+    private List<AlbumAndArtist> albums;
     private ViewHolderItemClickListener<Album> clickListener;
 
     AlbumAdapter(@NonNull Context context, LifecycleOwner owner, ViewHolderItemClickListener<Album> clickListener) {
@@ -51,8 +53,10 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumAdapter
     @Override
     public void onBindViewHolder(@NonNull AlbumAdapterViewHolder holder, int position) {
         // Get a hold of the loaded album
-        Album boundAlbum = albums.get(position);
+        Album boundAlbum = albums.get(position).getAlbum();
+        Artist boundArtist = albums.get(position).getArtist();
         holder.albumView.setText(boundAlbum.getName());
+        holder.artistView.setText(boundArtist.getName());
 
         // Setup and start service to download cover art
         SongListViewModel viewModel = InjectorUtils
@@ -78,7 +82,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumAdapter
         }
     }
 
-    void setAlbums(List<Album> albums) {
+    void setAlbums(List<AlbumAndArtist> albums) {
         this.albums = albums;
         notifyDataSetChanged();
     }
@@ -89,12 +93,14 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumAdapter
     class AlbumAdapterViewHolder extends RecyclerView.ViewHolder implements
             View.OnClickListener {
         private TextView albumView;
+        private TextView artistView;
         private CoverArtImageView coverArtView;
         private ProgressBar coverArtLoading;
 
         AlbumAdapterViewHolder(View view) {
             super(view);
             albumView = view.findViewById(R.id.album_name_tv);
+            artistView = view.findViewById(R.id.album_artist_name_tv);
             coverArtView = view.findViewById(R.id.cover_art_view);
 
             coverArtLoading = view.findViewById(R.id.album_cover_pb);
@@ -103,7 +109,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumAdapter
 
         @Override
         public void onClick(View v) {
-            Album album = albums.get(getAdapterPosition());
+            Album album = albums.get(getAdapterPosition()).getAlbum();
             clickListener.onItemClick(album);
         }
     }

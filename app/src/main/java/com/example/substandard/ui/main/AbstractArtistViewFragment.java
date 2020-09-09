@@ -3,9 +3,11 @@ package com.example.substandard.ui.main;
 import androidx.fragment.app.Fragment;
 
 import com.example.substandard.database.data.Album;
+import com.example.substandard.database.data.AlbumAndArtist;
 import com.example.substandard.database.data.Artist;
 import com.example.substandard.database.data.ArtistAndAllAlbums;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,5 +60,13 @@ public abstract class AbstractArtistViewFragment extends Fragment {
         return artist.getAlbums();
     }
 
+    public List<AlbumAndArtist> getAlbumsWithArtist() {
+        List<AlbumAndArtist> toRet = new ArrayList<>(getAlbums().size());
 
+        for (Album album : getAlbums()) {
+            toRet.add(new AlbumAndArtist(album ,getArtist()));
+        }
+
+        return toRet;
+    }
 }

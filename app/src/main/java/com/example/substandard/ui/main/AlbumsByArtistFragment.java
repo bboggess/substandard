@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -18,8 +17,6 @@ import com.example.substandard.R;
 import com.example.substandard.database.data.Album;
 import com.example.substandard.ui.ViewHolderItemClickListener;
 import com.example.substandard.ui.model.AlbumsByArtistViewModel;
-import com.example.substandard.ui.model.AlbumsByArtistViewModelFactory;
-import com.example.substandard.utility.InjectorUtils;
 
 /**
  * A {@link Fragment} to display a list of all albums by an artist, within the artist view
@@ -49,30 +46,12 @@ public class AlbumsByArtistFragment extends AbstractArtistViewFragment implement
 
         albumAdapter = new AlbumAdapter(getContext(), this, this);
         albumsView.setAdapter(albumAdapter);
-        albumAdapter.setAlbums(getArtistAndAllAlbums().getAlbums());
+        albumAdapter.setAlbums(getAlbumsWithArtist());
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    }
-
-    /**
-     * Helper method for initializing the ViewModel
-     */
-    private void setUpArtistsViewModel() {
-        Log.d(TAG, "setting up albums view model for: " + getArtist().getName());
-        progressBar.setVisibility(View.VISIBLE);
-
-        AlbumsByArtistViewModelFactory factory = InjectorUtils
-                .provideAlbumsByArtistViewModelFactory(getContext(), getArtist());
-        albumsViewModel = new ViewModelProvider(this, factory)
-                .get(AlbumsByArtistViewModel.class);
-        albumsViewModel.getAlbums().observe(this, (albums) -> {
-                Log.d(TAG, "fetched albums: " + albums.toString());
-                albumAdapter.setAlbums(albums);
-                progressBar.setVisibility(View.INVISIBLE);
-            });
     }
 
     @Override
@@ -85,7 +64,6 @@ public class AlbumsByArtistFragment extends AbstractArtistViewFragment implement
 
         progressBar = rootView.findViewById(R.id.albums_by_artist_pb);
         setUpRecyclerView(rootView);
-//        setUpArtistsViewModel();
         return rootView;
     }
 

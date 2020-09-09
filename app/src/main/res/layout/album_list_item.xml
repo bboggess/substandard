@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/Widget.MaterialComponents.CardView"
     android:layout_width="210dp"
-    android:layout_height="250dp">
+    android:layout_height="265dp">
 <com.google.android.material.card.MaterialCardView
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -39,12 +39,15 @@
                     android:id="@+id/album_name_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="8dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="2dp"
                     style="@style/TextAppearance.MaterialComponents.Subtitle1"
                     android:singleLine="true"
+                    android:ellipsize="end"
                     android:textColor="@color/secondaryTextColor"
-                    android:gravity="center_vertical"
-                    tools:text="album"/>
+                    tools:text="album name which is way too long"/>
 
                 <TextView
                     android:id="@+id/album_artist_name_tv"
@@ -56,7 +59,7 @@
                     style="@style/TextAppearance.MaterialComponents.Subtitle2"
                     android:textColor="@color/secondaryTextColor"
                     android:singleLine="true"
-                    android:gravity="center_vertical"
+                    android:ellipsize="end"
                     tools:text="artist"/>
 
         </LinearLayout>

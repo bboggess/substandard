@@ -15,6 +15,7 @@ import androidx.navigation.Navigation;
 import com.example.substandard.R;
 import com.example.substandard.service.LoginIntentService;
 import com.example.substandard.service.LoginResultReceiver;
+import com.google.android.material.snackbar.Snackbar;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -63,7 +64,11 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
             if (resultCode == LoginIntentService.STATUS_SUCCESS) {
                 Navigation.findNavController(rootView).navigateUp();
             } else {
-                //TODO popup error message
+                Snackbar snackbar = Snackbar.make(rootView,
+                                                    getString(R.string.login_failed),
+                                                    Snackbar.LENGTH_LONG);
+                snackbar.setBackgroundTint(getResources().getColor(R.color.alertColor));
+                snackbar.show();
             }
         });
 

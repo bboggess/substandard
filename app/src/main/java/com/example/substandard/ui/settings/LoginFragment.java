@@ -3,6 +3,7 @@ package com.example.substandard.ui.settings;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.example.substandard.R;
@@ -23,6 +25,7 @@ import com.google.android.material.snackbar.Snackbar;
  * create an instance of this fragment.
  */
 public class LoginFragment extends Fragment implements View.OnClickListener {
+    private static final String TAG = LoginFragment.class.getSimpleName();
 
     private LoginResultReceiver loginReceiver = new LoginResultReceiver(new Handler());
 
@@ -39,14 +42,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment LoginFragment.
      */
-    // TODO: Rename and change types and number of parameters
-    public static LoginFragment newInstance(String param1, String param2) {
-        LoginFragment fragment = new LoginFragment();
-        return fragment;
+    public static LoginFragment newInstance() {
+        return new LoginFragment();
     }
 
     @Override
@@ -62,7 +61,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
         loginReceiver.setReceiver((resultCode, resultData) -> {
             if (resultCode == LoginIntentService.STATUS_SUCCESS) {
-                Navigation.findNavController(rootView).navigateUp();
+                Log.d(TAG, "login successful");
+                NavController navController = Navigation.findNavController(rootView);
+                navController.navigateUp();
             } else {
                 Snackbar snackbar = Snackbar.make(rootView,
                                                     getString(R.string.login_failed),

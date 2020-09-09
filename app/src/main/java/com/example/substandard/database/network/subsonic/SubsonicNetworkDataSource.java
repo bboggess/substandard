@@ -51,7 +51,8 @@ public class SubsonicNetworkDataSource {
     }
 
     private final AppExecutors executors;
-    private final SubsonicUser user;
+    private SubsonicUser user;
+
 
     private SubsonicNetworkDataSource(Context context, AppExecutors executors) {
         this.context = context;
@@ -59,6 +60,10 @@ public class SubsonicNetworkDataSource {
         this.artists = new MutableLiveData<>();
         this.albums = new MutableLiveData<>();
         this.songs = new MutableLiveData<>();
+        refreshUser();
+    }
+
+    public void refreshUser() {
         user = SubsonicNetworkUtils.getSubsonicUserFromPreferences(context);
     }
 

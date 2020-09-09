@@ -6,8 +6,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,6 +22,7 @@ import com.example.substandard.ui.ViewHolderItemClickListener;
 import com.example.substandard.ui.model.ArtistViewModel;
 import com.example.substandard.ui.model.ArtistViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
+import com.example.substandard.utility.SubstandardPreferences;
 
 
 /**
@@ -29,9 +33,6 @@ public class ArtistsFragment extends Fragment implements ViewHolderItemClickList
     private static final String TAG = ArtistsFragment.class.getSimpleName();
 
     private ArtistAdapter artistAdapter;
-    private RecyclerView recyclerView;
-
-    private ArtistViewModel artistViewModel;
 
     public ArtistsFragment() {
         // Required empty public constructor
@@ -56,7 +57,7 @@ public class ArtistsFragment extends Fragment implements ViewHolderItemClickList
     }
 
     private void setUpRecyclerView(View rootView) {
-        recyclerView = rootView.findViewById(R.id.rv_artists);
+        RecyclerView recyclerView = rootView.findViewById(R.id.rv_artists);
         LinearLayoutManager layoutManager =
                 new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
@@ -68,23 +69,32 @@ public class ArtistsFragment extends Fragment implements ViewHolderItemClickList
 
     private void setUpArtistsViewModel() {
         ArtistViewModelFactory factory = InjectorUtils.provideArtistViewModelFactory(getContext());
-        artistViewModel = new ViewModelProvider(this, factory).get(ArtistViewModel.class);
+        ArtistViewModel artistViewModel = new ViewModelProvider(this, factory)
+                                                .get(ArtistViewModel.class);
         artistViewModel.getArtists().observe(getViewLifecycleOwner(), (artists) -> {
                 Log.d(TAG, "updating UI on database change");
                 artistAdapter.setArtists(artists);
-            });
+        });
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_artists, container, false);
-        setUpRecyclerView(rootView);
-        setUpArtistsViewModel();
-        return rootView;
+        return inflater.inflate(R.layout.fragment_artists, container, false);
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (!SubstandardPreferences.isLoggedIn(getContext())) {
+            NavController navController = Navigation.findNavController(view);
+            navController.navigate(R.id.loginFragment);
+        }
+
+        setUpRecyclerView(view);
+        setUpArtistsViewModel();
+    }
 
     @Override
     public void onItemClick(Artist artist) {

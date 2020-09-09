@@ -137,6 +137,7 @@ public class SubsonicLibraryRepository {
     public synchronized void refreshLibrary() {
         Log.d(TAG, "refreshing library");
         // I suppose this technically triggers everything else
+        dataSource.refreshUser();
         dataSource.initializeLibrary();
     }
 
@@ -146,16 +147,19 @@ public class SubsonicLibraryRepository {
      */
     public LiveData<List<Artist>> getArtists() {
         Log.d(TAG, "obtaining artists from DAO");
+
         return artistDao.loadAll();
     }
 
     public LiveData<List<Album>> getAlbums() {
         Log.d(TAG, "obtaining albums from DAO");
+
         return albumDao.loadAll();
     }
 
     public LiveData<List<Song>> getSongs() {
         Log.d(TAG, "obtaining songs from DAO");
+
         return songDao.loadAll();
     }
 
@@ -184,6 +188,7 @@ public class SubsonicLibraryRepository {
      */
     public LiveData<List<Artist>> getSimilarArtists(String artistId) {
         Log.d(TAG, "getting similar artists");
+
         return dataSource.fetchSimilarArtists(artistId);
     }
 

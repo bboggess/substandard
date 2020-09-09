@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.example.substandard.database.network.subsonic.SubsonicNetworkUtils;
 import com.example.substandard.database.network.subsonic.SubsonicUser;
+import com.example.substandard.utility.InjectorUtils;
 import com.example.substandard.utility.SubstandardPreferences;
 
 /**
@@ -64,6 +65,7 @@ public class LoginIntentService extends IntentService {
 
         if (loginSuccessful) {
             SubstandardPreferences.writePreferredUser(this, user);
+            InjectorUtils.provideLibraryRepository(this).refreshLibrary();
             resultReceiver.send(STATUS_SUCCESS, args);
         } else {
             resultReceiver.send(STATUS_FAILED, args);

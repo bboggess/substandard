@@ -23,9 +23,9 @@ public class NetworkRequestUtils {
      * Sends a request to an online service which returns a JSON Object.
      *
      * @param request object containing info for building request URL
-     * @return JSON response from the online service
+     * @return JSON response from the online service, or null if exception thrown
      * @throws JSONException Request didn't receive a JSON response
-     * @throws IOException
+     * @throws IOException unable to connect to URL
      */
     public static JSONObject sendRequest(AbstractNetworkRequest request) throws
             JSONException, IOException {
@@ -48,7 +48,7 @@ public class NetworkRequestUtils {
             connection.disconnect();
         }
 
-        return new JSONObject(jsonString);
+        return null != jsonString ? new JSONObject(jsonString) : null;
     }
 
     /**
@@ -57,7 +57,7 @@ public class NetworkRequestUtils {
      * directly hands you a URL.
      *
      * @param requestUrl URL where image can be found
-     * @return
+     * @return image requested
      * @throws IOException If unable to download image
      */
     public static Bitmap getBitmapFromURL(URL requestUrl) throws IOException {
@@ -72,9 +72,9 @@ public class NetworkRequestUtils {
      * Get a bitmap from a network request; to be used when you have to build your own
      * URLs.
      *
-     * @param request
-     * @return
-     * @throws IOException
+     * @param request object used to build a request URL
+     * @return requested image
+     * @throws IOException unable to download image
      */
     public static Bitmap getBitmapFromURL(AbstractNetworkRequest request) throws IOException {
         URL requestUrl = request.buildUrl();

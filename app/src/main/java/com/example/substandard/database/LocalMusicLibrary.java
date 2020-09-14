@@ -58,10 +58,21 @@ public class LocalMusicLibrary {
         return ROOT;
     }
 
+    /**
+     * Returns URL pointing to an audio file for streaming
+     * @param id id of song to stream
+     * @return direct streaming URL
+     * @throws MalformedURLException if something is wrong with the id passed
+     */
     public URL getStream(String id) throws MalformedURLException {
         return repository.streamSong(id);
     }
 
+    /**
+     * Processes a song request, subscribing the request object to the song load Observable.
+     * Once the song is loaded, request will be notified
+     * @param request requested song and post-load behavior
+     */
     public void processSongRequest(SongLoadRequest request) {
         Log.d(TAG, "processSongRequest: " + request.getSongId());
         Scheduler ioScheduler = Schedulers.io();

@@ -3,12 +3,12 @@
 
     <group>
         <item
+            android:id="@+id/artistsFragment"
+            android:title="@string/navigation_artists"/>
+    </group>
+    <group>
+        <item
             android:id="@id/settingsFragment"
             android:title="@string/navigation_settings" />
     </group>
-<!--    <group>-->
-<!--        <item-->
-<!--            android:id="@+id/item_rescan"-->
-<!--            android:title="@string/navigation_rescan" />-->
-<!--    </group>-->
 </menu>

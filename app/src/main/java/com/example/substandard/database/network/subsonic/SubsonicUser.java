@@ -9,6 +9,9 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.UUID;
 
+/**
+ * Encapsulates a user on a Subsonic server. Used for authenticating requests to the server
+ */
 public class SubsonicUser implements AbstractNetworkRequest.Authenticator {
 
     private String serverAddress;
@@ -36,6 +39,9 @@ public class SubsonicUser implements AbstractNetworkRequest.Authenticator {
         this.authToken = createAuthToken(password, salt);
     }
 
+    /**
+     * If you've already calculated the salt and authorization token, use this constructor
+     */
     SubsonicUser(String serverAddress, String username, String authToken, String salt) {
         this.serverAddress = serverAddress;
         this.username = username;

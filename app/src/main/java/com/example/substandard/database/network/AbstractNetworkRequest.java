@@ -29,9 +29,8 @@ public abstract class AbstractNetworkRequest {
         /**
          * Adds authentication parameters to request URL
          * @param builder an ongoing URL builder which needs authentication arguments
-         * @return the same URL builder, but with authentication info added
          */
-        Uri.Builder addAuthenticationParams(Uri.Builder builder);
+        void addAuthenticationParams(Uri.Builder builder);
     }
 
     public AbstractNetworkRequest(Authenticator authenticator) {
@@ -52,7 +51,7 @@ public abstract class AbstractNetworkRequest {
      * This is the main purpose of the class, and is used in making network requests.
      *
      * @return valid URL to which a request may be sent
-     * @throws MalformedURLException
+     * @throws MalformedURLException if unable to parse URL
      */
     public URL buildUrl() throws MalformedURLException {
         Uri.Builder builder = getBaseUrl().buildUpon();
@@ -68,7 +67,7 @@ public abstract class AbstractNetworkRequest {
     /**
      * Any additional query information which is needed by the request beyond service address and
      * authentication info.
-     * @return
+     * @return (param, value) pairs to append to url (i.e. in the form &param=value)
      */
     public Map<String, String> getAdditionalParams() {
         return additionalParams;

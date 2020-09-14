@@ -166,15 +166,7 @@ class SubsonicJsonParseUtils {
                 JSONObject artistObject = artistsArrayAtIndex.getJSONObject(j);
                 String id = artistObject.getString(ARTIST_ID_KEY);
                 String name = artistObject.getString(ARTIST_NAME_KEY);
-                // These two fields throw JSON exceptions??? Remove them I guess.
-//                String coverArt = "";
-//                if (artistObject.has(ARTIST_ART_KEY)) {
-//                    coverArt = artistObject.getString(ARTIST_ART_KEY);
-//                }
-//                String imageUrl = "";
-//                if (artistObject.has(ARTIST_IMAGE_URL_KEY)) {
-//                    imageUrl = artistObject.getString(ARTIST_IMAGE_URL_KEY);
-//                }
+
                 int albumCount = artistObject.getInt(ARTIST_ALBUM_COUNT);
 
                 artistList.add(new Artist(id, name, albumCount));
@@ -435,7 +427,7 @@ class SubsonicJsonParseUtils {
      *
      * @param json JSON returned by call to getArtistInfo2
      * @return URL to download artist thumbnail
-     * @throws JSONException
+     * @throws JSONException malformed JSON response -- you probably passed in wrong object
      */
     public static String parseArtistThumbnail(JSONObject json) throws JSONException {
         if (!requestSuccessful(json)) {
@@ -539,9 +531,9 @@ class SubsonicJsonParseUtils {
      * After a call to getTopSongs service, returns the top track from an artist (according
      * to Last.Fm data).
      *
-     * @param json
-     * @return
-     * @throws JSONException
+     * @param json JSON returned from getTopSongs service
+     * @return Returns the top track for the artist, or else null if no top track
+     * @throws JSONException if the JSON object is not of the correct form
      */
     static Song parseTopTrack(JSONObject json) throws JSONException {
         if (!requestSuccessful(json)) {
@@ -565,7 +557,6 @@ class SubsonicJsonParseUtils {
     }
 
     private static final String SONG_ID_KEY = "id";
-    private static final String SONG_ARTIST_ID_KEY = "artistId";
     private static final String SONG_ARTIST_NAME_KEY = "artist";
     private static final String SONG_ALBUM_ID_KEY = "albumId";
     private static final String SONG_TITLE_KEY = "title";

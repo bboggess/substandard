@@ -7,6 +7,11 @@ import com.example.substandard.database.network.AbstractNetworkRequest;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Represents all info contained in a request to the REST API on the subsonic server.
+ * Pass this into the methods in {@link com.example.substandard.database.network.NetworkRequestUtils}
+ * in order to make network requests
+ */
 public class SubsonicNetworkRequest extends AbstractNetworkRequest {
 
     private SubsonicUser user;
@@ -43,8 +48,11 @@ public class SubsonicNetworkRequest extends AbstractNetworkRequest {
 
     private final static Map<String, String> DEFAULT_PARAMS = getDefaultParams();
 
+    /**
+     * @return the parameters that must be associated with every request
+     */
     private static Map<String, String> getDefaultParams() {
-        Map<String, String> params = new HashMap();
+        Map<String, String> params = new HashMap<>();
         params.put(CLIENT_QUERY, APP_NAME);
         params.put(VERSION_QUERY, SUBSONIC_PROTOCOL_VERSION);
         params.put(FORMAT_QUERY, REQUEST_RETURN_FORMAT);
@@ -106,6 +114,15 @@ public class SubsonicNetworkRequest extends AbstractNetworkRequest {
         }
     }
 
+    /**
+     * For requests to the getAlbumList2 service, we need to tell the server how to construct
+     * the album list. The options are
+     *
+     * RANDOM: get random albums
+     * NEWEST: get most recently added
+     * FREQUENT: get most frequently played
+     * RECENT: get most recently played
+     */
     public enum AlbumListType {
         RANDOM ("random"),
         NEWEST ("newest"),
@@ -122,13 +139,25 @@ public class SubsonicNetworkRequest extends AbstractNetworkRequest {
         }
     }
 
-    public SubsonicNetworkRequest(SubsonicUser user, SubsonicService service) {
+    /**
+     * returns a call to service with no additional parameters
+     * @param user for authentication
+     * @param service what you want from the server
+     */
+    protected SubsonicNetworkRequest(SubsonicUser user, SubsonicService service) {
         super(user, DEFAULT_PARAMS);
         this.user = user;
         this.service = service;
     }
 
-    public SubsonicNetworkRequest(SubsonicUser user, SubsonicService service, Map<String, String> additionalParam) {
+    /**
+     * returns a call to service with specified additional parameters. Many services require
+     * extra parameters to be passed.
+     * @param user for authentication
+     * @param service what you want from the server
+     * @param additionalParam any additional arguments, in  (parameter, value) pairs
+     */
+    protected SubsonicNetworkRequest(SubsonicUser user, SubsonicService service, Map<String, String> additionalParam) {
         super(user, additionalParam);
         // Go ahead and all default parameters to the optional ones
         getAdditionalParams().putAll(DEFAULT_PARAMS);

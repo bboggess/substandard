@@ -88,8 +88,8 @@ public class BitmapDiskCache {
      * @param cacheDirectory location on disk to cache files
      * @param maxSize max space given of the cache. Will delete files based on least recent
      *                access once the space used exceeds maxSize
-     * @return
-     * @throws IOException
+     * @return cache instance. instantiates new cache if needed
+     * @throws IOException unable to open cache file
      */
     public synchronized static BitmapDiskCache getCache(File cacheDirectory, long maxSize) throws IOException {
         Log.d(TAG, "Getting cache");
@@ -104,7 +104,7 @@ public class BitmapDiskCache {
     /**
      * If the journal file already exists, read from it to initialize entries. If not, or if
      * the journal is corrupt, set up a fresh directory.
-     * @throws IOException
+     * @throws IOException unable to read journal file
      */
     private void loadJournal() throws IOException {
         if (journalFile.exists()) {
@@ -128,7 +128,7 @@ public class BitmapDiskCache {
 
     /**
      * Sets up a fresh cache directory, with a blank journal file.
-     * @throws IOException
+     * @throws IOException unable to create new file
      */
     private void initializeCacheDirectory() throws IOException {
         cacheDirectory.mkdirs();
@@ -152,7 +152,7 @@ public class BitmapDiskCache {
 
     /**
      * Reads a line from the journal and adds it to the entry list.
-     * @param line
+     * @param line raw line from journal
      * @throws IOException File is corrupted
      */
     private void readJournalLine(String line) throws IOException {
@@ -194,9 +194,9 @@ public class BitmapDiskCache {
 
     /**
      * Add an image to the cache
-     * @param key
-     * @param bitmap
-     * @throws IOException
+     * @param key key for accessing later
+     * @param bitmap image associated to key
+     * @throws IOException unable to write bitmap
      */
     public synchronized void put(String key, @NonNull Bitmap bitmap) throws IOException {
         String filename = getImageFilename(key);
@@ -236,7 +236,7 @@ public class BitmapDiskCache {
 
     /**
      * Removes the file that was least recently accessed
-     * @throws IOException
+     * @throws IOException unable to read/write to disk
      */
     private void removeOldest() throws IOException {
         removeEntry(getOldestKey());
@@ -244,8 +244,8 @@ public class BitmapDiskCache {
 
     /**
      * Deletes file with given key from the cache
-     * @param key
-     * @throws IOException
+     * @param key key to delete
+     * @throws IOException unable to read/write to disk
      */
     private synchronized void removeEntry(String key) throws IOException {
         Log.d(TAG, "removing entry from cache");
@@ -262,8 +262,8 @@ public class BitmapDiskCache {
 
     /**
      * Use this to check whether the given image is stored locally.
-     * @param key
-     * @return
+     * @param key key to search for
+     * @return true if stored in cache, false if not
      */
     public boolean contains(String key) {
         return entries.containsKey(key);
@@ -272,9 +272,9 @@ public class BitmapDiskCache {
     /**
      * Load the cached bitmap from the disk. You should check with contains
      * before calling this.
-     * @param key
-     * @return
-     * @throws IOException
+     * @param key key to search for
+     * @return bitmap stored under key. If key is not in cache, something bad will happen
+     * @throws IOException unable to read from disk
      */
     public synchronized Bitmap get(String key) throws IOException {
         Log.d(TAG, "retrieving image from cache");
@@ -300,9 +300,9 @@ public class BitmapDiskCache {
 
     /**
      * Log an action into the journal
-     * @param entry
+     * @param entry containing info on file updated
      * @param action Must be one of CREATE, READ, or REMOVE. If CREATE, also must supply a file size.
-     * @throws IOException
+     * @throws IOException unable to open/write journal file
      */
     private synchronized void writeToJournal(Entry entry, String action) throws IOException {
         Log.d(TAG, "writing to cache journal");
@@ -325,7 +325,7 @@ public class BitmapDiskCache {
 
     /**
      * Deletes everything in the cache, e.g. if the journal is corrupt.
-     * @throws IOException
+     * @throws IOException error writing to disk
      */
     private void delete() throws IOException {
         close();
@@ -337,7 +337,11 @@ public class BitmapDiskCache {
      * @param directory directory to delete
      */
     private void clearDirectory(File directory) {
-        for (File file : directory.listFiles()) {
+        assert directory != null;
+        File[] files = directory.listFiles();
+        assert files != null;
+
+        for (File file : files) {
             file.delete();
         }
 
@@ -346,7 +350,7 @@ public class BitmapDiskCache {
 
     /**
      * Closes all open file operations.
-     * @throws IOException
+     * @throws IOException unable to close journal file
      */
     private void close() throws IOException {
         if (null != journalWriter) {
@@ -359,7 +363,7 @@ public class BitmapDiskCache {
     /**
      * Represents an entry in the cache.
      */
-    class Entry {
+    static class Entry {
         private String id;
         private long size;
 

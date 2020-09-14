@@ -1,6 +1,7 @@
 package com.example.substandard.ui.main;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +56,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumAdapter
         // Get a hold of the loaded album
         Album boundAlbum = albums.get(position).getAlbum();
         Artist boundArtist = albums.get(position).getArtist();
+        Log.d(TAG, "onBindViewHolder: Artist " + boundArtist + ", album " + boundAlbum);
         holder.albumView.setText(boundAlbum.getName());
         holder.artistView.setText(boundArtist.getName());
 
@@ -84,6 +86,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumAdapter
 
     void setAlbums(List<AlbumAndArtist> albums) {
         this.albums = albums;
+        Log.d(TAG, this.albums.toString());
         notifyDataSetChanged();
     }
 

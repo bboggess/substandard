@@ -10,11 +10,15 @@ import com.example.substandard.database.data.ArtistDao;
 import com.example.substandard.database.data.SongDao;
 import com.example.substandard.database.data.SubsonicLibraryDatabase;
 import com.example.substandard.database.network.subsonic.SubsonicNetworkDataSource;
+import com.example.substandard.ui.model.AlbumListViewModelFactory;
 import com.example.substandard.ui.model.AlbumsByArtistViewModelFactory;
 import com.example.substandard.ui.model.ArtistDetailViewModelFactory;
 import com.example.substandard.ui.model.ArtistViewModelFactory;
+import com.example.substandard.ui.model.HomeScreenViewModelFactory;
 import com.example.substandard.ui.model.SimilarArtistsViewModelFactory;
 import com.example.substandard.ui.model.SongListViewModelFactory;
+
+import java.util.List;
 
 /**
  * Static methods for linking various components
@@ -67,4 +71,13 @@ public class InjectorUtils {
         return new SongListViewModelFactory(repository, albumId);
     }
 
+    public static AlbumListViewModelFactory provideAlbumListViewModelFactory(Context context, List<String> ids) {
+        SubsonicLibraryRepository repository = provideLibraryRepository(context);
+        return new AlbumListViewModelFactory(repository, ids);
+    }
+
+    public static HomeScreenViewModelFactory provideHomeScreenViewModelFactory(Context context) {
+        SubsonicLibraryRepository repository = provideLibraryRepository(context);
+        return new HomeScreenViewModelFactory(repository);
+    }
 }

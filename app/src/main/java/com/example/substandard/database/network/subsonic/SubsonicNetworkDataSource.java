@@ -441,4 +441,23 @@ public class SubsonicNetworkDataSource {
         return SubsonicNetworkUtils.getStream(songId, user);
     }
 
+    public LiveData<List<String>> fetchAlbumList(SubsonicNetworkRequest.AlbumListType type) {
+        MutableLiveData<List<String>> albumList = new MutableLiveData<>();
+        AppExecutors.getInstance().networkIo().execute(() -> {
+            try {
+                List<String> ids = SubsonicNetworkUtils.getAlbumList(type, user);
+                albumList.postValue(ids);
+            } catch (IOException e) {
+                Log.d(TAG, "fetchAlbumList: failed to fetch album list");
+                e.printStackTrace();
+            } catch (JSONException e) {
+                Log.d(TAG, "fetchAlbumList: malformed JSON from server request. "
+                        + "Did you pass in a valid address?");
+                e.printStackTrace();
+            }
+        });
+
+        return albumList;
+    }
+
 }

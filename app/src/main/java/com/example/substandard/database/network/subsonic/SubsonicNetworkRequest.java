@@ -56,57 +56,10 @@ public class SubsonicNetworkRequest extends AbstractNetworkRequest {
      */
     // used in many services
     public final static String ID_QUERY = "id";
-    // Optional in getIndexes, getArtists, getAlbumList, getRandomSongs, getSongsByGenre,
-    // getStarred, search
-    public final static String MUSIC_FOLDER_ID_QUERY = "musicFolderId";
-    // Used in createPlaylist
-    public final static String SONG_ID_QUERY = "songId";
-    // Used if starring an artist in star and unstar
-    public final static String ARTIST_ID_QUERY = "artistId";
-    // Used if starring an album in star and unstar
-    public final static String ALBUM_ID_QUERY = "albumId";
-    // Optional in getArtistInfo, getSimilarSongs, getTopSongs, search, scrobble,
-    public final static String MAX_COUNT_QUERY = "count";
-    // Optional in getArtistInfo
-    public final static String INCLUDE_NON_LIBRARY_QUERY = "includeNotPresent";
     // Optional in getAlbumList, getRandomSongs,
     public final static String NUM_TO_RETURN_QUERY = "size";
-    // Optional in getCoverArt
-    public final static String IMAGE_SIZE_QUERY = "size";
-    // Optional in getAlbumList, getSongsByGenre, search
-    public final static String OFFSET_QUERY = "offset";
-    // Required if searching getAlbumList by genre, getSongsByGenre
-    // Optional in getRandomSongs
-    public final static String GENRE_QUERY = "genre";
-    // Required in updatePlaylist and createPlaylist (if updating)
-    public final static String PLAYLIST_ID_QUERY = "playlistId";
-    // Required in createPlaylist if new playlist
-    public final static String PLAYLIST_NAME_QUERY = "name";
-    // Seems to be needed for getLyrics, getTopSongs
-    // Optional in search
     public final static String ARTIST_QUERY = "artist";
-    // Optional in search
-    public final static String ALBUM_QUERY = "album";
-    // Required for getLyrics
-    // Optional in search
-    public final static String SONG_QUERY = "title";
-    // Required in search2, search3
-    public final static String SEARCH_QUERY = "query";
-    // Optional in stream
-    public final static String MAX_BITRATE_QUERY = "maxBitRate";
-    // Required in setRating
-    public final static String RATING_QUERY = "rating";
-    // Optional in scrobble
-    public final static String SCROBBLE_TIME_QUERY = "time";
-    // Optional in scrobble
-    public final static String SCROBBLE_SUBMISSION_QUERY = "submission";
-    // Used in search2 and search3, if searching for albums/artists/etc
-    public final static String MAX_ALBUM_COUNT = "albumCount";
-    public final static String ALBUM_OFFSET = "albumOffset";
-    public final static String MAX_ARTIST_COUNT = "artistCount";
-    public final static String ARTIST_OFFSET = "artistOffset";
-    public final static String MAX_SONG_COUNT = "songCount";
-    public final static String SONG_OFFSET = "songOffset";
+    public final static String ALBUM_LIST_TYPE_QUERY = "type";
 
     public enum SubsonicService {
         PING ("ping.view"),
@@ -145,6 +98,22 @@ public class SubsonicNetworkRequest extends AbstractNetworkRequest {
 
         private final String text;
         SubsonicService(String text) {
+            this.text = text;
+        }
+
+        public String getText() {
+            return text;
+        }
+    }
+
+    public enum AlbumListType {
+        RANDOM ("random"),
+        NEWEST ("newest"),
+        FREQUENT ("frequent"),
+        RECENT("recent");
+
+        private final String text;
+        AlbumListType(String text) {
             this.text = text;
         }
 

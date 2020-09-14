@@ -5,10 +5,10 @@ import androidx.room.Relation;
 
 public class AlbumAndArtist {
     @Embedded
-    private Album album;
+    private Artist artist;
 
     @Relation(parentColumn = "id", entityColumn = "artist_id")
-    private Artist artist;
+    private Album album;
 
     public AlbumAndArtist(Album album, Artist artist) {
         this.album = album;

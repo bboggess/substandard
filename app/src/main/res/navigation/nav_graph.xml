@@ -6,12 +6,15 @@
     app:startDestination="@id/mainFragment">
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.example.substandard.ui.main.ArtistsFragment"
+        android:name="com.example.substandard.ui.main.HomeFragment"
         android:label="@string/artists"
-        tools:layout="@layout/fragment_artists">
+        tools:layout="@layout/fragment_home">
         <action
-            android:id="@+id/action_mainFragment_to_artistViewFragment"
-            app:destination="@id/artistViewFragment" />
+            android:id="@+id/action_mainFragment_to_artistsFragment"
+            app:destination="@id/artistsFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_songListFragment"
+            app:destination="@id/songListFragment" />
     </fragment>
     <fragment
         android:id="@+id/artistViewFragment"
@@ -66,4 +69,13 @@
         android:id="@+id/loginFragment"
         android:name="com.example.substandard.ui.settings.LoginFragment"
         android:label="LoginFragment" />
+    <fragment
+        android:id="@+id/artistsFragment"
+        android:name="com.example.substandard.ui.main.ArtistsFragment"
+        android:label="fragment_artists"
+        tools:layout="@layout/fragment_artists" >
+        <action
+            android:id="@+id/action_artistsFragment_to_artistViewFragment"
+            app:destination="@id/artistViewFragment" />
+    </fragment>
 </navigation>

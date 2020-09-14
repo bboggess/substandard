@@ -348,12 +348,12 @@ class SubsonicJsonParseUtils {
     /**
      * Parses JSON response from getAlbumList2 service
      * @param json JSON response from the server
-     * @return List of albums returned by the service (I'm not entirely sure how this service works)
+     * @return List of album IDs returned by the service (doesn't return albums in a usual format)
      * @throws JSONException JSON is in wrong form
      */
-    static List<Album> parseGetAlbumList(JSONObject json) throws JSONException {
+    static List<String> parseGetAlbumList(JSONObject json) throws JSONException {
         Log.d(TAG, "parsing JSON from getArtists request");
-        List<Album> albumList = new ArrayList<>();
+        List<String> albumList = new ArrayList<>();
         if (!requestSuccessful(json)) {
             return null;
         }
@@ -364,11 +364,11 @@ class SubsonicJsonParseUtils {
             return null;
         }
 
-        JSONArray albumsArray = responseObject.getJSONArray(ALBUM_LIST_KEY);
+        JSONArray albumsArray = responseObject.getJSONObject(ALBUM_LIST_KEY).getJSONArray(ALBUM_ARRAY_KEY);
 
         for (int i = 0; i < albumsArray.length(); i++) {
             JSONObject albumAtIndex = albumsArray.getJSONObject(i);
-            albumList.add(parseAlbumObject(albumAtIndex));
+            albumList.add(albumAtIndex.getString(ALBUM_ID_KEY));
         }
 
         return albumList;

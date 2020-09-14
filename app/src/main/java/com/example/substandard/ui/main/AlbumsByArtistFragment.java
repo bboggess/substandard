@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.substandard.R;
 import com.example.substandard.database.data.Album;
 import com.example.substandard.ui.ViewHolderItemClickListener;
-import com.example.substandard.ui.model.AlbumsByArtistViewModel;
 
 /**
  * A {@link Fragment} to display a list of all albums by an artist, within the artist view
@@ -29,7 +28,6 @@ public class AlbumsByArtistFragment extends AbstractArtistViewFragment implement
     private RecyclerView albumsView;
     private ProgressBar progressBar;
 
-    private AlbumsByArtistViewModel albumsViewModel;
     private AlbumAdapter albumAdapter;
 
     /**

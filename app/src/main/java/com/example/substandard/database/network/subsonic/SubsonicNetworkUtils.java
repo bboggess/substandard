@@ -100,22 +100,6 @@ public class SubsonicNetworkUtils {
     private static final String ALBUM_SEARCH_TYPE_QUERY = "type";
     private static final String ALL_ARTIST_PARAM = "alphabeticalByName";
 
-    /**
-     * Sends request to get all albums, sorted alphabetically
-     * @param requestUser User attached to request
-     * @return List of all albums present on the server
-     * @throws IOException if I/O error reading from server
-     * @throws JSONException if response from server is not valid JSON
-     */
-    public static List<Album> getAllAlbums(SubsonicUser requestUser) throws
-            IOException, JSONException {
-        Map<String, String> optionalParams = new HashMap<>();
-        optionalParams.put(ALBUM_SEARCH_TYPE_QUERY, ALL_ARTIST_PARAM);
-        SubsonicNetworkRequest request = new SubsonicNetworkRequest(requestUser,
-                SubsonicNetworkRequest.SubsonicService.GET_ALBUM_LIST, optionalParams);
-        return SubsonicJsonParseUtils.parseGetAlbumList(NetworkRequestUtils.sendRequest(request));
-    }
-
     public static List<Artist> getSimilarArtists(String artistId, SubsonicUser requestUser) throws
             IOException, JSONException {
         Map<String, String> optionalParams = new HashMap<>();
@@ -194,5 +178,15 @@ public class SubsonicNetworkUtils {
         SubsonicNetworkRequest request = new SubsonicNetworkRequest(requestUser,
                 SubsonicNetworkRequest.SubsonicService.STREAM, optionalParams);
         return request.buildUrl();
+    }
+
+    public static List<String> getAlbumList(SubsonicNetworkRequest.AlbumListType type, SubsonicUser requestUser)
+            throws IOException, JSONException {
+        Map<String, String> optionalParams = new HashMap<>();
+        optionalParams.put(SubsonicNetworkRequest.ALBUM_LIST_TYPE_QUERY, type.getText());
+        optionalParams.put(SubsonicNetworkRequest.NUM_TO_RETURN_QUERY, "5");
+        SubsonicNetworkRequest request = new SubsonicNetworkRequest(requestUser,
+                SubsonicNetworkRequest.SubsonicService.GET_ALBUM_LIST, optionalParams);
+        return SubsonicJsonParseUtils.parseGetAlbumList(NetworkRequestUtils.sendRequest(request));
     }
 }

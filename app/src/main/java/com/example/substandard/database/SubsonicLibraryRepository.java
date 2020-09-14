@@ -16,6 +16,7 @@ import com.example.substandard.AppExecutors;
 import com.example.substandard.R;
 import com.example.substandard.database.data.Album;
 import com.example.substandard.database.data.AlbumAndAllSongs;
+import com.example.substandard.database.data.AlbumAndArtist;
 import com.example.substandard.database.data.AlbumDao;
 import com.example.substandard.database.data.Artist;
 import com.example.substandard.database.data.ArtistAndAllAlbums;
@@ -23,6 +24,7 @@ import com.example.substandard.database.data.ArtistDao;
 import com.example.substandard.database.data.Song;
 import com.example.substandard.database.data.SongDao;
 import com.example.substandard.database.network.subsonic.SubsonicNetworkDataSource;
+import com.example.substandard.database.network.subsonic.SubsonicNetworkRequest;
 import com.example.substandard.service.CoverArtDownloadIntentService;
 import com.example.substandard.service.CoverArtResultReceiver;
 
@@ -247,6 +249,18 @@ public class SubsonicLibraryRepository {
         return albumDao.getAlbumWithAllSongs(albumId);
     }
 
+    public LiveData<List<Album>> getAlbums(List<String> albumIds) {
+        return albumDao.loadAlbumsById(albumIds);
+    }
+
+    public LiveData<AlbumAndArtist> getAlbumAndArtist(String albumId) {
+        return albumDao.getAlbumWithArtist(albumId);
+    }
+
+    public LiveData<List<AlbumAndArtist>> getAlbumsWithArtist(List<String> albumIds) {
+        return albumDao.getAlbumsWithArtist(albumIds);
+    }
+
     public LiveData<ArtistAndAllAlbums> getArtistAndAllAlbums(String artistId) {
         return artistDao.loadArtistAndAllAlbums(artistId);
     }
@@ -278,6 +292,22 @@ public class SubsonicLibraryRepository {
         return dataSource.getStreamUrl(id);
     }
 
+    public LiveData<List<String>> getNewestAlbums() {
+        return dataSource.fetchAlbumList(SubsonicNetworkRequest.AlbumListType.NEWEST);
+    }
+
+    public LiveData<List<String>> getRandomAlbums() {
+        return dataSource.fetchAlbumList(SubsonicNetworkRequest.AlbumListType.RANDOM);
+    }
+
+    public LiveData<List<String>> getFavoriteAlbums() {
+        return dataSource.fetchAlbumList(SubsonicNetworkRequest.AlbumListType.FREQUENT);
+    }
+
+    public LiveData<List<String>> getRecentAlbums() {
+        return dataSource.fetchAlbumList(SubsonicNetworkRequest.AlbumListType.RECENT);
+    }
+
     /**
      * Loads a song as an Observable
      * @param id
@@ -287,7 +317,7 @@ public class SubsonicLibraryRepository {
         return songDao.loadSongById(id);
     }
 
-    // TODO replace return type in DAO with Single<String>
+    // TODO replace return type in DAO with Single<String> (???)
     public String getAlbumName(String id) {
         return albumDao.loadAlbumName(id);
     }

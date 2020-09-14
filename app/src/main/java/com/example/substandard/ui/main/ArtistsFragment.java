@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,7 +21,6 @@ import com.example.substandard.ui.ViewHolderItemClickListener;
 import com.example.substandard.ui.model.ArtistViewModel;
 import com.example.substandard.ui.model.ArtistViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
-import com.example.substandard.utility.SubstandardPreferences;
 
 
 /**
@@ -87,10 +85,6 @@ public class ArtistsFragment extends Fragment implements ViewHolderItemClickList
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (!SubstandardPreferences.isLoggedIn(getContext())) {
-            NavController navController = Navigation.findNavController(view);
-            navController.navigate(R.id.loginFragment);
-        }
 
         setUpRecyclerView(view);
         setUpArtistsViewModel();
@@ -101,7 +95,7 @@ public class ArtistsFragment extends Fragment implements ViewHolderItemClickList
         // I am annoyed that I have to pass in the name as well, but otherwise the label
         // isn't correctly updated
         NavDirections directions = ArtistsFragmentDirections
-                .actionMainFragmentToArtistViewFragment(artist.getId(), artist.getName());
+                .actionArtistsFragmentToArtistViewFragment(artist.getId(), artist.getName());
         Navigation.findNavController(getView()).navigate(directions);
     }
 

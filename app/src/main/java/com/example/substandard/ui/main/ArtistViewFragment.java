@@ -26,8 +26,6 @@ public class ArtistViewFragment extends AbstractArtistViewFragment {
 
     private View rootView;
 
-    private ArtistDetailViewModel artistDetailViewModel;
-
     /**
      * Helper method to set up ViewPager and tabs
      */
@@ -54,6 +52,7 @@ public class ArtistViewFragment extends AbstractArtistViewFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_artist_view, container, false);
+        assert getArguments() != null;
         String artistId = ArtistViewFragmentArgs.fromBundle(getArguments()).getArtistId();
         setUpArtistDetailViewModel(artistId);
         return rootView;
@@ -61,8 +60,8 @@ public class ArtistViewFragment extends AbstractArtistViewFragment {
 
     private void setUpArtistDetailViewModel(String artistId) {
         ArtistDetailViewModelFactory factory = InjectorUtils.provideArtistDetailViewModelFactory(getContext(), artistId);
-        artistDetailViewModel = new ViewModelProvider(this, factory).get(ArtistDetailViewModel.class);
-        artistDetailViewModel.getArtist().observe(this, (artistAndAlbums) -> {
+        ArtistDetailViewModel artistDetailViewModel = new ViewModelProvider(this, factory).get(ArtistDetailViewModel.class);
+        artistDetailViewModel.getArtist().observe(getViewLifecycleOwner(), (artistAndAlbums) -> {
             setArtist(artistAndAlbums);
             setupViewPager();
         });
@@ -91,13 +90,12 @@ public class ArtistViewFragment extends AbstractArtistViewFragment {
             Log.d(TAG, "PagerAdapter getItem at position " + position);
             switch (position) {
                 case 0:
-                    AlbumsByArtistFragment fragment = new AlbumsByArtistFragment();
-                    return fragment;
+                    return new AlbumsByArtistFragment();
                 case 1:
-                    SimilarArtistsFragment artistsFragment = new SimilarArtistsFragment();
-                    return artistsFragment;
+                    return new SimilarArtistsFragment();
                 default:
-                    return null;
+                    // not possible, but it yells at me without it
+                    return new Fragment();
             }
         }
 

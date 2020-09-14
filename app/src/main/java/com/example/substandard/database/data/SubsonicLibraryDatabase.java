@@ -39,7 +39,7 @@ public abstract class SubsonicLibraryDatabase extends RoomDatabase {
                             public void onCreate(@NonNull SupportSQLiteDatabase db) {
                                 super.onCreate(db);
                                 AppExecutors executors = AppExecutors.getInstance();
-                                SubsonicNetworkDataSource.getInstance(context, executors)
+                                SubsonicNetworkDataSource.getInstance(context)
                                         .initializeLibrary();
                             }
                         })

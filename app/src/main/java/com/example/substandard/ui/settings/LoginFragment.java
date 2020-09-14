@@ -20,16 +20,14 @@ import com.example.substandard.service.LoginResultReceiver;
 import com.google.android.material.snackbar.Snackbar;
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link LoginFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * A simple {@link Fragment} subclass, used for logging in. The user should not be able to load
+ * any other fragments until they have logged in here.
  */
 public class LoginFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = LoginFragment.class.getSimpleName();
 
     private LoginResultReceiver loginReceiver = new LoginResultReceiver(new Handler());
 
-    private Button loginButton;
     private EditText serverText;
     private EditText userText;
     private EditText passwordText;
@@ -77,7 +75,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         userText = rootView.findViewById(R.id.username_edit_text);
         passwordText = rootView.findViewById(R.id.password_edit_text);
 
-        loginButton = rootView.findViewById(R.id.login_submit_button);
+        Button loginButton = rootView.findViewById(R.id.login_submit_button);
         loginButton.setOnClickListener(this);
 
         return rootView;
@@ -94,6 +92,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         loginIntent.putExtra(LoginIntentService.USERNAME_EXTRA_KEY, username);
         loginIntent.putExtra(LoginIntentService.PASSWORD_EXTRA_KEY, password);
         loginIntent.putExtra(LoginIntentService.RECEIVER_EXTRA_KEY, loginReceiver);
-        getContext().startService(loginIntent);
+        requireContext().startService(loginIntent);
     }
 }

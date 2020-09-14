@@ -79,7 +79,7 @@ public class HomeAlbumListFragment extends Fragment implements
 
         albumView = rootView.findViewById(R.id.rv_albums);
 
-        AlbumAdapter albumAdapter = new AlbumAdapter(getContext(), this, this);
+        AlbumAdapter albumAdapter = new AlbumAdapter(requireContext(), this, this);
         albumView.setAdapter(albumAdapter);
 
         AlbumListViewModelFactory factory = InjectorUtils.provideAlbumListViewModelFactory(getContext(), albumIdList);

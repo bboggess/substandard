@@ -15,15 +15,17 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.example.substandard.R;
-import com.example.substandard.database.data.Album;
 import com.example.substandard.ui.model.HomeScreenViewModel;
 import com.example.substandard.ui.model.HomeScreenViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
 import com.example.substandard.utility.SubstandardPreferences;
 
 import java.util.ArrayList;
-import java.util.List;
 
+/**
+ * Main {@link android.widget.FrameLayout}, first page seen when user opens the app. Contains
+ * quick links to different albums. Otherwise, user is expected to use nav drawer to navigate
+ */
 public class HomeFragment extends Fragment {
     private static final String TAG = HomeFragment.class.getSimpleName();
 
@@ -38,17 +40,6 @@ public class HomeFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
-    private ArrayList<String> mapToId(List<Album> albums) {
-        ArrayList<String> idList = new ArrayList<>();
-        // I am sad that the min API level I set doesn't allow streams...
-        for (Album album : albums) {
-            String id = album.getId();
-            idList.add(id);
-        }
-
-        return idList;
-    }
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -57,6 +48,7 @@ public class HomeFragment extends Fragment {
             navController.navigate(R.id.loginFragment);
         }
 
+        // observe the viewmodel and load fragments as we get info
         HomeScreenViewModelFactory factory = InjectorUtils.provideHomeScreenViewModelFactory(getContext());
         HomeScreenViewModel viewModel = new ViewModelProvider(this, factory).get(HomeScreenViewModel.class);
         viewModel.getRecentAlbums().observe(getViewLifecycleOwner(), idList -> {

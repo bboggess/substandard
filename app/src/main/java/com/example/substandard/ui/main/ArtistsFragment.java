@@ -61,7 +61,7 @@ public class ArtistsFragment extends Fragment implements ViewHolderItemClickList
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
 
-        artistAdapter = new ArtistAdapter(getContext(), this,this);
+        artistAdapter = new ArtistAdapter(requireContext(), this,this);
         recyclerView.setAdapter(artistAdapter);
     }
 
@@ -96,7 +96,7 @@ public class ArtistsFragment extends Fragment implements ViewHolderItemClickList
         // isn't correctly updated
         NavDirections directions = ArtistsFragmentDirections
                 .actionArtistsFragmentToArtistViewFragment(artist.getId(), artist.getName());
-        Navigation.findNavController(getView()).navigate(directions);
+        Navigation.findNavController(requireView()).navigate(directions);
     }
 
 }

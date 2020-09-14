@@ -43,7 +43,6 @@ public class MainActivity extends AppCompatActivity implements
     private SlidingUpPanelLayout mediaPlayerSlidingPanel;
     private MediaPlayerLayout mediaPlayerLayout;
 
-    private NavHostFragment navHost;
     private NavController navController;
     private Toolbar toolbar;
 
@@ -56,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements
         toolbar = findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
 
-        navHost = NavHostFragment.create(R.navigation.nav_graph);
+        NavHostFragment navHost = NavHostFragment.create(R.navigation.nav_graph);
         // create and show the start screen
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, navHost);
@@ -151,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements
 
     /**
      * Replaces the current play queue with the given album
-     * @param albumAndAllSongs
+     * @param albumAndAllSongs album to replace queue with
      */
     @Override
     public void onLoadAlbum(AlbumAndAllSongs albumAndAllSongs) {
@@ -184,6 +183,8 @@ public class MainActivity extends AppCompatActivity implements
         public void onPanelSlide(View panel, float slideOffset) {
             // deals with removing the action bar
             ActionBar actionBar = getSupportActionBar();
+            assert actionBar != null;
+
             if (slideOffset > OFFSET_THRESHOLD) {
                 if (actionBar.isShowing()) {
                     actionBar.hide();

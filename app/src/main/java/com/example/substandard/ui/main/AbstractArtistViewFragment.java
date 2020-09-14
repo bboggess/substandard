@@ -34,9 +34,7 @@ public abstract class AbstractArtistViewFragment extends Fragment {
      * @return A new instance of fragment ArtistViewFragment.
      */
     public static AbstractArtistViewFragment newInstance(Artist artist) {
-        ArtistViewFragment fragment = new ArtistViewFragment();
-//        fragment.setArtist(artist);
-        return fragment;
+        return new ArtistViewFragment();
     }
 
 

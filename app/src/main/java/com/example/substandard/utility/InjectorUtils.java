@@ -36,7 +36,7 @@ public class InjectorUtils {
         AlbumDao albumDao = database.albumDao();
         SongDao songDao = database.songDao();
         AppExecutors executors = AppExecutors.getInstance();
-        SubsonicNetworkDataSource dataSource = SubsonicNetworkDataSource.getInstance(context, executors);
+        SubsonicNetworkDataSource dataSource = SubsonicNetworkDataSource.getInstance(context);
         return SubsonicLibraryRepository.getInstance(artistDao, albumDao, songDao, dataSource, executors);
     }
 

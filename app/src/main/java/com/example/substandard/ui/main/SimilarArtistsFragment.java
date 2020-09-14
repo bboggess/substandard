@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
@@ -20,16 +19,12 @@ import com.example.substandard.ui.model.SimilarArtistsViewModel;
 import com.example.substandard.ui.model.SimilarArtistsViewModelFactory;
 import com.example.substandard.utility.InjectorUtils;
 
-import java.util.List;
-
 
 public class SimilarArtistsFragment extends AbstractArtistViewFragment implements
         ViewHolderItemClickListener<Artist> {
     private static final String TAG = SimilarArtistsFragment.class.getSimpleName();
 
-    private RecyclerView recyclerView;
     private ArtistAdapter artistAdapter;
-    private SimilarArtistsViewModel viewModel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,6 +37,7 @@ public class SimilarArtistsFragment extends AbstractArtistViewFragment implement
         Log.d(TAG, "created View");
         View rootView = inflater.inflate(R.layout.fragment_similar_artists, container, false);
         AbstractArtistViewFragment parent = (ArtistViewFragment) getParentFragment();
+        assert parent != null;
         setArtist(parent.getArtistAndAllAlbums());
         setUpRecyclerView(rootView);
         setUpArtistsViewModel();
@@ -49,13 +45,13 @@ public class SimilarArtistsFragment extends AbstractArtistViewFragment implement
     }
 
     private void setUpRecyclerView(View rootView) {
-        recyclerView = rootView.findViewById(R.id.rv_similar_artists);
+        RecyclerView recyclerView = rootView.findViewById(R.id.rv_similar_artists);
         LinearLayoutManager layoutManager =
                 new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
 
-        artistAdapter = new ArtistAdapter(getContext(), this,this);
+        artistAdapter = new ArtistAdapter(requireContext(), this,this);
         recyclerView.setAdapter(artistAdapter);
         Log.d(TAG, "set up RecyclerView for: " + getArtist().getName());
     }
@@ -63,14 +59,11 @@ public class SimilarArtistsFragment extends AbstractArtistViewFragment implement
     private void setUpArtistsViewModel() {
         SimilarArtistsViewModelFactory factory = InjectorUtils
                 .provideSimilarArtistsViewModelFactory(getContext(), getArtist().getId());
-        viewModel = new ViewModelProvider(this, factory)
+        SimilarArtistsViewModel viewModel = new ViewModelProvider(this, factory)
                 .get(SimilarArtistsViewModel.class);
-        viewModel.getSimilarArtists().observe(getViewLifecycleOwner(), new Observer<List<Artist>>() {
-            @Override
-            public void onChanged(List<Artist> artists) {
-                Log.d(TAG, "updating UI with similar artists");
-                artistAdapter.setArtists(artists);
-            }
+        viewModel.getSimilarArtists().observe(getViewLifecycleOwner(), artists -> {
+            Log.d(TAG, "updating UI with similar artists");
+            artistAdapter.setArtists(artists);
         });
     }
 
@@ -78,7 +71,7 @@ public class SimilarArtistsFragment extends AbstractArtistViewFragment implement
     public void onItemClick(Artist artist) {
         NavDirections directions = ArtistViewFragmentDirections
                 .actionArtistViewFragmentSelf(artist.getId(), artist.getName());
-        Navigation.findNavController(getView()).navigate(directions);
+        Navigation.findNavController(requireView()).navigate(directions);
     }
 
 }

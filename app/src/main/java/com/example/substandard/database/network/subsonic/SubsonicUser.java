@@ -104,8 +104,8 @@ public class SubsonicUser implements AbstractNetworkRequest.Authenticator {
     }
 
     @Override
-    public Uri.Builder addAuthenticationParams(Uri.Builder builder) {
-        return builder.appendQueryParameter(USERNAME_QUERY, getUsername())
+    public void addAuthenticationParams(Uri.Builder builder) {
+        builder.appendQueryParameter(USERNAME_QUERY, getUsername())
                 .appendQueryParameter(AUTH_TOKEN_QUERY, getAuthToken())
                 .appendQueryParameter(SALT_QUERY, getSalt());
     }

@@ -37,7 +37,7 @@ public class MusicBrainzNetworkRequest extends AbstractNetworkRequest {
 
     public MusicBrainzNetworkRequest(MusicBrainzService service, String mbid) {
         // no authentication required for lookups from MusicBrainz
-        super(builder -> builder, DEFAULT_PARAMS);
+        super(builder -> {}, DEFAULT_PARAMS);
         this.service = service;
         this.mbid = mbid;
     }
